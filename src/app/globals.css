@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-light: #eff6ff;
+  --color-muted: #94a3b8;
+  --color-border: #f1f5f9;
+  --color-border-strong: #e2e8f0;
+  --color-violet: #7c3aed;
+  --color-emerald: #10b981;
+  --color-amber: #f59e0b;
+  --radius-card: 1.5rem;
+  --radius-btn: 1rem;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Wireframe + design-system primitives */
+.app-screen {
+  @apply mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-2xl flex-col gap-4 px-4 pb-4 pt-5;
+  @apply md:min-h-0 md:max-w-none md:flex-1 md:gap-6 md:px-8 md:pb-8 md:pt-6;
+  @apply lg:px-10;
+}
+
+.app-screen-home {
+  @apply md:max-w-6xl md:mx-auto lg:max-w-7xl;
+}
+
+.app-section-label {
+  @apply text-[10px] font-bold uppercase tracking-widest text-slate-400;
+}
+
+.app-section-label-invert {
+  @apply text-[10px] font-bold uppercase tracking-widest text-white/70;
+}
+
+.app-card {
+  @apply rounded-3xl border border-slate-100 bg-white p-4 shadow-sm;
+}
+
+.app-hero {
+  @apply rounded-3xl bg-gradient-to-br from-violet-600 to-blue-600 p-5 text-white shadow-lg shadow-blue-200;
+}
+
+.app-btn-primary {
+  @apply flex min-h-11 w-full items-center justify-center rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-blue-200 transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60;
+}
+
+.app-btn-secondary {
+  @apply flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-50 active:scale-[0.98];
+}
+
+.app-chip {
+  @apply inline-flex min-h-11 shrink-0 items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700;
+}
+
+.app-chip-active {
+  @apply border-blue-600 bg-blue-50 font-semibold text-blue-700;
+}
+
+.app-input {
+  @apply w-full rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-800 transition-colors placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.app-status-pill {
+  @apply rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700;
+}

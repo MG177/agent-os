@@ -1,0 +1,1643 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Luna Apps — Nutrition Tracker &amp; PARA Dashboard</title>
+  <style>
+    /* ───────────────────────── tokens (mirroring globals.css + Tailwind usage) ───────────────────────── */
+    :root {
+      --background: 241 245 249;
+      /* slate-50 #f1f5f9 */
+      --foreground: 15 23 42;
+      /* slate-900 #0f172a */
+      --card: 255 255 255;
+      --muted: 241 245 249;
+      --muted-foreground: 148 163 184;
+      /* slate-400 */
+      --border: 241 245 249;
+      /* slate-100 */
+      --border-strong: 226 232 240;
+      /* slate-200 */
+      --primary: 37 99 235;
+      /* blue-600 */
+      --primary-hover: 29 78 216;
+      /* blue-700 */
+      --primary-light: 239 246 255;
+      /* blue-50 */
+      --accent-violet: 124 58 237;
+      /* violet-600 */
+      --gradient-hero-start: 124 58 237;
+      --gradient-hero-end: 37 99 235;
+      --gradient-luna-start: 79 70 229;
+      /* indigo-600 */
+      --gradient-luna-end: 124 58 237;
+      /* violet-600 */
+      --macro-protein: 59 130 246;
+      /* blue-500 */
+      --macro-carbs: 16 185 129;
+      /* emerald-500 */
+      --macro-fat: 245 158 11;
+      /* amber-500 */
+      --success: 22 163 74;
+      --warning: 245 158 11;
+      --destructive: 239 68 68;
+      --para-projects: 59 130 246;
+      --para-areas: 124 58 237;
+      --para-resources: 16 185 129;
+      --para-ideas: 251 191 36;
+      --radius-card: 24px;
+      /* rounded-3xl */
+      --radius-btn: 16px;
+      /* rounded-2xl */
+      --radius-input: 16px;
+      --radius-pill: 9999px;
+      --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-brand: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+      --nav-height: 64px;
+
+      --doc-ink: rgb(15 23 42);
+      --doc-ink-soft: rgb(71 85 105);
+      --doc-ink-muted: rgb(148 163 184);
+      --doc-line: rgb(226 232 240);
+      --doc-line-soft: rgb(241 245 249);
+      --doc-bg: rgb(241 245 249);
+      --doc-paper: #ffffff;
+      --doc-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+      --doc-sans: var(--font-geist, system-ui), -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+
+    @font-face {
+      font-family: 'Geist';
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: swap;
+      src: local('Geist');
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--doc-sans);
+      color: var(--doc-ink);
+      background: var(--doc-bg);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .doc {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 56px 32px 120px;
+    }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 40px;
+      align-items: end;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--doc-line);
+      margin-bottom: 56px;
+    }
+
+    .eyebrow {
+      font-family: var(--doc-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--doc-ink-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: currentColor;
+    }
+
+    .masthead h1 {
+      font-size: 52px;
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+      font-weight: 700;
+      margin: 18px 0 14px;
+      max-width: 14ch;
+    }
+
+    .masthead h1 em {
+      font-style: normal;
+      color: rgb(var(--primary));
+    }
+
+    .lede {
+      color: var(--doc-ink-soft);
+      font-size: 17px;
+      line-height: 1.55;
+      max-width: 58ch;
+    }
+
+    .meta {
+      display: grid;
+      gap: 6px;
+      align-content: end;
+      font-family: var(--doc-mono);
+      font-size: 12px;
+      color: var(--doc-ink-muted);
+    }
+
+    .meta dl {
+      display: grid;
+      grid-template-columns: 8em 1fr;
+      gap: 6px 16px;
+      margin: 0;
+    }
+
+    .meta dt {
+      color: var(--doc-ink-muted);
+    }
+
+    .meta dd {
+      margin: 0;
+      color: var(--doc-ink);
+    }
+
+    section {
+      margin-bottom: 88px;
+      scroll-margin-top: 24px;
+    }
+
+    .sec-head {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 24px;
+      align-items: baseline;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--doc-line);
+      margin-bottom: 28px;
+    }
+
+    .sec-num {
+      font-family: var(--doc-mono);
+      font-size: 12px;
+      color: var(--doc-ink-muted);
+      letter-spacing: 0.1em;
+    }
+
+    .sec-title {
+      font-size: 28px;
+      letter-spacing: -0.02em;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .sec-kicker {
+      font-family: var(--doc-mono);
+      font-size: 11px;
+      color: var(--doc-ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .sec-intro {
+      color: var(--doc-ink-soft);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 68ch;
+      margin: 0 0 28px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.cols-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid.cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grid.cols-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .panel {
+      background: var(--doc-paper);
+      border: 1px solid var(--doc-line);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .panel-flat {
+      background: var(--doc-paper);
+      border: 1px solid var(--doc-line);
+      border-radius: 12px;
+    }
+
+    .label-mono {
+      font-family: var(--doc-mono);
+      font-size: 11px;
+      color: var(--doc-ink-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .code {
+      font-family: var(--doc-mono);
+      font-size: 12px;
+      color: var(--doc-ink);
+    }
+
+    .code-muted {
+      font-family: var(--doc-mono);
+      font-size: 12px;
+      color: var(--doc-ink-muted);
+    }
+
+    .semantic-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .semantic-card {
+      background: var(--doc-paper);
+      border: 1px solid var(--doc-line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .semantic-card .chip {
+      height: 72px;
+    }
+
+    .semantic-card .chip.bordered {
+      box-shadow: inset 0 0 0 1px var(--doc-line);
+    }
+
+    .semantic-card .meta-row {
+      padding: 12px 14px;
+      display: grid;
+      gap: 2px;
+      border-top: 1px solid var(--doc-line);
+    }
+
+    .semantic-card .meta-row .nm {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .semantic-card .meta-row .var {
+      font-family: var(--doc-mono);
+      font-size: 11px;
+      color: var(--doc-ink-muted);
+    }
+
+    .swatch-row {
+      display: grid;
+      grid-template-columns: 120px repeat(10, 1fr);
+      gap: 0;
+      border: 1px solid var(--doc-line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--doc-paper);
+    }
+
+    .swatch-row+.swatch-row {
+      margin-top: 14px;
+    }
+
+    .swatch-name {
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 2px;
+      border-right: 1px solid var(--doc-line);
+    }
+
+    .swatch-name .nm {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .swatch-name .nm-mono {
+      font-family: var(--doc-mono);
+      font-size: 10px;
+      color: var(--doc-ink-muted);
+    }
+
+    .swatch {
+      aspect-ratio: 1.1 / 1;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .swatch .step {
+      font-family: var(--doc-mono);
+      font-size: 10px;
+      opacity: 0.85;
+    }
+
+    .swatch .hex {
+      font-family: var(--doc-mono);
+      font-size: 10px;
+      opacity: 0.75;
+    }
+
+    .light-on-dark {
+      color: white !important;
+    }
+
+    .dark-on-light {
+      color: rgb(15 23 42) !important;
+    }
+
+    .type-row {
+      display: grid;
+      grid-template-columns: 200px 1fr 200px;
+      gap: 24px;
+      align-items: baseline;
+      padding: 18px 0;
+      border-bottom: 1px dashed var(--doc-line);
+    }
+
+    .type-row:last-child {
+      border-bottom: none;
+    }
+
+    .type-row .label {
+      display: grid;
+      gap: 4px;
+    }
+
+    .type-row .label .nm {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .type-row .label .nm-mono {
+      font-family: var(--doc-mono);
+      font-size: 11px;
+      color: var(--doc-ink-muted);
+    }
+
+    .type-row .specs {
+      font-family: var(--doc-mono);
+      font-size: 11px;
+      color: var(--doc-ink-muted);
+      text-align: right;
+      line-height: 1.6;
+    }
+
+    .token-table {
+      background: var(--doc-paper);
+      border: 1px solid var(--doc-line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .token-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 110px;
+      align-items: center;
+      padding: 14px 18px;
+      border-top: 1px solid var(--doc-line);
+    }
+
+    .token-row:first-child {
+      border-top: none;
+    }
+
+    .token-row .name {
+      font-family: var(--doc-mono);
+      font-size: 12px;
+    }
+
+    .token-row .val {
+      font-family: var(--doc-mono);
+      font-size: 11px;
+      color: var(--doc-ink-muted);
+      text-align: right;
+    }
+
+    .space-bar {
+      height: 14px;
+      background: rgb(var(--primary));
+      border-radius: 2px;
+    }
+
+    .radius-block {
+      width: 56px;
+      height: 36px;
+      background: var(--doc-line-soft);
+      border: 1px solid var(--doc-line);
+    }
+
+    .demo {
+      background: var(--doc-paper);
+      border: 1px solid var(--doc-line);
+      border-radius: 12px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .demo .demo-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .demo .demo-title .nm {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .demo .demo-title .nm-mono {
+      font-family: var(--doc-mono);
+      font-size: 11px;
+      color: var(--doc-ink-muted);
+    }
+
+    .demo .demo-stage {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      padding: 14px;
+      border-radius: 8px;
+      background: var(--doc-line-soft);
+      border: 1px dashed var(--doc-line);
+    }
+
+    .demo .demo-stage.column {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    /* ── App component styles (from Tailwind classes in repos) ── */
+    .app-page {
+      background: rgb(var(--background));
+      padding: 20px 16px;
+      border-radius: 16px;
+      max-width: 400px;
+    }
+
+    .app-h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: rgb(var(--foreground));
+      letter-spacing: -0.01em;
+    }
+
+    .app-caption {
+      font-size: 12px;
+      color: rgb(var(--muted-foreground));
+      margin-top: 2px;
+    }
+
+    .app-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgb(var(--muted-foreground));
+    }
+
+    .app-card {
+      background: white;
+      border-radius: var(--radius-card);
+      padding: 20px;
+      border: 1px solid rgb(var(--border));
+      box-shadow: var(--shadow-card);
+    }
+
+    .app-hero {
+      background: linear-gradient(135deg, rgb(var(--gradient-hero-start)) 0%, rgb(var(--gradient-hero-end)) 100%);
+      border-radius: var(--radius-card);
+      padding: 20px;
+      color: white;
+      box-shadow: var(--shadow-brand);
+    }
+
+    .app-hero .hero-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      opacity: 0.7;
+      margin-bottom: 16px;
+    }
+
+    .app-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgb(var(--primary));
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: var(--radius-btn);
+      border: none;
+      box-shadow: 0 1px 2px rgba(59, 130, 246, 0.2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .app-btn-primary:hover {
+      background: rgb(var(--primary-hover));
+    }
+
+    .app-btn-secondary {
+      background: white;
+      color: rgb(71 85 105);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-radius: var(--radius-btn);
+      border: 1px solid rgb(var(--border-strong));
+      cursor: pointer;
+    }
+
+    .app-btn-ghost-link {
+      background: rgb(var(--primary-light));
+      color: rgb(var(--primary));
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .app-input {
+      width: 100%;
+      background: rgb(var(--muted));
+      border-radius: var(--radius-input);
+      padding: 12px 16px;
+      font-size: 14px;
+      border: none;
+      outline: none;
+      color: rgb(var(--foreground));
+    }
+
+    .app-input:focus {
+      box-shadow: 0 0 0 2px rgb(var(--primary));
+      background: white;
+    }
+
+    .app-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      background: rgb(var(--primary-light));
+      color: rgb(var(--primary));
+    }
+
+    .app-badge-count {
+      background: rgb(241 245 249);
+      color: rgb(100 116 139);
+    }
+
+    .app-macro-bar {
+      height: 8px;
+      background: rgb(241 245 249);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .app-macro-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.7s;
+    }
+
+    .app-meal-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border-top: 1px solid rgb(248 250 252);
+    }
+
+    .app-meal-row:first-child {
+      border-top: none;
+    }
+
+    .app-nav {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: var(--nav-height);
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(226, 232, 240, 0.8);
+      border-radius: 0 0 16px 16px;
+      margin: 0 -16px -20px;
+      padding: 0 8px;
+    }
+
+    .app-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      border-radius: 16px;
+      color: rgb(var(--muted-foreground));
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+    }
+
+    .app-nav-item.active {
+      color: rgb(var(--primary));
+    }
+
+    .app-nav-item.active .nav-icon-wrap {
+      background: rgb(var(--primary-light));
+      padding: 6px;
+      border-radius: 12px;
+    }
+
+    .app-chat-user {
+      background: rgb(var(--primary));
+      color: white;
+      font-size: 14px;
+      padding: 12px 16px;
+      border-radius: 24px 24px 8px 24px;
+      max-width: 80%;
+      margin-left: auto;
+      line-height: 1.5;
+      box-shadow: 0 1px 2px rgba(59, 130, 246, 0.2);
+    }
+
+    .app-chat-ai {
+      background: white;
+      border: 1px solid rgb(var(--border));
+      border-radius: 24px 24px 24px 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: rgb(30 41 59);
+      line-height: 1.5;
+      box-shadow: var(--shadow-card);
+    }
+
+    .app-avatar-ai {
+      width: 28px;
+      height: 28px;
+      border-radius: 99px;
+      background: linear-gradient(135deg, rgb(139 92 246), rgb(59 130 246));
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .app-sidebar {
+      width: 224px;
+      background: white;
+      border-right: 1px solid rgb(var(--border));
+      border-radius: 12px 0 0 12px;
+      padding: 16px 0;
+      font-size: 14px;
+    }
+
+    .app-sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      margin: 0 4px;
+      border-radius: 8px;
+      color: rgb(51 65 85);
+      cursor: pointer;
+    }
+
+    .app-sidebar-item:hover {
+      background: rgb(248 250 252);
+    }
+
+    .app-sidebar-item.active {
+      background: rgb(var(--primary-light));
+      color: rgb(29 78 216);
+      font-weight: 500;
+    }
+
+    .app-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 99px;
+      flex-shrink: 0;
+    }
+
+    .app-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 99px;
+      background: rgb(var(--primary-light));
+      color: rgb(var(--primary));
+    }
+
+    .app-luna-card {
+      background: linear-gradient(135deg, rgb(var(--gradient-luna-start)), rgb(var(--gradient-luna-end)));
+      border-radius: var(--radius-card);
+      padding: 20px;
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.25);
+    }
+
+    .app-empty {
+      text-align: center;
+      padding: 40px 16px;
+    }
+
+    .app-empty .emoji {
+      font-size: 36px;
+      margin-bottom: 12px;
+    }
+
+    .mock-stage {
+      background: var(--doc-line-soft);
+      border: 1px solid var(--doc-line);
+      border-radius: 24px;
+      padding: 36px;
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .phone {
+      width: 360px;
+      background: rgb(var(--background));
+      border-radius: 36px;
+      padding: 20px 16px 0;
+      box-shadow: 0 30px 60px -20px rgba(15, 23, 42, 0.25);
+      border: 8px solid #0f172a;
+      min-height: 680px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .phone::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 26px;
+      background: #0f172a;
+      border-radius: 99px;
+      z-index: 5;
+    }
+
+    .desktop-frame {
+      width: 720px;
+      min-height: 480px;
+      background: rgb(var(--background));
+      border-radius: 16px;
+      border: 1px solid var(--doc-line);
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.15);
+    }
+
+    .ring-demo {
+      position: relative;
+      width: 88px;
+      height: 88px;
+    }
+
+    .ring-demo svg {
+      transform: rotate(-90deg);
+    }
+
+    .ring-demo .ring-center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .doc-footer {
+      padding-top: 28px;
+      border-top: 1px solid var(--doc-line);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+    }
+
+    .doc-footer .colophon {
+      font-family: var(--doc-mono);
+      font-size: 11px;
+      color: var(--doc-ink-muted);
+    }
+
+    .app-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .app-compare .app-label {
+      font-family: var(--doc-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--doc-ink-muted);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="doc">
+
+    <header class="masthead">
+      <div>
+        <div class="eyebrow">Luna Apps · Shared Design Language · v1.0.0</div>
+        <h1>Tokens &amp; patterns for <em>Nutrition</em> and <em>PARA</em>.</h1>
+        <p class="lede">Both apps share one visual system: slate surfaces, Geist typography, blue interactive accents,
+          violet→blue hero gradients, and soft rounded cards. Extracted from <span class="code">nutrition-tracker</span>
+          and <span class="code">para-dashboard</span> — mirrored 1:1 from <span class="code">src/app/globals.css</span>
+          and component Tailwind classes.</p>
+      </div>
+      <div class="meta">
+        <dl>
+          <dt>Stack</dt>
+          <dd>Next.js 16 · Tailwind 4 · Geist</dd>
+          <dt>Nutrition</dt>
+          <dd>localhost:3000 · max-w-2xl</dd>
+          <dt>PARA</dt>
+          <dd>localhost:3002 · sidebar + inbox</dd>
+          <dt>Icons</dt>
+          <dd>inline SVG · stroke 1.8</dd>
+          <dt>Radius</dt>
+          <dd>rounded-3xl cards · rounded-2xl controls</dd>
+          <dt>Modes</dt>
+          <dd>light only (no dark theme)</dd>
+        </dl>
+      </div>
+    </header>
+
+    <!-- 01 Foundations -->
+    <section id="foundations">
+      <div class="sec-head">
+        <span class="sec-num">01 / 07</span>
+        <h2 class="sec-title">Foundations</h2>
+        <span class="sec-kicker">slate · blue · shared globals</span>
+      </div>
+      <p class="sec-intro">Both projects define identical base styles in <span class="code">globals.css</span>: <span
+          class="code">body { background: #f1f5f9; color: #0f172a }</span> with Geist as <span
+          class="code">--font-geist-sans</span>. All UI is composed with Tailwind utility classes — no shadcn, no CSS
+        variables beyond the font.</p>
+
+      <div class="panel-flat">
+        <div style="padding: 18px 20px; border-bottom: 1px solid var(--doc-line);"><span class="label-mono">semantic ·
+            light</span></div>
+        <div class="semantic-grid" style="padding: 16px; gap: 10px;">
+          <div class="semantic-card">
+            <div class="chip bordered" style="background: #f1f5f9;"></div>
+            <div class="meta-row"><span class="nm">background</span><span class="var">slate-50 · #f1f5f9</span></div>
+          </div>
+          <div class="semantic-card">
+            <div class="chip bordered" style="background: #ffffff;"></div>
+            <div class="meta-row"><span class="nm">card / surface</span><span class="var">white · #ffffff</span></div>
+          </div>
+          <div class="semantic-card">
+            <div class="chip" style="background: #0f172a;"></div>
+            <div class="meta-row"><span class="nm">foreground</span><span class="var">slate-900 · #0f172a</span></div>
+          </div>
+          <div class="semantic-card">
+            <div class="chip" style="background: #2563eb;"></div>
+            <div class="meta-row"><span class="nm">primary</span><span class="var">blue-600 · #2563eb</span></div>
+          </div>
+          <div class="semantic-card">
+            <div class="chip" style="background: #94a3b8;"></div>
+            <div class="meta-row"><span class="nm">muted text</span><span class="var">slate-400 · #94a3b8</span></div>
+          </div>
+          <div class="semantic-card">
+            <div class="chip" style="background: #f1f5f9; box-shadow: inset 0 0 0 1px #e2e8f0;"></div>
+            <div class="meta-row"><span class="nm">border</span><span class="var">slate-100/200</span></div>
+          </div>
+          <div class="semantic-card">
+            <div class="chip" style="background: linear-gradient(135deg, #7c3aed, #2563eb);"></div>
+            <div class="meta-row"><span class="nm">hero gradient</span><span class="var">violet-600 → blue-600</span>
+            </div>
+          </div>
+          <div class="semantic-card">
+            <div class="chip" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);"></div>
+            <div class="meta-row"><span class="nm">Luna card</span><span class="var">indigo-600 → violet-600</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid cols-2" style="margin-top: 24px;">
+        <div class="panel">
+          <strong style="font-size: 14px;">Macro colors</strong> <span class="label-mono"
+            style="margin-left: 8px;">nutrition-tracker only</span>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px;">
+            <div>
+              <div style="height: 48px; background: #3b82f6; border-radius: 8px;"></div>
+              <div class="code-muted" style="margin-top: 6px;">Protein · blue-500</div>
+            </div>
+            <div>
+              <div style="height: 48px; background: #10b981; border-radius: 8px;"></div>
+              <div class="code-muted" style="margin-top: 6px;">Carbs · emerald-500</div>
+            </div>
+            <div>
+              <div style="height: 48px; background: #f59e0b; border-radius: 8px;"></div>
+              <div class="code-muted" style="margin-top: 6px;">Fat · amber-500</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <strong style="font-size: 14px;">PARA section dots</strong> <span class="label-mono"
+            style="margin-left: 8px;">BrowseSidebar</span>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px;">
+            <div>
+              <div style="height: 48px; background: #3b82f6; border-radius: 8px;"></div>
+              <div class="code-muted" style="margin-top: 6px;">Projects</div>
+            </div>
+            <div>
+              <div style="height: 48px; background: #7c3aed; border-radius: 8px;"></div>
+              <div class="code-muted" style="margin-top: 6px;">Areas</div>
+            </div>
+            <div>
+              <div style="height: 48px; background: #10b981; border-radius: 8px;"></div>
+              <div class="code-muted" style="margin-top: 6px;">Resources</div>
+            </div>
+            <div>
+              <div style="height: 48px; background: #fbbf24; border-radius: 8px;"></div>
+              <div class="code-muted" style="margin-top: 6px;">Ideas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 Color scales -->
+    <section id="scales">
+      <div class="sec-head">
+        <span class="sec-num">02 / 07</span>
+        <h2 class="sec-title">Color scales</h2>
+        <span class="sec-kicker">tailwind defaults in use</span>
+      </div>
+      <p class="sec-intro">Palettes come from Tailwind v4 defaults. Slate carries neutrals; blue is the brand;
+        violet/indigo power hero cards; emerald/amber/red carry macros and status.</p>
+
+      <div class="swatch-row">
+        <div class="swatch-name"><span class="nm">Slate</span><span class="nm-mono">neutral system</span></div>
+        <div class="swatch" style="background:#f8fafc;"><span class="step dark-on-light">50</span><span
+            class="hex dark-on-light">#f8fafc</span></div>
+        <div class="swatch" style="background:#f1f5f9;"><span class="step dark-on-light">100</span><span
+            class="hex dark-on-light">#f1f5f9</span></div>
+        <div class="swatch" style="background:#e2e8f0;"><span class="step dark-on-light">200</span><span
+            class="hex dark-on-light">#e2e8f0</span></div>
+        <div class="swatch" style="background:#cbd5e1;"><span class="step dark-on-light">300</span><span
+            class="hex dark-on-light">#cbd5e1</span></div>
+        <div class="swatch" style="background:#94a3b8;"><span class="step light-on-dark">400</span><span
+            class="hex light-on-dark">#94a3b8</span></div>
+        <div class="swatch" style="background:#64748b;"><span class="step light-on-dark">500</span><span
+            class="hex light-on-dark">#64748b</span></div>
+        <div class="swatch" style="background:#475569;"><span class="step light-on-dark">600</span><span
+            class="hex light-on-dark">#475569</span></div>
+        <div class="swatch" style="background:#334155;"><span class="step light-on-dark">700</span><span
+            class="hex light-on-dark">#334155</span></div>
+        <div class="swatch" style="background:#1e293b;"><span class="step light-on-dark">800</span><span
+            class="hex light-on-dark">#1e293b</span></div>
+        <div class="swatch" style="background:#0f172a;"><span class="step light-on-dark">900</span><span
+            class="hex light-on-dark">#0f172a</span></div>
+      </div>
+
+      <div class="swatch-row">
+        <div class="swatch-name"><span class="nm">Blue</span><span class="nm-mono">primary · CTAs</span></div>
+        <div class="swatch" style="background:#eff6ff;"><span class="step dark-on-light">50</span><span
+            class="hex dark-on-light">#eff6ff</span></div>
+        <div class="swatch" style="background:#dbeafe;"><span class="step dark-on-light">100</span><span
+            class="hex dark-on-light">#dbeafe</span></div>
+        <div class="swatch" style="background:#bfdbfe;"><span class="step dark-on-light">200</span><span
+            class="hex dark-on-light">#bfdbfe</span></div>
+        <div class="swatch" style="background:#93c5fd;"><span class="step dark-on-light">300</span><span
+            class="hex dark-on-light">#93c5fd</span></div>
+        <div class="swatch" style="background:#60a5fa;"><span class="step light-on-dark">400</span><span
+            class="hex light-on-dark">#60a5fa</span></div>
+        <div class="swatch" style="background:#3b82f6;"><span class="step light-on-dark">500</span><span
+            class="hex light-on-dark">#3b82f6</span></div>
+        <div class="swatch" style="background:#2563eb;"><span class="step light-on-dark">600</span><span
+            class="hex light-on-dark">#2563eb</span></div>
+        <div class="swatch" style="background:#1d4ed8;"><span class="step light-on-dark">700</span><span
+            class="hex light-on-dark">#1d4ed8</span></div>
+        <div class="swatch" style="background:#1e40af;"><span class="step light-on-dark">800</span><span
+            class="hex light-on-dark">#1e40af</span></div>
+        <div class="swatch" style="background:#1e3a8a;"><span class="step light-on-dark">900</span><span
+            class="hex light-on-dark">#1e3a8a</span></div>
+      </div>
+
+      <div class="swatch-row">
+        <div class="swatch-name"><span class="nm">Violet</span><span class="nm-mono">hero · AI avatar</span></div>
+        <div class="swatch" style="background:#f5f3ff;"><span class="step dark-on-light">50</span><span
+            class="hex dark-on-light">#f5f3ff</span></div>
+        <div class="swatch" style="background:#ede9fe;"><span class="step dark-on-light">100</span><span
+            class="hex dark-on-light">#ede9fe</span></div>
+        <div class="swatch" style="background:#ddd6fe;"><span class="step dark-on-light">200</span><span
+            class="hex dark-on-light">#ddd6fe</span></div>
+        <div class="swatch" style="background:#c4b5fd;"><span class="step dark-on-light">300</span><span
+            class="hex dark-on-light">#c4b5fd</span></div>
+        <div class="swatch" style="background:#a78bfa;"><span class="step light-on-dark">400</span><span
+            class="hex light-on-dark">#a78bfa</span></div>
+        <div class="swatch" style="background:#8b5cf6;"><span class="step light-on-dark">500</span><span
+            class="hex light-on-dark">#8b5cf6</span></div>
+        <div class="swatch" style="background:#7c3aed;"><span class="step light-on-dark">600</span><span
+            class="hex light-on-dark">#7c3aed</span></div>
+        <div class="swatch" style="background:#6d28d9;"><span class="step light-on-dark">700</span><span
+            class="hex light-on-dark">#6d28d9</span></div>
+        <div class="swatch" style="background:#5b21b6;"><span class="step light-on-dark">800</span><span
+            class="hex light-on-dark">#5b21b6</span></div>
+        <div class="swatch" style="background:#4c1d95;"><span class="step light-on-dark">900</span><span
+            class="hex light-on-dark">#4c1d95</span></div>
+      </div>
+    </section>
+
+    <!-- 03 Typography -->
+    <section id="type">
+      <div class="sec-head">
+        <span class="sec-num">03 / 07</span>
+        <h2 class="sec-title">Typography</h2>
+        <span class="sec-kicker">geist · tabular nums</span>
+      </div>
+      <p class="sec-intro">Geist via <span class="code">next/font/google</span> on <span
+          class="code">--font-geist-sans</span>. Sizes are fixed (not fluid clamp). Nutrition and macro values use <span
+          class="code">tabular-nums</span> for aligned digits.</p>
+
+      <div class="panel" style="padding: 8px 28px;">
+        <div class="type-row">
+          <div class="label"><span class="nm">Page title</span><span class="nm-mono">text-xl font-bold
+              text-slate-900</span></div>
+          <div class="specimen" style="font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.01em;">Good
+            evening 👋 · Inbox</div>
+          <div class="specs">20px · 700<br />slate-900</div>
+        </div>
+        <div class="type-row">
+          <div class="label"><span class="nm">Hero stat</span><span class="nm-mono">text-3xl font-bold
+              tabular-nums</span></div>
+          <div class="specimen"
+            style="font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1;">2,200</div>
+          <div class="specs">30px · 700<br />tabular-nums</div>
+        </div>
+        <div class="type-row">
+          <div class="label"><span class="nm">Hero inline</span><span class="nm-mono">text-2xl font-bold (ring
+              center)</span></div>
+          <div class="specimen" style="font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums;">1,240
+            kcal</div>
+          <div class="specs">24px · 700<br />inside ProgressRing</div>
+        </div>
+        <div class="type-row">
+          <div class="label"><span class="nm">Section label</span><span class="nm-mono">text-xs uppercase
+              tracking-widest</span></div>
+          <div class="specimen"
+            style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">
+            Today's Calories · Macros · Vault</div>
+          <div class="specs">12px · 600<br />slate-400</div>
+        </div>
+        <div class="type-row">
+          <div class="label"><span class="nm">Micro label</span><span class="nm-mono">text-[10px] uppercase
+              tracking-widest</span></div>
+          <div class="specimen"
+            style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8;">
+            Daily Targets · 3 items</div>
+          <div class="specs">10px · 700<br />form field labels</div>
+        </div>
+        <div class="type-row">
+          <div class="label"><span class="nm">Body</span><span class="nm-mono">text-sm text-slate-700/800</span></div>
+          <div class="specimen" style="font-size: 14px; color: #334155; line-height: 1.6;">Chicken breast · 150g · 2:30
+            PM</div>
+          <div class="specs">14px · regular<br />list rows, chat</div>
+        </div>
+        <div class="type-row">
+          <div class="label"><span class="nm">Caption</span><span class="nm-mono">text-xs text-slate-400</span></div>
+          <div class="specimen" style="font-size: 12px; color: #94a3b8;">Tuesday, May 26 · 160g left</div>
+          <div class="specs">12px · slate-400</div>
+        </div>
+        <div class="type-row">
+          <div class="label"><span class="nm">Nav label</span><span class="nm-mono">text-[10px] font-semibold</span>
+          </div>
+          <div class="specimen" style="font-size: 10px; font-weight: 600; letter-spacing: 0.02em; color: #2563eb;">Home
+            · Log · Inbox</div>
+          <div class="specs">10px · 600<br />bottom navigation</div>
+        </div>
+        <div class="type-row">
+          <div class="label"><span class="nm">Markdown H1</span><span class="nm-mono">para · text-2xl font-bold</span>
+          </div>
+          <div class="specimen" style="font-size: 24px; font-weight: 700; color: #0f172a;">Project Requirements</div>
+          <div class="specs">24px · MarkdownRenderer</div>
+        </div>
+        <div class="type-row">
+          <div class="label"><span class="nm">Code inline</span><span class="nm-mono">text-xs font-mono
+              bg-slate-100</span></div>
+          <div class="specimen"
+            style="font-family: var(--doc-mono); font-size: 12px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">
+            mongodb://127.0.0.1:27017/nutrition-tracker</div>
+          <div class="specs">12px · mono<br />paths, code blocks</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 Spacing -->
+    <section id="primitives">
+      <div class="sec-head">
+        <span class="sec-num">04 / 07</span>
+        <h2 class="sec-title">Spacing · radius · elevation</h2>
+        <span class="sec-kicker">4px grid · soft shadows</span>
+      </div>
+      <p class="sec-intro">Page padding is <span class="code">px-4 pt-5 pb-4</span> with <span
+          class="code">space-y-4</span> between sections. Cards use <span class="code">rounded-3xl</span> (24px);
+        buttons and inputs use <span class="code">rounded-2xl</span> (16px). Elevation is minimal — <span
+          class="code">shadow-sm</span> on cards, <span class="code">shadow-lg shadow-blue-200</span> on heroes.</p>
+
+      <div class="grid cols-3">
+        <div class="token-table">
+          <div style="padding: 14px 18px; border-bottom: 1px solid var(--doc-line);"><strong
+              style="font-size: 13px;">Spacing</strong></div>
+          <div class="token-row"><span class="name">px-4 page</span><span class="visual"><span class="space-bar"
+                style="width:16px"></span></span><span class="val">16px</span></div>
+          <div class="token-row"><span class="name">p-5 card</span><span class="visual"><span class="space-bar"
+                style="width:20px"></span></span><span class="val">20px</span></div>
+          <div class="token-row"><span class="name">gap-3 / gap-4</span><span class="visual"><span class="space-bar"
+                style="width:16px"></span></span><span class="val">12–16px</span></div>
+          <div class="token-row"><span class="name">h-16 nav</span><span class="visual"><span class="space-bar"
+                style="width:64px"></span></span><span class="val">64px</span></div>
+          <div class="token-row"><span class="name">pb-16 body</span><span class="visual"><span class="space-bar"
+                style="width:64px"></span></span><span class="val">nav offset</span></div>
+          <div class="token-row"><span class="name">max-w-2xl</span><span class="visual"><span class="space-bar"
+                style="width:100%;max-width:180px"></span></span><span class="val">672px</span></div>
+        </div>
+        <div class="token-table">
+          <div style="padding: 14px 18px; border-bottom: 1px solid var(--doc-line);"><strong
+              style="font-size: 13px;">Border radius</strong></div>
+          <div class="token-row"><span class="name">rounded-xl</span><span class="visual"><span class="radius-block"
+                style="border-radius:12px"></span></span><span class="val">12px · nav chip</span></div>
+          <div class="token-row"><span class="name">rounded-2xl</span><span class="visual"><span class="radius-block"
+                style="border-radius:16px"></span></span><span class="val">16px · btn/input</span></div>
+          <div class="token-row"><span class="name">rounded-3xl</span><span class="visual"><span class="radius-block"
+                style="border-radius:24px"></span></span><span class="val">24px · cards</span></div>
+          <div class="token-row"><span class="name">rounded-full</span><span class="visual"><span class="radius-block"
+                style="border-radius:9999px"></span></span><span class="val">badges · ring</span></div>
+        </div>
+        <div class="token-table">
+          <div style="padding: 14px 18px; border-bottom: 1px solid var(--doc-line);"><strong
+              style="font-size: 13px;">Elevation</strong></div>
+          <div class="token-row"><span class="name">shadow-sm</span><span class="visual"><span class="radius-block"
+                style="box-shadow:0 1px 2px rgba(0,0,0,0.05)"></span></span><span class="val">cards</span></div>
+          <div class="token-row"><span class="name">shadow-lg</span><span class="visual"><span class="radius-block"
+                style="box-shadow:0 10px 15px rgba(0,0,0,0.1)"></span></span><span class="val">hero</span></div>
+          <div class="token-row"><span class="name">shadow-blue-200</span><span class="visual"><span
+                class="radius-block" style="box-shadow:0 4px 14px rgba(191,219,254,0.8)"></span></span><span
+              class="val">CTA tint</span></div>
+          <div class="token-row"><span class="name">backdrop-blur-md</span><span class="visual"><span
+                class="radius-block" style="background:rgba(255,255,255,0.9)"></span></span><span class="val">bottom
+              nav</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 Components -->
+    <section id="components">
+      <div class="sec-head">
+        <span class="sec-num">05 / 07</span>
+        <h2 class="sec-title">Components</h2>
+        <span class="sec-kicker">shared primitives</span>
+      </div>
+      <p class="sec-intro">No component library — patterns are built from Tailwind utilities in page files and <span
+          class="code">src/components/*</span>. Below are the canonical variants used in both apps.</p>
+
+      <div class="grid cols-2">
+        <div class="demo">
+          <div class="demo-title"><span class="nm">Buttons</span><span class="nm-mono">primary · secondary ·
+              ghost</span></div>
+          <div class="demo-stage">
+            <button class="app-btn-primary">+ Add Meal</button>
+            <button class="app-btn-primary">+ New Note</button>
+            <button class="app-btn-secondary">Cancel</button>
+            <button class="app-btn-ghost-link">Log your first meal →</button>
+          </div>
+          <div class="code-muted">bg-blue-600 · rounded-2xl · shadow-sm shadow-blue-200 · hover:bg-blue-700 ·
+            active:scale-95</div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-title"><span class="nm">Inputs</span><span class="nm-mono">search · form · focus ring</span>
+          </div>
+          <div class="demo-stage column">
+            <input class="app-input" placeholder="Search food…" />
+            <input class="app-input" placeholder="What's on your mind?" style="margin-top:8px" />
+            <div
+              style="display:flex;align-items:center;gap:8px;background:#f1f5f9;border-radius:16px;padding:8px 12px;margin-top:8px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
+              <input style="flex:1;background:transparent;border:none;outline:none;font-size:14px"
+                placeholder="Capture a note…" />
+            </div>
+          </div>
+          <div class="code-muted">bg-slate-50 rounded-2xl · focus:ring-2 focus:ring-blue-500 focus:bg-white</div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-title"><span class="nm">Badges &amp; tags</span><span class="nm-mono">counts ·
+              hashtags</span></div>
+          <div class="demo-stage">
+            <span class="app-badge">3</span>
+            <span class="app-badge app-badge-count">12 meals</span>
+            <span class="app-tag">#project</span>
+            <span class="app-tag">#idea</span>
+          </div>
+          <div class="code-muted">bg-blue-50 text-blue-600 · text-xs font-semibold · rounded-full</div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-title"><span class="nm">Cards</span><span class="nm-mono">base · hero · luna</span></div>
+          <div class="demo-stage column">
+            <div class="app-card" style="width:100%">
+              <p class="app-section-label" style="margin-bottom:12px">Macros</p>
+              <p style="font-size:14px;font-weight:600;color:#334155">Protein</p>
+              <div class="app-macro-bar">
+                <div class="app-macro-fill" style="width:65%;background:#3b82f6"></div>
+              </div>
+            </div>
+            <div class="app-hero" style="width:100%">
+              <p class="hero-label">Today's Calories</p>
+              <p style="font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;margin:0">0</p>
+              <p style="font-size:12px;opacity:0.7;margin-top:4px">kcal remaining</p>
+            </div>
+            <div class="app-luna-card" style="width:100%">
+              <p style="font-size:14px;font-weight:700;margin:0">🌙 Luna Integration Active</p>
+              <p style="font-size:12px;opacity:0.7;margin-top:8px;line-height:1.5">Log meals via natural language in
+                Chat.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo" style="grid-column: span 2;">
+          <div class="demo-title"><span class="nm">ProgressRing</span><span class="nm-mono">nutrition-tracker · SVG
+              circle</span></div>
+          <div class="demo-stage" style="justify-content:center;gap:32px">
+            <div class="ring-demo">
+              <svg width="88" height="88">
+                <circle cx="44" cy="44" r="36" fill="none" stroke="#e2e8f0" stroke-width="10" />
+                <circle cx="44" cy="44" r="36" fill="none" stroke="#3b82f6" stroke-width="10" stroke-dasharray="226"
+                  stroke-dashoffset="79" stroke-linecap="round" />
+              </svg>
+              <div class="ring-center"><span
+                  style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums">840</span><span
+                  style="font-size:10px;color:#94a3b8">kcal</span></div>
+            </div>
+            <div class="ring-demo" style="width:120px;height:120px">
+              <svg width="120" height="120">
+                <circle cx="60" cy="60" r="49" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="11" />
+                <circle cx="60" cy="60" r="49" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="11"
+                  stroke-dasharray="308" stroke-dashoffset="154" stroke-linecap="round" />
+              </svg>
+              <div class="ring-center"><span
+                  style="font-size:24px;font-weight:700;color:white;font-variant-numeric:tabular-nums">420</span><span
+                  style="font-size:10px;color:rgba(255,255,255,0.7)">kcal</span></div>
+            </div>
+          </div>
+          <div class="code-muted">strokeLinecap round · 0.6s ease transition · white track on hero, slate-100 elsewhere
+          </div>
+        </div>
+
+        <div class="demo" style="grid-column: span 2;">
+          <div class="demo-title"><span class="nm">Chat bubbles</span><span class="nm-mono">nutrition-tracker
+              /chat</span></div>
+          <div class="demo-stage column" style="max-width:400px;margin:0 auto">
+            <div class="app-chat-user">Log 200g chicken breast for lunch</div>
+            <div style="display:flex;gap:8px;align-items:flex-end">
+              <div class="app-avatar-ai">AI</div>
+              <div class="app-chat-ai">Logged! 330 kcal · P62g · C0g · F7g added to today.</div>
+            </div>
+          </div>
+          <div class="code-muted">user: bg-blue-600 rounded-3xl rounded-br-lg · assistant: white card + violet-blue
+            avatar</div>
+        </div>
+
+        <div class="demo" style="grid-column: span 2;">
+          <div class="demo-title"><span class="nm">Bottom navigation</span><span class="nm-mono">Nav.tsx · both
+              apps</span></div>
+          <div class="demo-stage" style="padding:0;overflow:hidden;border-radius:12px">
+            <div class="app-nav" style="margin:0;border-radius:0;width:100%">
+              <a class="app-nav-item active" href="#"><span class="nav-icon-wrap">⌂</span>Home</a>
+              <a class="app-nav-item" href="#">+</a>
+              <a class="app-nav-item" href="#">💬</a>
+              <a class="app-nav-item" href="#">◎</a>
+              <a class="app-nav-item" href="#">⚙</a>
+            </div>
+          </div>
+          <div class="code-muted">fixed bottom-0 · bg-white/90 backdrop-blur-md · border-t slate-200/80 · active:
+            text-blue-600 + bg-blue-50 icon chip · PARA hides on md+</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 App-specific -->
+    <section id="app-specific">
+      <div class="sec-head">
+        <span class="sec-num">06 / 07</span>
+        <h2 class="sec-title">App-specific patterns</h2>
+        <span class="sec-kicker">nutrition · para</span>
+      </div>
+
+      <div class="grid cols-2">
+        <div class="demo">
+          <div class="demo-title"><span class="nm">Meal list row</span><span class="nm-mono">nutrition · page.tsx</span>
+          </div>
+          <div class="demo-stage column" style="padding:0;background:white;border-radius:16px;overflow:hidden">
+            <div class="app-meal-row">
+              <div style="flex:1;min-width:0">
+                <p style="font-size:14px;font-weight:600;color:#1e293b;margin:0">Grilled chicken</p>
+                <p style="font-size:12px;color:#94a3b8;margin:4px 0 0">150g · 12:30 PM</p>
+              </div>
+              <div style="text-align:right">
+                <p style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;margin:0">248 <span
+                    style="font-size:12px;font-weight:400;color:#94a3b8">kcal</span></p>
+                <p style="font-size:10px;color:#94a3b8;margin:2px 0 0;font-variant-numeric:tabular-nums">P46 · C0 · F5
+                </p>
+              </div>
+              <button
+                style="padding:6px;border-radius:12px;border:none;background:transparent;color:#cbd5e1;cursor:pointer">🗑</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-title"><span class="nm">Macro bars</span><span class="nm-mono">MacroBar component</span>
+          </div>
+          <div class="demo-stage column" style="background:white;border-radius:16px;padding:16px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span
+                  style="font-weight:600;color:#475569">Protein</span><span style="color:#94a3b8"><b
+                    style="color:#334155">82</b> / 160g</span></div>
+              <div class="app-macro-bar">
+                <div class="app-macro-fill" style="width:51%;background:#3b82f6"></div>
+              </div>
+              <p style="font-size:10px;color:#94a3b8;text-align:right;margin:4px 0 0">78g left</p>
+            </div>
+            <div style="margin-top:12px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span
+                  style="font-weight:600;color:#475569">Carbs</span><span style="color:#94a3b8"><b
+                    style="color:#334155">120</b> / 220g</span></div>
+              <div class="app-macro-bar">
+                <div class="app-macro-fill" style="width:55%;background:#10b981"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-title"><span class="nm">Inbox list row</span><span class="nm-mono">para · page.tsx</span>
+          </div>
+          <div class="demo-stage column" style="padding:0;background:white;border-radius:16px;overflow:hidden">
+            <div class="app-meal-row" style="border-top:none">
+              <div style="flex:1">
+                <p style="font-size:14px;font-weight:500;color:#1e293b;margin:0">Ship landing page v2</p>
+                <div style="display:flex;gap:8px;margin-top:4px"><span
+                    style="font-size:12px;color:#94a3b8">Today</span><span class="app-tag">#project</span></div>
+              </div>
+              <button
+                style="padding:6px;border-radius:12px;border:none;background:transparent;color:#cbd5e1">📦</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="demo">
+          <div class="demo-title"><span class="nm">Vault tree item</span><span class="nm-mono">BrowseSidebar.tsx</span>
+          </div>
+          <div class="demo-stage column" style="padding:0">
+            <div class="app-sidebar" style="width:100%;border-radius:12px">
+              <p class="app-section-label" style="padding:0 16px 12px">Vault</p>
+              <div class="app-sidebar-item"><span class="app-dot" style="background:#3b82f6"></span>Projects <span
+                  style="margin-left:auto;font-size:10px;color:#94a3b8">4</span></div>
+              <div class="app-sidebar-item active" style="padding-left:32px">↳ aksara-karir</div>
+              <div class="app-sidebar-item"><span class="app-dot" style="background:#7c3aed"></span>Areas</div>
+              <div class="app-sidebar-item"><span class="app-dot" style="background:#10b981"></span>Resources</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 Patterns / mockups -->
+    <section id="patterns">
+      <div class="sec-head">
+        <span class="sec-num">07 / 07</span>
+        <h2 class="sec-title">Patterns in context</h2>
+        <span class="sec-kicker">mobile · desktop</span>
+      </div>
+      <p class="sec-intro">Nutrition Tracker is mobile-first (<span class="code">max-w-2xl</span>) with a persistent
+        bottom nav. PARA Dashboard adds a desktop three-column shell: vault sidebar · content · inbox panel.</p>
+
+      <div class="mock-stage">
+        <!-- Nutrition phone -->
+        <div>
+          <p class="label-mono" style="margin-bottom:12px">Nutrition Tracker · :3000</p>
+          <div class="phone">
+            <div style="padding-top:28px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <div>
+                  <p class="app-h1" style="margin:0">Good evening 👋</p>
+                  <p class="app-caption">Tuesday, May 26</p>
+                </div>
+                <button class="app-btn-primary" style="font-size:13px">+ Add Meal</button>
+              </div>
+              <div class="app-hero" style="margin-bottom:16px">
+                <p class="hero-label">Today's Calories</p>
+                <div style="display:flex;gap:20px;align-items:center">
+                  <div class="ring-demo" style="width:72px;height:72px">
+                    <svg width="72" height="72">
+                      <circle cx="36" cy="36" r="28" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8" />
+                      <circle cx="36" cy="36" r="28" fill="none" stroke="white" stroke-width="8" stroke-dasharray="176"
+                        stroke-dashoffset="176" stroke-linecap="round" />
+                    </svg>
+                    <div class="ring-center"><span style="font-size:18px;font-weight:700;color:white">0</span></div>
+                  </div>
+                  <div>
+                    <p style="font-size:28px;font-weight:700;margin:0;font-variant-numeric:tabular-nums">2200</p>
+                    <p style="font-size:12px;opacity:0.7;margin:4px 0 0">kcal remaining</p>
+                  </div>
+                </div>
+              </div>
+              <div class="app-card" style="margin-bottom:12px">
+                <p class="app-section-label" style="margin-bottom:12px">Macros</p>
+                <div class="app-macro-bar" style="margin-bottom:8px">
+                  <div class="app-macro-fill" style="width:0%;background:#3b82f6"></div>
+                </div>
+                <div class="app-macro-bar" style="margin-bottom:8px">
+                  <div class="app-macro-fill" style="width:0%;background:#10b981"></div>
+                </div>
+                <div class="app-macro-bar">
+                  <div class="app-macro-fill" style="width:0%;background:#f59e0b"></div>
+                </div>
+              </div>
+              <div class="app-card" style="padding:0;overflow:hidden">
+                <div
+                  style="padding:16px 20px;border-bottom:1px solid #f8fafc;display:flex;justify-content:space-between">
+                  <span class="app-section-label">Today's Meals</span><span class="app-badge app-badge-count">0</span>
+                </div>
+                <div class="app-empty">
+                  <div class="emoji">🥗</div>
+                  <p style="font-size:14px;font-weight:500;color:#475569">No meals logged yet</p><button
+                    class="app-btn-ghost-link" style="margin-top:12px">Log your first meal →</button>
+                </div>
+              </div>
+            </div>
+            <div class="app-nav" style="margin-top:auto">
+              <a class="app-nav-item active" href="#"><span class="nav-icon-wrap">⌂</span>Home</a>
+              <a class="app-nav-item" href="#">Log</a>
+              <a class="app-nav-item" href="#">Chat</a>
+              <a class="app-nav-item" href="#">Foods</a>
+              <a class="app-nav-item" href="#">Goals</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- PARA desktop -->
+        <div>
+          <p class="label-mono" style="margin-bottom:12px">PARA Dashboard · :3002 · md+</p>
+          <div class="desktop-frame">
+            <div class="app-sidebar">
+              <p class="app-section-label" style="padding:0 16px 12px">Vault</p>
+              <div class="app-sidebar-item"><span class="app-dot" style="background:#3b82f6"></span>Projects</div>
+              <div class="app-sidebar-item"><span class="app-dot" style="background:#7c3aed"></span>Areas</div>
+              <div class="app-sidebar-item"><span class="app-dot" style="background:#10b981"></span>Resources</div>
+              <div class="app-sidebar-item"><span class="app-dot" style="background:#fbbf24"></span>Ideas</div>
+            </div>
+            <div style="flex:1;padding:20px 16px;overflow:auto">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <h2 class="app-h1" style="margin:0">Inbox</h2><span class="app-badge">0</span>
+                </div>
+                <button class="app-btn-primary">+ New Note</button>
+              </div>
+              <div class="app-hero" style="margin-bottom:16px">
+                <p
+                  style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;opacity:0.6;margin:0 0 4px">
+                  Inbox</p>
+                <p style="font-size:30px;font-weight:700;margin:0;font-variant-numeric:tabular-nums">0</p>
+                <p style="font-size:14px;opacity:0.7;margin:8px 0 0">All clear — inbox zero!</p>
+              </div>
+              <div class="app-card app-empty">
+                <div class="emoji">📥</div>
+                <p style="font-size:14px;font-weight:600">Your inbox is empty</p>
+                <p class="app-caption" style="margin:8px 0 16px">Capture ideas, links, and notes here</p><button
+                  class="app-btn-primary">+ Add First Note</button>
+              </div>
+            </div>
+            <div style="width:280px;background:white;border-left:1px solid #f1f5f9;display:flex;flex-direction:column">
+              <div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:8px">
+                <strong style="font-size:14px">Inbox</strong><span class="app-badge">0</span></div>
+              <div style="padding:10px 12px;border-bottom:1px solid #f1f5f9">
+                <div style="display:flex;gap:8px;background:#f8fafc;border-radius:12px;padding:8px 12px"><span
+                    style="color:#94a3b8">🔍</span><span style="font-size:14px;color:#94a3b8">Capture a note…</span>
+                </div>
+              </div>
+              <div class="app-empty" style="flex:1;padding-top:48px">
+                <div class="emoji">📥</div>
+                <p class="app-caption">Inbox zero</p>
+              </div>
+            </div>
+          </div>
+          <p class="code-muted" style="margin-top:12px">ShellLayout: md:flex · w-56 left sidebar · InboxSidebar w-72
+            right · mobile uses bottom nav only</p>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:32px">
+        <strong style="font-size:14px;">Shared vs. divergent</strong>
+        <table style="width:100%;margin-top:16px;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="border-bottom:1px solid var(--doc-line);text-align:left">
+              <th style="padding:10px 12px;font-family:var(--doc-mono);font-size:11px;color:var(--doc-ink-muted)">Token
+                / pattern</th>
+              <th style="padding:10px 12px">Nutrition Tracker</th>
+              <th style="padding:10px 12px">PARA Dashboard</th>
+            </tr>
+          </thead>
+          <tbody style="color:var(--doc-ink-soft)">
+            <tr style="border-top:1px solid var(--doc-line)">
+              <td style="padding:10px 12px;font-family:var(--doc-mono);font-size:12px">Layout</td>
+              <td style="padding:10px 12px">max-w-2xl centered</td>
+              <td style="padding:10px 12px">ShellLayout + sidebars @ md</td>
+            </tr>
+            <tr style="border-top:1px solid var(--doc-line)">
+              <td style="padding:10px 12px;font-family:var(--doc-mono);font-size:12px">Hero</td>
+              <td style="padding:10px 12px">Calories + ProgressRing</td>
+              <td style="padding:10px 12px">Inbox count stat</td>
+            </tr>
+            <tr style="border-top:1px solid var(--doc-line)">
+              <td style="padding:10px 12px;font-family:var(--doc-mono);font-size:12px">Nav items</td>
+              <td style="padding:10px 12px">Home · Log · Chat · Foods · Goals</td>
+              <td style="padding:10px 12px">Inbox · Projects · Areas · Resources · Ideas</td>
+            </tr>
+            <tr style="border-top:1px solid var(--doc-line)">
+              <td style="padding:10px 12px;font-family:var(--doc-mono);font-size:12px">Unique UI</td>
+              <td style="padding:10px 12px">MacroBar · chat bubbles · Luna card</td>
+              <td style="padding:10px 12px">Vault tree · MarkdownRenderer · archive</td>
+            </tr>
+            <tr style="border-top:1px solid var(--doc-line)">
+              <td style="padding:10px 12px;font-family:var(--doc-mono);font-size:12px">Port</td>
+              <td style="padding:10px 12px">3000 (dev)</td>
+              <td style="padding:10px 12px">3002 (dev)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="doc-footer">
+      <div class="colophon">Luna Apps Design System v1.0.0 · sourced from nutrition-tracker &amp; para-dashboard @
+        /Users/mg/Project</div>
+      <div class="colophon">foundations · type · components · patterns</div>
+    </footer>
+
+  </main>
+</body>
+
+</html>

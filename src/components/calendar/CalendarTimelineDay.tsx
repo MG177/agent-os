@@ -226,7 +226,7 @@ export function CalendarTimelineDay({
       {allDay.length > 0 && (
         <div className="app-card shrink-0 space-y-1 p-2">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+            <p className="app-section-label">
               All day
             </p>
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
@@ -364,7 +364,7 @@ function TimelineAllDayRow({ event }: { event: CalendarEventSummary }) {
       <p className="max-w-[16rem] truncate text-xs font-medium leading-tight text-slate-800">
         {event.title}
       </p>
-      <span className="rounded-full bg-white px-1.5 py-0.5 text-[9px] font-semibold text-slate-500">
+      <span className="rounded-full bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
         {calendarShort}
       </span>
     </div>

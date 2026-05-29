@@ -1,0 +1,69 @@
+services:
+  agent-os:
+    image: agent-os:latest
+    build: .
+    restart: unless-stopped
+    ports:
+      # Optional: host-only access for npm run migrate:nutrition from the VPS shell
+      - "127.0.0.1:27017:27017"
+    volumes:
+      # Vault read + Inbox/ writes (external git-sync system pushes /root/PARA)
+      - /root/PARA:/root/PARA
+      # Audit log + embedded MongoDB data
+      - agent-os-data:/var/lib/agent-os
+    environment:
+      - NODE_ENV=production
+      - VAULT_PATH=/root/PARA
+      - AGENT_OS_DATA_PATH=/var/lib/agent-os
+      - MONGO_DBPATH=/var/lib/agent-os/mongodb
+      - TZ=Asia/Jakarta
+      # Embedded MongoDB (127.0.0.1 inside container); set EMBEDDED_MONGO=false + external URI to opt out
+      - MONGODB_URI=${MONGODB_URI:-mongodb://127.0.0.1:27017/nutrition-tracker}
+      - EMBEDDED_MONGO=${EMBEDDED_MONGO:-auto}
+      # Required for /nutrition/chat
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # WAHA webhook → /api/webhooks/whatsapp
+      - WAHA_WEBHOOK_SECRET=${WAHA_WEBHOOK_SECRET}
+      - WAHA_BASE_URL=${WAHA_BASE_URL:-http://waha:3000}
+      - WAHA_API_KEY=${WAHA_API_KEY}
+      - WAHA_SESSION=${WAHA_SESSION:-default}
+      - WHATSAPP_ALLOWED_JIDS=${WHATSAPP_ALLOWED_JIDS}
+      - WHATSAPP_ACK_MESSAGE=${WHATSAPP_ACK_MESSAGE:-Saved to Inbox}
+      # Google Calendar (read-only OAuth)
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+      - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
+      - GOOGLE_OAUTH_REDIRECT_URI=${GOOGLE_OAUTH_REDIRECT_URI:-}
+      - TOKEN_ENCRYPTION_KEY=${TOKEN_ENCRYPTION_KEY}
+      - OAUTH_STATE_SECRET=${OAUTH_STATE_SECRET}
+    networks:
+      - dokploy-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "mongodb://127.0.0.1:27017/nutrition-tracker",
+          "--eval",
+          "db.adminCommand('ping')",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: dokploy-network
+      traefik.http.routers.agent-os-web.rule: Host(`personal.lumen-dev.com`)
+      traefik.http.routers.agent-os-web.entrypoints: web
+      traefik.http.routers.agent-os-web.middlewares: redirect-to-https@file
+      traefik.http.routers.agent-os-websecure.rule: Host(`personal.lumen-dev.com`)
+      traefik.http.routers.agent-os-websecure.entrypoints: websecure
+      traefik.http.routers.agent-os-websecure.tls.certresolver: letsencrypt
+      traefik.http.services.agent-os.loadbalancer.server.port: "3003"
+
+volumes:
+  agent-os-data:
+
+networks:
+  dokploy-network:
+    external: true

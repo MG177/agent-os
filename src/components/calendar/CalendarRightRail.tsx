@@ -108,7 +108,7 @@ export function CalendarRightRail({
       )}
 
       <div className="app-hero p-5">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">
+        <p className="app-section-label-invert">
           This week
         </p>
         <p className="mt-2 text-3xl font-bold tabular-nums text-white">
