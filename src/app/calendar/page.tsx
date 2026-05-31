@@ -1,68 +1,132 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDayAgendaPanel } from "@/components/calendar/CalendarDayAgendaPanel";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CalendarAgendaPanel } from "@/components/calendar/CalendarAgendaPanel";
 import {
   CalendarConnectionEmpty,
   CalendarLoadingSkeleton,
 } from "@/components/calendar/CalendarConnectionEmpty";
+import { CalendarDayAgendaPanel } from "@/components/calendar/CalendarDayAgendaPanel";
+import { CalendarMonthGrid } from "@/components/calendar/CalendarMonthGrid";
 import { CalendarRightRail } from "@/components/calendar/CalendarRightRail";
-import { CalendarTimelineDay } from "@/components/calendar/CalendarTimelineDay";
-import { CalendarWeekStrip } from "@/components/calendar/CalendarWeekStrip";
+import { CalendarTimeGrid } from "@/components/calendar/CalendarTimeGrid";
 import {
-  ViewToggle,
-  type CalendarViewMode,
-} from "@/components/calendar/ViewToggle";
-import {
-  buildWeekDayKeys,
+  addDaysToKey,
+  addMonthsToKey,
+  buildMonthGridKeys,
+  buildWeekKeys,
   filterEventsByVisibleCalendars,
-  formatSelectedDaySubtitle,
-  groupEventsByDay,
+  filterEventsForDay,
+  formatEventDayLabel,
+  formatWeekRangeLabel,
   localDateKey,
+  startOfMonthKey,
+  startOfWeekKey,
 } from "@/components/calendar/calendar-utils";
 import { useScheduleClock } from "@/components/calendar/useScheduleClock";
 import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
+
+type DetailSpan = "day" | "week";
+type MobileView = "month" | "detail";
+
+function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+  className,
+  ariaLabel,
+}: {
+  options: readonly { id: T; label: string }[];
+  value: T;
+  onChange: (value: T) => void;
+  className?: string;
+  ariaLabel: string;
+}) {
+  return (
+    <div
+      className={`inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1 ${className ?? ""}`}
+      role="tablist"
+      aria-label={ariaLabel}
+    >
+      {options.map(({ id, label }) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={value === id}
+          onClick={() => onChange(id)}
+          className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors ${
+            value === id
+              ? "bg-white text-blue-600 shadow-sm"
+              : "text-slate-500 hover:text-slate-700"
+          }`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEventSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [view, setView] = useState<CalendarViewMode>("timeline");
+  const [detailSpan, setDetailSpan] = useState<DetailSpan>("day");
+  const [mobileView, setMobileView] = useState<MobileView>("detail");
+  const [listMode, setListMode] = useState(false);
   const [selectedDay, setSelectedDay] = useState(() => localDateKey());
   const [hiddenCalendarIds, setHiddenCalendarIds] = useState<Set<string>>(
     () => new Set(),
   );
   const nowMs = useScheduleClock();
+  const today = useMemo(() => localDateKey(), []);
+  const hasLoadedRef = useRef(false);
 
-  const load = useCallback(async (refresh = false) => {
-    if (refresh) setRefreshing(true);
-    else setLoading(true);
+  // The visible month grid is the widest window we render, and it always
+  // covers the selected day/week detail — so a single month fetch suffices.
+  const monthGrid = useMemo(() => buildMonthGridKeys(selectedDay), [selectedDay]);
+  const fetchFrom = `${monthGrid[0].day}T00:00:00`;
+  const fetchTo = `${addDaysToKey(monthGrid[0].day, 42)}T00:00:00`;
+  const rangeKey = `${fetchFrom}|${fetchTo}`;
 
-    const res = await fetch(
-      `/api/calendar/events?range=14days${refresh ? "&refresh=1" : ""}`,
-    );
-    if (res.status === 401) {
-      setError("not_connected");
-      setEvents([]);
-    } else if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      setError(body.error ?? "Failed to load calendar");
-      setEvents([]);
-    } else {
-      const data = await res.json();
-      setEvents(data.events ?? []);
-      setError(null);
-    }
+  const load = useCallback(
+    async (from: string, to: string, opts?: { refresh?: boolean }) => {
+      const refresh = opts?.refresh ?? false;
+      if (hasLoadedRef.current || refresh) setRefreshing(true);
+      else setLoading(true);
 
-    setLoading(false);
-    setRefreshing(false);
-  }, []);
+      const params = new URLSearchParams({ from, to });
+      if (refresh) params.set("refresh", "1");
+
+      const res = await fetch(`/api/calendar/events?${params.toString()}`);
+      if (res.status === 401) {
+        setError("not_connected");
+        setEvents([]);
+      } else if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setError(body.error ?? "Failed to load calendar");
+        setEvents([]);
+      } else {
+        const data = await res.json();
+        setEvents(data.events ?? []);
+        setError(null);
+      }
+
+      hasLoadedRef.current = true;
+      setLoading(false);
+      setRefreshing(false);
+    },
+    [],
+  );
 
   useEffect(() => {
-    load();
-  }, [load]);
+    load(fetchFrom, fetchTo);
+    // Refetch only when the resolved month window changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rangeKey]);
 
   const filteredEvents = useMemo(
     () =>
@@ -72,14 +136,31 @@ export default function CalendarPage() {
     [events, hiddenCalendarIds],
   );
 
-  const weekDays = useMemo(
-    () => buildWeekDayKeys(groupEventsByDay(filteredEvents)),
-    [filteredEvents],
+  const detailDays = useMemo(
+    () =>
+      detailSpan === "week"
+        ? buildWeekKeys(startOfWeekKey(selectedDay))
+        : [selectedDay],
+    [detailSpan, selectedDay],
   );
 
-  const selectedDayGroup = useMemo(
-    () => weekDays.find((d) => d.day === selectedDay) ?? weekDays[0],
-    [weekDays, selectedDay],
+  const dayGroup = useMemo(
+    () => ({
+      day: selectedDay,
+      label: formatEventDayLabel(selectedDay),
+      events: filterEventsForDay(filteredEvents, selectedDay),
+    }),
+    [selectedDay, filteredEvents],
+  );
+
+  const weekGroups = useMemo(
+    () =>
+      detailDays.map((day) => ({
+        day,
+        label: formatEventDayLabel(day),
+        events: filterEventsForDay(filteredEvents, day),
+      })),
+    [detailDays, filteredEvents],
   );
 
   const toggleCalendar = useCallback((calendarId: string) => {
@@ -91,35 +172,77 @@ export default function CalendarPage() {
     });
   }, []);
 
+  // Month cell click: focus that day at the current detail span (mobile → detail).
+  const selectFromMonth = useCallback((day: string) => {
+    setSelectedDay(day);
+    setMobileView("detail");
+  }, []);
+
+  // Week day-header click: zoom into that single day.
+  const focusDayDetail = useCallback((day: string) => {
+    setSelectedDay(day);
+    setDetailSpan("day");
+    setMobileView("detail");
+  }, []);
+
+  const stepPrev = () =>
+    setSelectedDay((d) =>
+      detailSpan === "week" ? addDaysToKey(startOfWeekKey(d), -7) : addDaysToKey(d, -1),
+    );
+  const stepNext = () =>
+    setSelectedDay((d) =>
+      detailSpan === "week" ? addDaysToKey(startOfWeekKey(d), 7) : addDaysToKey(d, 1),
+    );
+  const prevMonth = () =>
+    setSelectedDay((d) => addMonthsToKey(startOfMonthKey(d), -1));
+  const nextMonth = () =>
+    setSelectedDay((d) => addMonthsToKey(startOfMonthKey(d), 1));
+
   const showScheduleChrome =
     !loading && error !== "not_connected" && events !== null;
 
-  const dayFocusBody = () => {
-    if (!selectedDayGroup) {
-      return (
-        <p className="py-12 text-center text-sm text-slate-400">
-          No events in the next 14 days
-        </p>
-      );
-    }
+  const detailCount =
+    detailSpan === "week"
+      ? weekGroups.reduce((n, g) => n + g.events.length, 0)
+      : dayGroup.events.length;
+  const noun = detailCount === 1 ? "event" : "events";
+  const headerSubtitle = !showScheduleChrome
+    ? "All connected calendars"
+    : detailSpan === "week"
+      ? `${formatWeekRangeLabel(detailDays[0])} · ${detailCount} ${noun}`
+      : `${formatEventDayLabel(selectedDay)} · ${detailCount} ${noun}`;
 
-    if (view === "timeline") {
-      return (
-        <CalendarTimelineDay
-          events={filteredEvents}
-          day={selectedDayGroup.day}
-          dayLabel={selectedDayGroup.label}
-          hideHeader
-        />
-      );
+  const mobileTab: "month" | DetailSpan =
+    mobileView === "month" ? "month" : detailSpan;
+  const onMobileTab = (tab: "month" | DetailSpan) => {
+    if (tab === "month") setMobileView("month");
+    else {
+      setMobileView("detail");
+      setDetailSpan(tab);
     }
-
-    return (
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <CalendarDayAgendaPanel group={selectedDayGroup} nowMs={nowMs} />
-      </div>
-    );
   };
+
+  const miniMonth = (
+    <CalendarMonthGrid
+      events={filteredEvents}
+      selectedDay={selectedDay}
+      highlightDays={detailDays}
+      today={today}
+      onSelectDay={selectFromMonth}
+      onPrev={prevMonth}
+      onNext={nextMonth}
+    />
+  );
+
+  const rail = (
+    <CalendarRightRail
+      events={filteredEvents}
+      allEvents={events ?? []}
+      hiddenCalendarIds={hiddenCalendarIds}
+      onToggleCalendar={toggleCalendar}
+      nowMs={nowMs}
+    />
+  );
 
   return (
     <div className="app-screen app-screen-home flex h-full min-h-0! flex-1 flex-col gap-4 overflow-hidden">
@@ -129,21 +252,72 @@ export default function CalendarPage() {
             Calendar
           </h1>
           <p className="mt-0.5 text-xs text-slate-400 md:text-sm">
-            {showScheduleChrome && selectedDayGroup
-              ? formatSelectedDaySubtitle(
-                selectedDayGroup.label,
-                selectedDayGroup.events.length,
-              )
-              : "Next 14 days · all connected calendars"}
+            {headerSubtitle}
           </p>
         </div>
+
         <div className="flex flex-wrap items-center gap-2">
           {showScheduleChrome && (
-            <ViewToggle value={view} onChange={setView} />
+            <>
+              <Segmented
+                ariaLabel="Calendar view (mobile)"
+                className="md:hidden"
+                value={mobileTab}
+                onChange={onMobileTab}
+                options={[
+                  { id: "month", label: "Month" },
+                  { id: "week", label: "Week" },
+                  { id: "day", label: "Day" },
+                ]}
+              />
+              <Segmented
+                ariaLabel="Detail span"
+                className="hidden md:inline-flex"
+                value={detailSpan}
+                onChange={setDetailSpan}
+                options={[
+                  { id: "day", label: "Day" },
+                  { id: "week", label: "Week" },
+                ]}
+              />
+              <button
+                type="button"
+                onClick={() => setListMode((v) => !v)}
+                aria-pressed={listMode}
+                className="hidden rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 md:inline-flex"
+              >
+                {listMode ? "Grid" : "List"}
+              </button>
+              <div className="inline-flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={stepPrev}
+                  aria-label="Previous"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDay(today)}
+                  className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                  Today
+                </button>
+                <button
+                  type="button"
+                  onClick={stepNext}
+                  aria-label="Next"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                  ›
+                </button>
+              </div>
+            </>
           )}
           <button
             type="button"
-            onClick={() => load(true)}
+            onClick={() => load(fetchFrom, fetchTo, { refresh: true })}
             disabled={refreshing || loading}
             className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
           >
@@ -152,71 +326,61 @@ export default function CalendarPage() {
         </div>
       </header>
 
-      {showScheduleChrome && (
-        <div className="shrink-0">
-          <CalendarWeekStrip
-            days={weekDays}
-            selectedDay={selectedDayGroup?.day ?? selectedDay}
-            onSelect={setSelectedDay}
-          />
-        </div>
-      )}
-
-      <div className="grid min-h-0 flex-1 md:grid-cols-12 md:items-stretch md:gap-6 lg:gap-8">
-        <section
-          className="flex min-h-0 flex-col gap-3 md:col-span-7 lg:col-span-8"
-          aria-label="Schedule"
-        >
-          {loading && <CalendarLoadingSkeleton rows={5} />}
-
+      {!showScheduleChrome && (
+        <div className="min-h-0 flex-1">
+          {loading && <CalendarLoadingSkeleton rows={6} />}
           {!loading && error === "not_connected" && <CalendarConnectionEmpty />}
-
           {!loading && error && error !== "not_connected" && (
             <p className="py-16 text-center text-sm text-amber-700">{error}</p>
           )}
+        </div>
+      )}
 
-          {showScheduleChrome && (
-            <>
-              <div className="app-card flex min-h-0 flex-1 flex-col overflow-hidden p-0">
-                <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-3 py-2.5 sm:px-4">
-                  <p className="text-sm font-semibold text-slate-900">
-                    {selectedDayGroup?.label ?? "Day"}
-                  </p>
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-                    {selectedDayGroup?.events.length ?? 0} event
-                    {(selectedDayGroup?.events.length ?? 0) === 1 ? "" : "s"}
-                  </span>
+      {showScheduleChrome && (
+        <div className="grid min-h-0 flex-1 grid-rows-1 gap-4 md:grid-cols-12 md:gap-5 lg:gap-6">
+          {/* Detail: scalable time-grid (or list) */}
+          <div
+            className={`${
+              mobileView === "detail" ? "flex" : "hidden"
+            } min-h-0 flex-col md:flex md:col-span-7 lg:col-span-8 xl:col-span-9`}
+          >
+            {listMode ? (
+              detailSpan === "week" ? (
+                <CalendarAgendaPanel groups={weekGroups} />
+              ) : (
+                <div className="app-card flex min-h-0 flex-1 flex-col overflow-hidden p-0">
+                  <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                    <CalendarDayAgendaPanel group={dayGroup} nowMs={nowMs} />
+                  </div>
                 </div>
-                <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-2.5 pt-0 sm:p-3 sm:pt-1.5">
-                  {dayFocusBody()}
-                </div>
-              </div>
+              )
+            ) : (
+              <CalendarTimeGrid
+                events={filteredEvents}
+                days={detailDays}
+                today={today}
+                selectedDay={selectedDay}
+                onFocusDay={focusDayDetail}
+              />
+            )}
+          </div>
 
-              <div className="shrink-0 md:hidden">
-                <CalendarRightRail
-                  events={filteredEvents}
-                  allEvents={events ?? []}
-                  hiddenCalendarIds={hiddenCalendarIds}
-                  onToggleCalendar={toggleCalendar}
-                  nowMs={nowMs}
-                />
-              </div>
-            </>
-          )}
-        </section>
+          {/* Mobile-only Month tab */}
+          <div
+            className={`${
+              mobileView === "month" ? "flex" : "hidden"
+            } min-h-0 flex-col overflow-y-auto md:hidden`}
+          >
+            {miniMonth}
+          </div>
 
-        {showScheduleChrome && (
-          <aside className="hidden min-h-0 overflow-y-auto overscroll-contain md:col-span-5 md:block lg:col-span-4">
-            <CalendarRightRail
-              events={filteredEvents}
-              allEvents={events ?? []}
-              hiddenCalendarIds={hiddenCalendarIds}
-              onToggleCalendar={toggleCalendar}
-              nowMs={nowMs}
-            />
-          </aside>
-        )}
-      </div>
+          {/* Rail (md+): mini-month navigator on top, then Now / Next / Calendars */}
+          <div className="hidden min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain md:flex md:col-span-5 lg:col-span-4 xl:col-span-3">
+            {miniMonth}
+            {rail}
+          </div>
+        </div>
+      )}
 
       <p className="shrink-0 text-center text-xs text-slate-400 md:hidden">
         <Link

@@ -1,20 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
-import { ActivityRow } from "@/components/ui/ActivityRow";
+import { ActivityStats } from "@/components/activity/ActivityStats";
+import { ActivityTimeline } from "@/components/activity/ActivityTimeline";
+import { computeStats, groupByDay } from "@/components/activity/activity-display";
 import type { ActivityEvent, ActivityKind } from "@/lib/activity";
 
-const FILTERS: { id: "all" | ActivityKind | "reverted"; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "capture", label: "Capture" },
-  { id: "nutrition", label: "Nutrition" },
-  { id: "reverted", label: "Reverted" },
+type FilterId = "all" | ActivityKind | "reverted";
+
+const FILTERS: { id: FilterId; label: string; title: string }[] = [
+  { id: "all", label: "All", title: "All activity" },
+  { id: "capture", label: "Capture", title: "Captures" },
+  { id: "nutrition", label: "Nutrition", title: "Nutrition" },
+  { id: "reverted", label: "Reverted", title: "Reverted" },
 ];
 
 export default function ActivityPage() {
   const [events, setEvents] = useState<ActivityEvent[]>([]);
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
+  const [filter, setFilter] = useState<FilterId>("all");
   const [undoing, setUndoing] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -29,28 +33,34 @@ export default function ActivityPage() {
     load();
   }, [load]);
 
-  const filtered =
-    filter === "all"
-      ? events
-      : events.filter((e) => e.kind === filter);
+  const filtered = useMemo(
+    () => (filter === "all" ? events : events.filter((e) => e.kind === filter)),
+    [events, filter],
+  );
+  const stats = useMemo(() => computeStats(filtered), [filtered]);
+  const groups = useMemo(() => groupByDay(filtered), [filtered]);
+  const title = FILTERS.find((f) => f.id === filter)?.title ?? "Activity";
 
-  async function handleUndo(event: ActivityEvent) {
-    setUndoing(event.id);
-    if ((event.kind === "capture" || event.kind === "whatsapp") && event.slug) {
-      await fetch(`/api/inbox/${encodeURIComponent(event.slug)}`, {
-        method: "DELETE",
-      });
-    } else if (event.kind === "nutrition" && event.mealId) {
-      await fetch(`/api/nutrition/log/${encodeURIComponent(event.mealId)}`, {
-        method: "DELETE",
-      });
-    }
-    await load();
-    setUndoing(null);
-  }
+  const handleUndo = useCallback(
+    async (event: ActivityEvent) => {
+      setUndoing(event.id);
+      if ((event.kind === "capture" || event.kind === "whatsapp") && event.slug) {
+        await fetch(`/api/inbox/${encodeURIComponent(event.slug)}`, {
+          method: "DELETE",
+        });
+      } else if (event.kind === "nutrition" && event.mealId) {
+        await fetch(`/api/nutrition/log/${encodeURIComponent(event.mealId)}`, {
+          method: "DELETE",
+        });
+      }
+      await load();
+      setUndoing(null);
+    },
+    [load],
+  );
 
   return (
-    <div className="app-screen">
+    <div className="app-screen app-screen-wide">
       <ScreenHeader title="Activity" />
 
       <section className="space-y-2">
@@ -69,23 +79,22 @@ export default function ActivityPage() {
         </div>
       </section>
 
-      <div className="app-card flex-1">
-        {filtered.length === 0 ? (
-          <p className="py-8 text-center text-sm text-slate-400">
-            No activity for this filter
-          </p>
-        ) : (
-          filtered.map((event) => (
-            <ActivityRow
-              key={event.id}
-              event={event}
-              onUndo={
-                event.undoable ? () => handleUndo(event) : undefined
-              }
-              undoing={undoing === event.id}
+      <div className="flex-1 lg:grid lg:grid-cols-[minmax(220px,260px)_1fr] lg:gap-6 lg:items-start">
+        <ActivityStats title={title} stats={stats} />
+
+        <div className="app-card mt-4 lg:mt-0">
+          {filtered.length === 0 ? (
+            <p className="py-12 text-center text-sm text-slate-400">
+              No activity for this filter
+            </p>
+          ) : (
+            <ActivityTimeline
+              groups={groups}
+              onUndo={handleUndo}
+              undoing={undoing}
             />
-          ))
-        )}
+          )}
+        </div>
       </div>
 
       <p className="rounded-2xl bg-slate-50 px-4 py-3 text-center text-xs text-slate-500">

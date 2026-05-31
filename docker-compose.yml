@@ -20,8 +20,9 @@ services:
       # Embedded MongoDB (127.0.0.1 inside container); set EMBEDDED_MONGO=false + external URI to opt out
       - MONGODB_URI=${MONGODB_URI:-mongodb://127.0.0.1:27017/nutrition-tracker}
       - EMBEDDED_MONGO=${EMBEDDED_MONGO:-auto}
-      # Required for /nutrition/chat
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # Required for /assistant (Cursor SDK)
+      - CURSOR_API_KEY=${CURSOR_API_KEY}
+      - CURSOR_ASSISTANT_MODEL=${CURSOR_ASSISTANT_MODEL:-composer-2.5}
       # WAHA webhook → /api/webhooks/whatsapp
       - WAHA_WEBHOOK_SECRET=${WAHA_WEBHOOK_SECRET}
       - WAHA_BASE_URL=${WAHA_BASE_URL:-http://waha:3000}

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight, FileText, Folder } from "lucide-react";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import type {
   BrowseColumn,
@@ -28,58 +29,33 @@ function parseBrowsePath(pathname: string): string[] {
 
 const ICON_SM = "h-3.5 w-3.5 shrink-0";
 
-function FolderIcon({
-  className,
-  filled,
-}: {
-  className?: string;
-  filled?: boolean;
-}) {
+function FolderIcon({ className }: { className?: string; filled?: boolean }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill={filled ? "currentColor" : "none"}
-      stroke="currentColor"
+    <Folder
       strokeWidth={1.5}
       className={`${ICON_SM} ${className ?? ""}`}
       aria-hidden
-    >
-      <path
-        d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"
-        strokeLinejoin="round"
-      />
-    </svg>
+    />
   );
 }
 
 function FileIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
+    <FileText
       strokeWidth={1.5}
       className={`${ICON_SM} ${className ?? ""}`}
       aria-hidden
-    >
-      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-    </svg>
+    />
   );
 }
 
-function ChevronRight({ className }: { className?: string }) {
+function RowChevron({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
+    <ChevronRight
       strokeWidth={2}
       className={`h-3 w-3 shrink-0 opacity-50 ${className ?? ""}`}
       aria-hidden
-    >
-      <polyline points="9 18 15 12 9 6" />
-    </svg>
+    />
   );
 }
 
@@ -119,7 +95,7 @@ function ColumnRow({
           {label}
         </span>
         {isDirectory ? (
-          <ChevronRight className={selected ? "text-white/70" : undefined} />
+          <RowChevron className={selected ? "text-white/70" : undefined} />
         ) : (
           <span className="h-3 w-3 shrink-0" aria-hidden />
         )}
@@ -414,15 +390,7 @@ export default function ColumnBrowser({
           className="flex shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-1.5 text-slate-600 transition-colors hover:bg-slate-100 md:hidden"
           aria-label="Go back"
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            className="h-4 w-4"
-          >
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
+          <ChevronLeft strokeWidth={2} className="h-4 w-4" aria-hidden />
         </button>
         <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900">
           {headerTitle}

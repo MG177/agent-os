@@ -3,6 +3,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import {
+  ChevronRight as ChevronRightIcon,
+  FileText,
+  Folder,
+  FolderOpen,
+  Loader2,
+} from 'lucide-react'
 
 interface Entry {
   name: string
@@ -20,37 +27,20 @@ const SECTION_META: Record<Section, { color: string; dot: string }> = {
 }
 
 function FolderIcon({ filled, className }: { filled?: boolean; className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.8} className={className ?? 'w-3.5 h-3.5'}>
-      <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" strokeLinejoin="round" />
-    </svg>
-  )
+  const Glyph = filled ? FolderOpen : Folder
+  return <Glyph strokeWidth={1.8} className={className ?? 'w-3.5 h-3.5'} aria-hidden />
 }
 
 function FileIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className ?? 'w-3.5 h-3.5'}>
-      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-    </svg>
-  )
+  return <FileText strokeWidth={1.8} className={className ?? 'w-3.5 h-3.5'} aria-hidden />
 }
 
 function ChevronRight({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className={className ?? 'w-3 h-3'}>
-      <polyline points="9 18 15 12 9 6" />
-    </svg>
-  )
+  return <ChevronRightIcon strokeWidth={2.5} className={className ?? 'w-3 h-3'} aria-hidden />
 }
 
 function Spinner() {
-  return (
-    <svg className="w-3 h-3 animate-spin text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-      <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity={0.2} />
-      <path d="M21 12c0-4.97-4.03-9-9-9" />
-    </svg>
-  )
+  return <Loader2 className="w-3 h-3 animate-spin text-slate-300" aria-hidden />
 }
 
 export default function BrowseSidebar() {

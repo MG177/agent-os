@@ -6,6 +6,6 @@ export default async function LogRedirectPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const { tab } = await searchParams;
-  if (tab === "photo") redirect("/nutrition?view=ai");
+  if (tab === "photo") redirect("/assistant");
   redirect("/nutrition?view=log");
 }

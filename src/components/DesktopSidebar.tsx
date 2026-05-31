@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 import { useSidebar } from "@/components/SidebarContext";
 import {
   IconActivity,
-  IconCapture,
   IconHome,
   IconInbox,
   IconCalendar,
@@ -15,12 +15,6 @@ import {
 
 const PRIMARY = [
   { href: "/", label: "Home", match: (p: string) => p === "/", Icon: IconHome },
-  {
-    href: "/capture",
-    label: "Capture",
-    match: (p: string) => p.startsWith("/capture"),
-    Icon: IconCapture,
-  },
   {
     href: "/nutrition",
     label: "Nutrition",
@@ -78,16 +72,11 @@ function NavItem({
 
 function CollapseIcon({ collapsed }: { collapsed: boolean }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
+    <ChevronLeft
       strokeWidth={2}
       className={`h-4 w-4 transition-transform ${collapsed ? "rotate-180" : ""}`}
       aria-hidden
-    >
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
+    />
   );
 }
 

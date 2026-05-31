@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { QuickCaptureField } from "@/components/QuickCaptureField";
+import { useQuickPanel } from "@/components/QuickPanelContext";
 
 interface InboxItem {
   slug: string;
@@ -24,6 +25,7 @@ function formatDate(mtime: number): string {
 export default function InboxPage() {
   const [items, setItems] = useState<InboxItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { open } = useQuickPanel();
 
   const load = useCallback(async () => {
     const res = await fetch("/api/inbox");
@@ -47,7 +49,7 @@ export default function InboxPage() {
   const count = items.length;
 
   return (
-    <div className="app-screen md:mx-auto md:max-w-6xl md:pb-8 lg:max-w-7xl">
+    <div className="app-screen app-screen-wide">
       <div className="flex items-center justify-between border-b border-slate-100 pb-4 md:pb-5">
         <h1 className="text-xl font-bold text-slate-900 md:text-2xl md:tracking-tight">
           Inbox
@@ -59,17 +61,18 @@ export default function InboxPage() {
         )}
       </div>
 
-      <div className="flex flex-col gap-4 md:grid md:grid-cols-12 md:items-start md:gap-6 lg:gap-8">
+      <div className="flex flex-col gap-4 md:grid md:grid-cols-12 md:items-start md:gap-5 lg:gap-6">
         {/* Item list — left on desktop */}
         <section className="order-2 flex min-h-0 flex-col space-y-2 md:order-1 md:col-span-7 md:min-h-[28rem] lg:col-span-8">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="app-section-label">To triage</p>
-            <Link
-              href="/capture"
+            <button
+              type="button"
+              onClick={() => open("capture")}
               className="hidden h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 md:inline-flex"
             >
               New capture
-            </Link>
+            </button>
           </div>
 
           <div className="app-card flex min-h-[12rem] flex-1 flex-col overflow-hidden p-0 md:min-h-0">
@@ -85,12 +88,13 @@ export default function InboxPage() {
                 <p className="mt-1 text-xs text-slate-400">
                   Use Capture or quick capture below
                 </p>
-                <Link
-                  href="/capture"
+                <button
+                  type="button"
+                  onClick={() => open("capture")}
                   className="mt-4 inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 md:hidden"
                 >
-                  Go to Capture
-                </Link>
+                  New capture
+                </button>
               </div>
             ) : (
               <ul className="min-h-0 flex-1 divide-y divide-slate-50 overflow-y-auto">
@@ -98,7 +102,7 @@ export default function InboxPage() {
                   <li key={item.slug}>
                     <Link
                       href={`/inbox/${encodeURIComponent(item.slug)}`}
-                      className="block px-5 py-4 transition-colors hover:bg-slate-50"
+                      className="block px-4 py-2.5 transition-colors hover:bg-slate-50"
                     >
                       <p className="truncate text-sm font-medium text-slate-800">
                         {item.title}
@@ -137,9 +141,13 @@ export default function InboxPage() {
       </div>
 
       <div className="md:hidden">
-        <Link href="/capture" className="app-btn-secondary flex w-full justify-center">
-          Go to Capture
-        </Link>
+        <button
+          type="button"
+          onClick={() => open("capture")}
+          className="app-btn-secondary flex w-full justify-center"
+        >
+          New capture
+        </button>
       </div>
     </div>
   );

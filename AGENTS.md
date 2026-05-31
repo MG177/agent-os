@@ -23,12 +23,26 @@ See vault ADR: `Projects/lumendev-personal-agent-os/decisions/adr-2026-05-26-age
 UI work must follow **`Design System — Nutrition & PARA.html`** (repo root). Open in a browser for live reference.
 
 - **Brand:** Luna Apps · shared visual language for Nutrition + PARA surfaces
-- **Stack:** Next.js 16 · Tailwind 4 · Geist · inline SVG icons (stroke 1.8)
+- **Stack:** Next.js 16 · Tailwind 4 · Geist · [`lucide-react`](https://lucide.dev/icons/) icons (stroke 1.8). Shared icon set in `src/components/ui/icons.tsx`; import other glyphs directly from `lucide-react`.
 - **Tokens:** slate-50 background, slate-900 foreground, blue-600 primary, violet→blue hero gradients, `rounded-3xl` cards
 - **Modes:** light only (no dark theme)
 - **Sections:** foundations, color scales, typography, spacing/radius/elevation, components, app-specific patterns (meal rows, macro bars, inbox rows, vault sidebar), full-page mockups
 
 Extracted from `nutrition-tracker` and `para-dashboard` — mirror `globals.css` and Tailwind classes when implementing components.
+
+## Layout & density
+
+Every screen must earn its space: favor information density and **use the full viewport on large / high-res displays**. These rules apply to *all* pages, not just Home — when adding or editing any screen, follow them.
+
+- **Container width.** Standard screens use `.app-screen` (`max-w-2xl` on mobile → fluid from `md`). Glance/dashboard-style screens add `.app-screen-home`, which scales `lg:max-w-7xl 2xl:max-w-[1600px]`. Never cap a content-rich screen at a fixed narrow width on wide monitors — let columns grow or add columns.
+- **Progressive columns.** Ladder up, don't stay static: 1 col (mobile) → 2 col (`md`/`lg`) → add a 3rd column or more tiles at `xl`/`2xl` (`xl:grid-cols-3`, `2xl:grid-cols-4`, `auto-rows-fr`). No large dead horizontal bands.
+- **Compact spacing.** Section gaps `gap-4` (mobile) → `md:gap-5`/`gap-6` max. Card padding `p-4` → `md:p-5`/`p-6` (avoid `p-8`). Inter-section `space-y-4`. List rows `py-2.5`.
+- **Type scale.** Hero numbers cap at `md:text-4xl` (avoid `text-5xl`); body `text-sm`; labels `text-xs`/`text-[10px]`. Bigger ≠ better on a glance surface.
+- **One encoding per metric.** Show a value once (ring *or* bar *or* number), never the same number three ways.
+- **Fill vertical room.** Scrollable lists (schedule, activity, agenda) raise `max-h` on `lg`+ and reveal more rows instead of truncating to "+N more".
+- **Radius.** Keep `rounded-3xl` for hero / primary cards (per design system); inner/secondary tiles use `rounded-2xl`.
+
+Reuse the `globals.css` primitives (`.app-screen`, `.app-screen-home`, `.app-card`, `.app-hero`) — don't hand-roll widths or padding.
 
 ## Local dev
 
@@ -37,7 +51,7 @@ cp .env.example .env.local   # VAULT_PATH=/Users/mg/Obsidian
 npm install && npm run dev   # http://localhost:3003
 ```
 
-Routes: `/` Home · `/capture` · `/calendar` · `/settings/integrations` · `/inbox` · `/browse/...` (read-only) · `/nutrition/*` · `POST /api/inbox` · `POST /api/webhooks/whatsapp` (WAHA, HMAC) → `Inbox/` only · `GET /api/calendar/events` (Google read-only). Nutrition: **MongoDB required** (`MONGODB_URI`); calendar tokens live under `AGENT_OS_DATA/integrations/` (not Mongo). See vault runbook `runbook-google-calendar-connect`.
+Routes: `/` Home · `/assistant` (Cursor SDK + MCP tools) · `/capture` · `/calendar` · `/settings/integrations` · `/inbox` · `/browse/...` (read-only) · `/nutrition/*` · `POST /api/inbox` · `POST /api/chat` · `POST /api/webhooks/whatsapp` (WAHA, HMAC) → `Inbox/` only · `GET /api/calendar/events` (Google read-only). Assistant: **`CURSOR_API_KEY`**, model **`composer-2.5`** (`CURSOR_ASSISTANT_MODEL`). Nutrition: **MongoDB required** (`MONGODB_URI`); calendar tokens live under `AGENT_OS_DATA/integrations/` (not Mongo). See vault runbook `runbook-google-calendar-connect`.
 
 ## Doc sync
 

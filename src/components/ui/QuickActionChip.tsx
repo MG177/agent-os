@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 const STYLES = {
@@ -12,24 +14,38 @@ const STYLES = {
 
 export function QuickActionChip({
   href,
+  onClick,
   label,
   icon,
   variant,
 }: {
-  href: string;
+  href?: string;
+  onClick?: () => void;
   label: string;
   icon: React.ReactNode;
   variant: keyof typeof STYLES;
 }) {
-  return (
-    <Link
-      href={href}
-      className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold shadow-sm transition-colors ${STYLES[variant]}`}
-    >
+  const className = `inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold shadow-sm transition-colors ${STYLES[variant]}`;
+  const content = (
+    <>
       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/80 text-sm">
         {icon}
       </span>
       {label}
-    </Link>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
+    </button>
   );
 }

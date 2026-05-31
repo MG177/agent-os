@@ -1,35 +1,7 @@
 "use client";
 
 import type { ActivityEvent } from "@/lib/activity";
-
-function formatTime(ts: number): string {
-  return new Date(ts).toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-const KIND_STYLE: Record<
-  ActivityEvent["kind"],
-  { icon: string; box: string }
-> = {
-  capture: {
-    icon: "✓",
-    box: "border-blue-200 bg-blue-50 text-blue-600",
-  },
-  nutrition: {
-    icon: "🥗",
-    box: "border-emerald-200 bg-emerald-50 text-emerald-600",
-  },
-  reverted: {
-    icon: "↩",
-    box: "border-amber-200 bg-amber-50 text-amber-600",
-  },
-  whatsapp: {
-    icon: "📱",
-    box: "border-violet-200 bg-violet-50 text-violet-600",
-  },
-};
+import { KIND_STYLE, formatTime } from "@/components/activity/activity-display";
 
 export function ActivityRow({
   event,
@@ -43,12 +15,12 @@ export function ActivityRow({
   const style = KIND_STYLE[event.kind];
 
   return (
-    <div className="flex gap-3 border-b border-slate-50 py-3 last:border-0">
+    <div className="flex gap-3 border-b border-slate-50 py-2.5 last:border-0">
       <div
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border text-sm ${style.box}`}
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border ${style.box}`}
         aria-hidden
       >
-        {style.icon}
+        <style.Icon strokeWidth={1.8} className="h-4 w-4" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-slate-800">{event.text}</p>

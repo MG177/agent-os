@@ -16,7 +16,8 @@ import {
 import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
 
 /** Max height of the schedule card on Home (scroll inside). */
-const HOME_SCHEDULE_MAX_H = "max-h-[min(36vh,14rem)]";
+const HOME_SCHEDULE_MAX_H =
+  "max-h-[min(36vh,14rem)] lg:max-h-[min(44vh,22rem)]";
 
 type ScheduleState =
   | { kind: "loading" }

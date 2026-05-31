@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
-import AppNav from "@/components/AppNav";
 import AppShell from "@/components/AppShell";
 import ParaShell from "@/components/ParaShell";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
@@ -37,7 +36,6 @@ export default function RootLayout({
         <AppShell>
           <ParaShell>{children}</ParaShell>
         </AppShell>
-        <AppNav />
         <ServiceWorkerRegister />
       </body>
     </html>

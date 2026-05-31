@@ -218,7 +218,7 @@ export function getTimedEventTemporalState(
   return null;
 }
 
-export const HOME_SCHEDULE_WINDOW_AHEAD = 3;
+export const HOME_SCHEDULE_WINDOW_AHEAD = 5;
 export const HOME_SCHEDULE_CONTEXT_PAST = 1;
 
 export type HomeScheduleWindow = {
@@ -320,4 +320,186 @@ export function formatSelectedDaySubtitle(
 ): string {
   const noun = eventCount === 1 ? "event" : "events";
   return `${label} · ${eventCount} ${noun}`;
+}
+
+/* ------------------------------------------------------------------ */
+/* Week / month grid helpers                                          */
+/* ------------------------------------------------------------------ */
+
+export const INDONESIA_HOLIDAY_CALENDAR = "hari libur di indonesia";
+
+/** Add `days` to a `YYYY-MM-DD` key, returning a local day key. */
+export function addDaysToKey(dayKey: string, days: number): string {
+  const d = new Date(`${dayKey}T12:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toLocaleDateString("en-CA");
+}
+
+/** Add `months` to a `YYYY-MM-DD` key, returning a local day key. */
+export function addMonthsToKey(dayKey: string, months: number): string {
+  const d = new Date(`${dayKey}T12:00:00`);
+  d.setMonth(d.getMonth() + months);
+  return d.toLocaleDateString("en-CA");
+}
+
+/** First day of the month for a day key (`YYYY-MM-01`). */
+export function startOfMonthKey(dayKey: string): string {
+  return `${dayKey.slice(0, 7)}-01`;
+}
+
+/** Monday of the week containing `dayKey`. */
+export function startOfWeekKey(dayKey: string): string {
+  const d = new Date(`${dayKey}T12:00:00`);
+  const offset = (d.getDay() + 6) % 7; // 0 = Monday
+  return addDaysToKey(dayKey, -offset);
+}
+
+/** 7 consecutive day keys starting at `weekStartKey` (Mon → Sun). */
+export function buildWeekKeys(weekStartKey: string): string[] {
+  return Array.from({ length: 7 }, (_, i) => addDaysToKey(weekStartKey, i));
+}
+
+export type MonthGridCell = { day: string; inMonth: boolean };
+
+/** 6×7 month grid (Mon-start) covering the month containing `anchorDayKey`. */
+export function buildMonthGridKeys(anchorDayKey: string): MonthGridCell[] {
+  const month = anchorDayKey.slice(0, 7);
+  const gridStart = startOfWeekKey(startOfMonthKey(anchorDayKey));
+  return Array.from({ length: 42 }, (_, i) => {
+    const day = addDaysToKey(gridStart, i);
+    return { day, inMonth: day.slice(0, 7) === month };
+  });
+}
+
+export function isWeekendDayKey(dayKey: string): boolean {
+  const dow = new Date(`${dayKey}T12:00:00`).getDay();
+  return dow === 0 || dow === 6;
+}
+
+export function dayHasHoliday(events: CalendarEventSummary[]): boolean {
+  return events.some(
+    (event) =>
+      event.calendarName.trim().toLowerCase() === INDONESIA_HOLIDAY_CALENDAR,
+  );
+}
+
+export function formatMonthLabel(dayKey: string): string {
+  return new Date(`${dayKey}T12:00:00`).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+}
+
+export function formatWeekRangeLabel(weekStartKey: string): string {
+  const start = new Date(`${weekStartKey}T12:00:00`);
+  const endKey = addDaysToKey(weekStartKey, 6);
+  const end = new Date(`${endKey}T12:00:00`);
+  const sameMonth = start.getMonth() === end.getMonth();
+  const startStr = start.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+  const endStr = end.toLocaleDateString(
+    "en-US",
+    sameMonth ? { day: "numeric" } : { month: "short", day: "numeric" },
+  );
+  return `${startStr} – ${endStr}`;
+}
+
+/* ------------------------------------------------------------------ */
+/* Shared timed-event layout (timeline + week grid)                   */
+/* ------------------------------------------------------------------ */
+
+export type LaidOutTimedEvent = {
+  event: CalendarEventSummary;
+  startMin: number;
+  endMin: number;
+  top: number;
+  height: number;
+  lane: number;
+};
+
+export type TimedEventCluster = {
+  id: string;
+  items: LaidOutTimedEvent[];
+  laneCount: number;
+  startTop: number;
+  endTop: number;
+};
+
+/**
+ * Position timed events on a vertical day axis and assign collision lanes.
+ * Pure geometry shared by the day Timeline and the Week grid columns.
+ */
+export function clusterTimedEvents(
+  timed: CalendarEventSummary[],
+  slotPx: number,
+  opts: { minHeight: number },
+): TimedEventCluster[] {
+  const maxTop = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * slotPx;
+  const base = timed
+    .map((event) => {
+      const startMin = eventStartMinutes(event);
+      const endMin = startMin + eventDurationMinutes(event);
+      const rawTop = ((startMin - TIMELINE_START_HOUR * 60) / 60) * slotPx;
+      const rawHeight = Math.max(
+        (eventDurationMinutes(event) / 60) * slotPx,
+        opts.minHeight,
+      );
+      const rawBottom = rawTop + rawHeight;
+      if (rawBottom <= 0 || rawTop >= maxTop) return null;
+      const top = Math.max(0, rawTop);
+      const bottom = Math.min(maxTop, rawBottom);
+      const height = Math.max(opts.minHeight, bottom - top);
+      return { event, startMin, endMin, top, height };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null)
+    .sort((a, b) => a.startMin - b.startMin || a.endMin - b.endMin);
+
+  const raw: Array<{
+    id: string;
+    items: typeof base;
+    maxEndMin: number;
+    startTop: number;
+    endTop: number;
+  }> = [];
+
+  base.forEach((item) => {
+    const current = raw.at(-1);
+    if (!current || item.startMin >= current.maxEndMin) {
+      raw.push({
+        id: `${item.startMin}-${item.endMin}-${raw.length}`,
+        items: [item],
+        maxEndMin: item.endMin,
+        startTop: item.top,
+        endTop: item.top + item.height,
+      });
+      return;
+    }
+    current.items.push(item);
+    current.maxEndMin = Math.max(current.maxEndMin, item.endMin);
+    current.startTop = Math.min(current.startTop, item.top);
+    current.endTop = Math.max(current.endTop, item.top + item.height);
+  });
+
+  return raw.map((cluster) => {
+    const laneEndMins: number[] = [];
+    const items = cluster.items.map((item) => {
+      let lane = laneEndMins.findIndex((endMin) => item.startMin >= endMin);
+      if (lane === -1) {
+        lane = laneEndMins.length;
+        laneEndMins.push(item.endMin);
+      } else {
+        laneEndMins[lane] = item.endMin;
+      }
+      return { ...item, lane };
+    });
+    return {
+      id: cluster.id,
+      items,
+      laneCount: laneEndMins.length,
+      startTop: cluster.startTop,
+      endTop: cluster.endTop,
+    };
+  });
 }

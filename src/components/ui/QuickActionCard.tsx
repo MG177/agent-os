@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 const STYLES = {
@@ -21,27 +23,31 @@ const STYLES = {
 
 export function QuickActionCard({
   href,
+  onClick,
   title,
   description,
   icon,
   variant,
   layout = "row",
 }: {
-  href: string;
+  href?: string;
+  onClick?: () => void;
   title: string;
   description: string;
-  icon: string;
+  icon: React.ReactNode;
   variant: keyof typeof STYLES;
   layout?: "row" | "grid";
 }) {
   const s = STYLES[variant];
 
-  if (layout === "grid") {
-    return (
-      <Link
-        href={href}
-        className={`group flex h-full min-h-[4.5rem] items-center gap-3 rounded-2xl border px-3.5 py-3 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 ${s.card}`}
-      >
+  const className =
+    layout === "grid"
+      ? `group flex h-full min-h-[4.5rem] w-full items-center gap-3 rounded-2xl border px-3.5 py-3 text-left shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 ${s.card}`
+      : `flex w-full items-start gap-4 rounded-3xl border p-4 text-left shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 ${s.card}`;
+
+  const content =
+    layout === "grid" ? (
+      <>
         <span
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm ${s.icon}`}
         >
@@ -55,24 +61,32 @@ export function QuickActionCard({
             {description}
           </p>
         </div>
+      </>
+    ) : (
+      <>
+        <span
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-lg ${s.icon}`}
+        >
+          {icon}
+        </span>
+        <div className="min-w-0 pt-0.5">
+          <p className="text-sm font-semibold text-slate-800">{title}</p>
+          <p className="mt-0.5 text-xs text-slate-500">{description}</p>
+        </div>
+      </>
+    );
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
       </Link>
     );
   }
 
   return (
-    <Link
-      href={href}
-      className={`flex items-start gap-4 rounded-3xl border p-4 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 ${s.card}`}
-    >
-      <span
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-lg ${s.icon}`}
-      >
-        {icon}
-      </span>
-      <div className="min-w-0 pt-0.5">
-        <p className="text-sm font-semibold text-slate-800">{title}</p>
-        <p className="mt-0.5 text-xs text-slate-500">{description}</p>
-      </div>
-    </Link>
+    <button type="button" onClick={onClick} className={className}>
+      {content}
+    </button>
   );
 }

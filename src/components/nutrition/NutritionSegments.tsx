@@ -6,7 +6,6 @@ const ALL_SEGMENTS: { id: NutritionView; label: string }[] = [
   { id: "today", label: "Today" },
   { id: "log", label: "Log" },
   { id: "library", label: "Library" },
-  { id: "ai", label: "AI" },
 ];
 
 const WORKSPACE_SEGMENTS = ALL_SEGMENTS.filter((s) => s.id !== "today");

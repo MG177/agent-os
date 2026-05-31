@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
+import { Search, X } from "lucide-react";
 
 type SearchFieldProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -18,17 +19,11 @@ const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(
 
     return (
       <div className="relative">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
+        <Search
           strokeWidth={2}
           className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
           aria-hidden
-        >
-          <circle cx={11} cy={11} r={8} />
-          <line x1={21} y1={21} x2={16.65} y2={16.65} />
-        </svg>
+        />
         <input
           ref={ref}
           type="text"
@@ -47,17 +42,7 @@ const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(
             className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
             aria-label="Clear search"
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              className="h-4 w-4"
-              aria-hidden
-            >
-              <line x1={18} y1={6} x2={6} y2={18} />
-              <line x1={6} y1={6} x2={18} y2={18} />
-            </svg>
+            <X strokeWidth={2} className="h-4 w-4" aria-hidden />
           </button>
         )}
       </div>

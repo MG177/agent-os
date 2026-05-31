@@ -7,7 +7,7 @@ Single PWA merging **para-dashboard** (PARA vault) and **nutrition-tracker** (ma
 ```bash
 cp .env.example .env.local
 # VAULT_PATH=/Users/mg/Obsidian
-# GEMINI_API_KEY=...   # for /nutrition/chat
+# CURSOR_API_KEY=...   # for /assistant (Cursor SDK, composer-2.5)
 
 npm install
 npm run dev
@@ -26,10 +26,37 @@ Main mobile tabs: **Home · Capture · Nutrition · Activity** (see `Personal Ag
 | `/capture/success` | Saved confirmation |
 | `/nutrition` | Nutrition today |
 | `/nutrition/log` | Log meal (Manual / Photo) |
+| `/assistant` | Multi-module AI assistant (nutrition, vault, calendar) |
 | `/activity` | Audit + undo |
 | `/calendar` | Google Calendar week view |
 | `/settings/integrations` | Connect / disconnect Google Calendar |
 | `/inbox`, `/browse/...` | Secondary (desktop nav) |
+
+### Assistant stack
+
+| Layer | Path |
+|-------|------|
+| Cursor SDK utils | `src/lib/cursor-sdk/` |
+| Tool registry + runtime | `src/lib/assistant/` |
+| MCP stdio server | `scripts/assistant-mcp-server.ts` |
+| HTTP boundary | `POST /api/chat` |
+
+Model default: `composer-2.5` (`CURSOR_ASSISTANT_MODEL`). Local Cursor agent + MCP tools calling domain libs (no direct vault writes outside `Inbox/`).
+
+**Slash commands** (hybrid routing — hard = strict tools for writes, soft = prefer tools for reads):
+
+| Command | Mode | Purpose |
+|---------|------|---------|
+| `/log-nutrition` | hard | Log meals, search/add foods, daily summary |
+| `/nutrition-summary` | soft | Today's macros vs goals |
+| `/capture` | hard | `capture_note` → Inbox only |
+| `/inbox` | soft | List/read Inbox items |
+| `/list-events` | soft | Calendar today or range (read-only) |
+| `/vault-search` | soft | Search/read vault notes |
+| `/recent-activity` | soft | Audit activity feed |
+| `/general` | none | All tools (default) |
+
+Type `/` in the assistant input for autocomplete. Optional `command` field on `POST /api/chat`.
 
 ### APIs
 
@@ -40,7 +67,7 @@ Main mobile tabs: **Home · Capture · Nutrition · Activity** (see `Personal Ag
 | `/api/home` | Home stats + recent activity |
 | `/api/activity` | Full activity feed |
 | `/api/nutrition/*` | Nutrition REST |
-| `/api/chat` | Gemini streaming |
+| `/api/chat` | Assistant chat (Cursor SDK + MCP tools) |
 | `GET /api/integrations/google-calendar/status` | Calendar connection status |
 | `GET /api/integrations/google-calendar/auth` | Start Google OAuth |
 | `GET /api/integrations/google-calendar/callback` | OAuth callback |
@@ -63,7 +90,7 @@ Vault git push/pull is **out of scope** — an external sync system keeps `VAULT
 - Domain: `personal.lumen-dev.com` (Traefik via `dokploy-network`)
 - Compose: single `agent-os` service; embedded `mongod` via `docker-entrypoint.sh`; data under `/var/lib/agent-os/mongodb`
 - `MONGODB_URI` required; default in compose: `mongodb://127.0.0.1:27017/nutrition-tracker`
-- Host env required: `GEMINI_API_KEY`
+- Host env required: `CURSOR_API_KEY` (assistant), `MONGODB_URI` (nutrition)
 - One-shot legacy import: `LEGACY_NUTRITION_IMPORT_DIR=... npm run migrate:nutrition`
 
 ## Legacy repos
@@ -77,7 +104,7 @@ Shipped:
 - Capture UI PWA, `POST /api/inbox`, `Inbox/`-only write guard
 - Audit log + 24h undo + `/activity` feed
 - Read-only browse for vault sections
-- Nutrition UI + Mongo-backed API + Gemini chat
+- Nutrition UI + Mongo-backed API + Cursor SDK assistant (`/assistant`)
 - Dockerfile + docker-compose for VPS
 
 Not yet implemented:

@@ -1,17 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SearchField from "@/components/ui/SearchField";
-import type { FoodEntry } from "../types";
+import type { FoodEntry, LogEntry } from "../types";
 
-export default function LogPanel({
-  onSuccess,
-  onOpenAi,
-}: {
-  onSuccess: () => void;
-  onOpenAi: () => void;
-}) {
-  const [tab, setTab] = useState<"manual" | "photo">("manual");
+const FREQUENT_PREVIEW = 5;
+
+export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<FoodEntry[]>([]);
   const [selected, setSelected] = useState<FoodEntry | null>(null);
@@ -19,6 +14,8 @@ export default function LogPanel({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [allFoods, setAllFoods] = useState<FoodEntry[]>([]);
+  const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
+  const [showAllFrequent, setShowAllFrequent] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -27,9 +24,26 @@ export default function LogPanel({
       .then((d) => setAllFoods(d.foods || []));
   }, []);
 
+  const loadLog = useCallback(() => {
+    fetch("/api/nutrition/log")
+      .then((r) => r.json())
+      .then((d) => setLogEntries(d.entries || []))
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
-    if (tab === "manual") inputRef.current?.focus();
-  }, [tab]);
+    loadLog();
+  }, [loadLog]);
+
+  useEffect(() => {
+    const onUpdate = () => loadLog();
+    window.addEventListener("nutrition:updated", onUpdate);
+    return () => window.removeEventListener("nutrition:updated", onUpdate);
+  }, [loadLog]);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (!query.trim() || selected) {
@@ -46,6 +60,33 @@ export default function LogPanel({
         .slice(0, 6),
     );
   }, [query, allFoods, selected]);
+
+  /** Foods ranked by how often they appear in the log, mapped to library items. */
+  const frequent = useMemo(() => {
+    if (!allFoods.length || !logEntries.length) return [];
+    const byName = new Map<string, FoodEntry>();
+    for (const f of allFoods) byName.set(f.display_name.toLowerCase(), f);
+    const counts = new Map<string, number>();
+    for (const e of logEntries) {
+      const key = e.food_name?.toLowerCase();
+      if (!key || !byName.has(key)) continue;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([key, count]) => ({ food: byName.get(key)!, count }));
+  }, [allFoods, logEntries]);
+
+  const showFrequent = !query.trim() && !selected && frequent.length > 0;
+  const visibleFrequent = showAllFrequent
+    ? frequent
+    : frequent.slice(0, FREQUENT_PREVIEW);
+
+  const selectFood = useCallback((food: FoodEntry) => {
+    setSelected(food);
+    setQuery(food.display_name);
+    setResults([]);
+  }, []);
 
   const nutrition = selected?.per_100g;
   const preview =
@@ -78,91 +119,105 @@ export default function LogPanel({
       setQuery("");
       setSelected(null);
       setQuantity(250);
+      loadLog();
       onSuccess();
     } else {
       const d = await res.json();
       setError(d.error || "Failed to save");
     }
     setSaving(false);
-  }, [selected, quantity, onSuccess]);
+  }, [selected, quantity, loadLog, onSuccess]);
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex border-b border-slate-200">
-        {(["manual", "photo"] as const).map((t) => (
+      <SearchField
+        ref={inputRef}
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setSelected(null);
+        }}
+        onClear={() => {
+          setQuery("");
+          setSelected(null);
+          inputRef.current?.focus();
+        }}
+        placeholder="Search food library…"
+        aria-label="Search food library"
+      />
+
+      {allFoods.length === 0 && (
+        <p className="text-xs text-slate-600">
+          No foods in library yet — add items under the Library tab first.
+        </p>
+      )}
+
+      {/* Tap-to-log: most frequently logged foods, no search needed. */}
+      {showFrequent && (
+        <section className="space-y-2">
+          <p className="text-sm font-semibold text-slate-800">Most logged</p>
+          <div className="max-h-80 space-y-2 overflow-y-auto pr-1 lg:max-h-[28rem]">
+            {visibleFrequent.map(({ food, count }) => (
+              <button
+                key={food.key}
+                type="button"
+                onClick={() => selectFood(food)}
+                className="app-card flex w-full items-center justify-between gap-3 text-left transition-colors hover:border-blue-200"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium text-slate-800">
+                    {food.display_name}
+                  </span>
+                  <span className="mt-0.5 block text-xs text-slate-400">
+                    {food.per_100g.calories} kcal per 100g
+                  </span>
+                </span>
+                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-500">
+                  {count}×
+                </span>
+              </button>
+            ))}
+          </div>
+          {frequent.length > FREQUENT_PREVIEW && (
+            <button
+              type="button"
+              onClick={() => setShowAllFrequent((v) => !v)}
+              className="w-full rounded-xl py-2 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-50"
+            >
+              {showAllFrequent
+                ? "Show less"
+                : `Show more (${frequent.length - FREQUENT_PREVIEW})`}
+            </button>
+          )}
+        </section>
+      )}
+
+      {!showFrequent && !selected && allFoods.length > 0 && !query.trim() && (
+        <p className="text-xs text-slate-500">
+          Search your food library to log a meal.
+        </p>
+      )}
+
+      <div className="space-y-2">
+        {results.map((f) => (
           <button
-            key={t}
+            key={f.key}
             type="button"
-            onClick={() => setTab(t)}
-            className={`min-h-11 flex-1 px-4 text-sm font-semibold capitalize transition-colors ${tab === t
-                ? "border-b-2 border-blue-600 text-slate-900"
-                : "text-slate-500 hover:text-slate-700"
-              }`}
+            onClick={() => selectFood(f)}
+            className="app-card w-full text-left transition-colors hover:border-blue-200"
           >
-            {t === "manual" ? "Manual" : "Photo"}
+            <p className="text-sm font-medium text-slate-800">
+              {f.display_name}
+            </p>
+            <p className="mt-0.5 text-xs text-slate-400">
+              {f.per_100g.calories} kcal per 100g
+            </p>
           </button>
         ))}
       </div>
 
-      {tab === "photo" ? (
-        <div className="app-card flex flex-col items-center gap-4 py-8 text-center">
-          <p className="text-sm text-slate-600">
-            Send a meal photo to the nutrition AI — it will estimate macros and
-            log for you.
-          </p>
-          <button type="button" onClick={onOpenAi} className="app-btn-primary max-w-xs">
-            Open AI chat
-          </button>
-          <p className="text-xs text-slate-400">
-            Vision extraction runs in the AI tab (Gemini).
-          </p>
-        </div>
-      ) : (
+      {selected && (
         <>
-          <SearchField
-            ref={inputRef}
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setSelected(null);
-            }}
-            onClear={() => {
-              setQuery("");
-              setSelected(null);
-              inputRef.current?.focus();
-            }}
-            placeholder="Search food library…"
-            aria-label="Search food library"
-          />
-
-          {allFoods.length === 0 && (
-            <p className="text-xs text-slate-600">
-              No foods in library yet — add items under the Library tab first.
-            </p>
-          )}
-
-          <div className="space-y-2">
-            {results.map((f) => (
-              <button
-                key={f.key}
-                type="button"
-                onClick={() => {
-                  setSelected(f);
-                  setQuery(f.display_name);
-                  setResults([]);
-                }}
-                className="app-card w-full text-left transition-colors hover:border-blue-200"
-              >
-                <p className="text-sm font-medium text-slate-800">
-                  {f.display_name}
-                </p>
-                <p className="mt-0.5 text-xs text-slate-400">
-                  {f.per_100g.calories} kcal per 100g
-                </p>
-              </button>
-            ))}
-          </div>
-
           <section className="space-y-2">
             <p className="text-sm font-semibold text-slate-800">Portion</p>
             <div className="app-card flex items-center justify-between">

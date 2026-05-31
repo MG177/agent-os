@@ -2,10 +2,10 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Settings } from "lucide-react";
 import NutritionGoalsSheet from "./NutritionGoalsSheet";
 import NutritionSegments from "./NutritionSegments";
 import NutritionSummary from "./NutritionSummary";
-import ChatPanel from "./panels/ChatPanel";
 import LibraryPanel from "./panels/LibraryPanel";
 import LogPanel from "./panels/LogPanel";
 import TodayPanel from "./panels/TodayPanel";
@@ -37,21 +37,15 @@ type WorkspaceView = Exclude<NutritionView, "today">;
 function WorkspacePanel({
   panel,
   onLogSuccess,
-  onOpenAi,
-  onMealLoggedRefresh,
 }: {
   panel: WorkspaceView;
   onLogSuccess: () => void;
-  onOpenAi: () => void;
-  onMealLoggedRefresh: () => void;
 }) {
   switch (panel) {
     case "log":
-      return <LogPanel onSuccess={onLogSuccess} onOpenAi={onOpenAi} />;
+      return <LogPanel onSuccess={onLogSuccess} />;
     case "library":
       return <LibraryPanel />;
-    case "ai":
-      return <ChatPanel onMealLogged={onMealLoggedRefresh} />;
     default:
       return null;
   }
@@ -62,6 +56,11 @@ function NutritionDashboardInner() {
   const searchParams = useSearchParams();
   const view = parseNutritionView(searchParams.get("view"));
   const goalsOpen = searchParams.get("goals") === "1";
+
+  // The AI assistant moved to its own /assistant route — redirect legacy deep-links.
+  useEffect(() => {
+    if (searchParams.get("view") === "ai") router.replace("/assistant");
+  }, [searchParams, router]);
 
   const desktopPanel: WorkspaceView =
     view === "today" ? "log" : view;
@@ -93,6 +92,13 @@ function NutritionDashboardInner() {
 
   useEffect(() => {
     refresh();
+  }, [refresh]);
+
+  // Refresh when a meal is logged elsewhere (e.g. the quick-panel meal field).
+  useEffect(() => {
+    const onUpdate = () => refresh();
+    window.addEventListener("nutrition:updated", onUpdate);
+    return () => window.removeEventListener("nutrition:updated", onUpdate);
   }, [refresh]);
 
   const setView = useCallback(
@@ -141,11 +147,7 @@ function NutritionDashboardInner() {
     refresh();
   }
 
-  const workspaceClass = (panel: NutritionView | WorkspaceView) =>
-    `min-h-0 flex-1 ${panel === "ai"
-      ? "flex flex-col overflow-hidden"
-      : "overflow-y-auto"
-    }`;
+  const workspaceClass = "min-h-0 flex-1 overflow-y-auto";
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col overflow-hidden md:max-w-none">
@@ -160,17 +162,7 @@ function NutritionDashboardInner() {
           className="flex min-h-11 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
           aria-label="Edit daily goals"
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.8}
-            className="h-4 w-4"
-            aria-hidden
-          >
-            <circle cx={12} cy={12} r={3} />
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-          </svg>
+          <Settings strokeWidth={1.8} className="h-4 w-4" aria-hidden />
           Goals
         </button>
       </header>
@@ -186,7 +178,7 @@ function NutritionDashboardInner() {
             <NutritionSummary totals={totals} goals={goals} />
             <NutritionSegments view={view} onChange={setView} mode="mobile" />
             <div
-              className={`px-4 py-4 ${workspaceClass(view)}`}
+              className={`px-4 py-4 ${workspaceClass}`}
               role="tabpanel"
             >
               {view === "today" ? (
@@ -200,8 +192,6 @@ function NutritionDashboardInner() {
                 <WorkspacePanel
                   panel={view}
                   onLogSuccess={handleMealLoggedMobile}
-                  onOpenAi={() => setView("ai")}
-                  onMealLoggedRefresh={refresh}
                 />
               )}
             </div>
@@ -216,14 +206,12 @@ function NutritionDashboardInner() {
                 mode="desktop"
               />
               <div
-                className={`pt-4 ${workspaceClass(desktopPanel)}`}
+                className={`pt-4 ${workspaceClass}`}
                 role="tabpanel"
               >
                 <WorkspacePanel
                   panel={desktopPanel}
                   onLogSuccess={handleMealLoggedDesktop}
-                  onOpenAi={() => setView("ai")}
-                  onMealLoggedRefresh={refresh}
                 />
               </div>
             </section>

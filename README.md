@@ -12,7 +12,7 @@ Personal Agent OS — unified mobile-first PWA for **PARA** and **nutrition**.
 ```bash
 cp .env.example .env.local
 # VAULT_PATH=/Users/mg/Obsidian
-# GEMINI_API_KEY=...        # optional, for /nutrition/chat
+# CURSOR_API_KEY=...        # required for /assistant (Cursor SDK)
 
 npm install
 npm run dev
@@ -24,6 +24,7 @@ http://localhost:3003
 |------|--------|
 | PARA | `/` Capture · `/inbox` · `/browse/Projects` · WAHA → `POST /api/webhooks/whatsapp` |
 | Nutrition | `/nutrition` |
+| Assistant | `/assistant` |
 
 ## Related repos (legacy)
 

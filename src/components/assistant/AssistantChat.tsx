@@ -1,6 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Image as ImageIcon, Send, X } from "lucide-react";
+import {
+  filterSlashCommands,
+  getSlashCommandDefinition,
+  type AssistantSlashCommandId,
+} from "@/lib/assistant/commands";
 
 interface Message {
   role: "user" | "assistant";
@@ -9,9 +15,26 @@ interface Message {
 }
 
 const QUICK_ACTIONS = [
-  { label: "Today's summary", text: "Give me my nutrition summary for today" },
-  { label: "Log water", text: "Log 500ml water" },
-  { label: "What can you do?", text: "What can you help me with?" },
+  {
+    label: "Today's summary",
+    text: "Give me my nutrition summary for today",
+    command: "nutrition-summary" as AssistantSlashCommandId,
+  },
+  {
+    label: "Today's schedule",
+    text: "What's on my calendar today?",
+    command: "list-events" as AssistantSlashCommandId,
+  },
+  {
+    label: "Capture note",
+    text: "Capture: follow up on vault assistant plan",
+    command: "capture" as AssistantSlashCommandId,
+  },
+  {
+    label: "What can you do?",
+    text: "What can you help me with?",
+    command: "general" as AssistantSlashCommandId,
+  },
 ];
 
 function TypingDots() {
@@ -82,9 +105,13 @@ function AssistantBubble({
   );
 }
 
-export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void }) {
+export default function AssistantChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [activeCommand, setActiveCommand] =
+    useState<AssistantSlashCommandId | null>(null);
+  const [slashMenuOpen, setSlashMenuOpen] = useState(false);
+  const [slashHighlight, setSlashHighlight] = useState(0);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [streaming, setStreaming] = useState(false);
@@ -93,6 +120,12 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
   const inputRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const slashQuery =
+    input.startsWith("/") && !activeCommand ? input.slice(1) : "";
+  const slashSuggestions = slashMenuOpen
+    ? filterSlashCommands(slashQuery)
+    : [];
+
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
@@ -100,6 +133,10 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
   useEffect(() => {
     scrollToBottom();
   }, [messages, streamingText, scrollToBottom]);
+
+  useEffect(() => {
+    setSlashHighlight(0);
+  }, [slashQuery]);
 
   function compressImage(
     file: File,
@@ -136,10 +173,40 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
     setImagePreview(null);
   }
 
-  async function handleSend(overrideText?: string) {
+  function selectSlashCommand(id: AssistantSlashCommandId) {
+    setActiveCommand(id === "general" ? null : id);
+    setInput("");
+    setSlashMenuOpen(false);
+    inputRef.current?.focus();
+  }
+
+  function clearActiveCommand() {
+    setActiveCommand(null);
+    inputRef.current?.focus();
+  }
+
+  function handleInputChange(value: string) {
+    setInput(value);
+    if (activeCommand) {
+      setSlashMenuOpen(false);
+      return;
+    }
+    if (value.startsWith("/")) {
+      setSlashMenuOpen(true);
+    } else {
+      setSlashMenuOpen(false);
+    }
+  }
+
+  async function handleSend(overrideText?: string, overrideCommand?: AssistantSlashCommandId | null) {
     const text = (overrideText ?? input).trim();
     if (!text && !imageBase64) return;
     if (streaming) return;
+
+    const commandForRequest =
+      overrideCommand !== undefined
+        ? overrideCommand
+        : activeCommand;
 
     const userMsg: Message = {
       role: "user",
@@ -149,7 +216,9 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInput("");
+    setSlashMenuOpen(false);
     const capturedBase64 = imageBase64;
+    const capturedCommand = commandForRequest;
     clearImage();
     setStreaming(true);
     setStreamingText("");
@@ -166,6 +235,7 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
           image: capturedBase64
             ? { base64: capturedBase64, mediaType: "image/jpeg" }
             : undefined,
+          command: capturedCommand ?? undefined,
         }),
       });
 
@@ -194,7 +264,6 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
 
       setMessages((prev) => [...prev, { role: "assistant", content: full }]);
       setStreamingText("");
-      onMealLogged?.();
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -210,6 +279,34 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
+    if (slashMenuOpen && slashSuggestions.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSlashHighlight((i) =>
+          i + 1 >= slashSuggestions.length ? 0 : i + 1,
+        );
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSlashHighlight((i) =>
+          i - 1 < 0 ? slashSuggestions.length - 1 : i - 1,
+        );
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setSlashMenuOpen(false);
+        return;
+      }
+      if (e.key === "Tab" || (e.key === "Enter" && slashQuery.length > 0)) {
+        e.preventDefault();
+        const picked = slashSuggestions[slashHighlight];
+        if (picked) selectSlashCommand(picked.id);
+        return;
+      }
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -217,6 +314,9 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
   }
 
   const isEmpty = messages.length === 0 && !streaming;
+  const activeDef = activeCommand
+    ? getSlashCommandDefinition(activeCommand)
+    : null;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -227,17 +327,22 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
               AI
             </div>
             <h2 className="mb-1 text-base font-bold text-slate-800">
-              Nutrition AI
+              Assistant
             </h2>
             <p className="mb-5 max-w-xs text-xs leading-relaxed text-slate-400">
-              Log food, send label photos, or ask about your progress.
+              Type <span className="font-mono text-slate-500">/</span> for
+              commands — log nutrition, capture, calendar, vault search, and
+              more.
             </p>
             <div className="flex flex-wrap justify-center gap-2">
-              {QUICK_ACTIONS.map(({ label, text }) => (
+              {QUICK_ACTIONS.map(({ label, text, command }) => (
                 <button
                   key={label}
                   type="button"
-                  onClick={() => handleSend(text)}
+                  onClick={() => {
+                    setActiveCommand(command === "general" ? null : command);
+                    handleSend(text, command === "general" ? null : command);
+                  }}
                   className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-blue-200 hover:bg-slate-50 hover:text-blue-600 active:scale-95"
                 >
                   {label}
@@ -265,7 +370,40 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
         <div ref={bottomRef} />
       </div>
 
-      <div className="shrink-0 border-t border-slate-100 pt-3">
+      <div className="relative shrink-0 border-t border-slate-100 pt-3">
+        {slashMenuOpen && slashSuggestions.length > 0 && (
+          <div
+            className="absolute bottom-full left-0 right-0 z-10 mb-1 max-h-48 overflow-y-auto rounded-2xl border border-slate-200 bg-white py-1 shadow-lg"
+            role="listbox"
+            aria-label="Slash commands"
+          >
+            {slashSuggestions.map((cmd, i) => (
+              <button
+                key={cmd.id}
+                type="button"
+                role="option"
+                aria-selected={i === slashHighlight}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  selectSlashCommand(cmd.id);
+                }}
+                className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left transition-colors ${
+                  i === slashHighlight
+                    ? "bg-blue-50 text-blue-900"
+                    : "text-slate-800 hover:bg-slate-50"
+                }`}
+              >
+                <span className="font-mono text-xs font-semibold">
+                  {cmd.slash}
+                </span>
+                <span className="text-[11px] text-slate-500">
+                  {cmd.description}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {imagePreview && (
           <div className="mb-2 flex items-start gap-2">
             <div className="relative">
@@ -288,6 +426,25 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
           </div>
         )}
 
+        {activeDef && (
+          <div className="mb-2 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2.5 py-1 font-mono text-[11px] font-semibold text-violet-800">
+              {activeDef.slash}
+              <button
+                type="button"
+                onClick={clearActiveCommand}
+                className="rounded-full p-0.5 hover:bg-violet-200"
+                aria-label="Clear command mode"
+              >
+                <X className="h-3 w-3" strokeWidth={2} aria-hidden />
+              </button>
+            </span>
+            <span className="text-[10px] text-slate-400">
+              {activeDef.routing === "hard" ? "strict tools" : "focused"}
+            </span>
+          </div>
+        )}
+
         <div className="flex items-end gap-2 rounded-3xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
           <button
             type="button"
@@ -295,17 +452,7 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
             className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-500"
             aria-label="Attach image"
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.8}
-              className="h-5 w-5"
-            >
-              <rect x={3} y={3} width={18} height={18} rx={3} />
-              <circle cx={8.5} cy={8.5} r={1.5} fill="currentColor" />
-              <polyline points="21 15 16 10 5 21" />
-            </svg>
+            <ImageIcon strokeWidth={1.8} className="h-5 w-5" aria-hidden />
           </button>
           <input
             ref={fileRef}
@@ -319,9 +466,13 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
             ref={inputRef}
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => handleInputChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Log food, ask a question…"
+            placeholder={
+              activeCommand
+                ? `Message (${activeDef?.slash})…`
+                : "Message or type / for commands…"
+            }
             disabled={streaming}
             className="flex-1 resize-none bg-transparent py-1.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none disabled:opacity-50"
           />
@@ -335,9 +486,7 @@ export default function ChatPanel({ onMealLogged }: { onMealLogged?: () => void 
             {streaming ? (
               <span className="text-xs">…</span>
             ) : (
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-              </svg>
+              <Send strokeWidth={2} className="h-4 w-4" aria-hidden />
             )}
           </button>
         </div>

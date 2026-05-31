@@ -1,4 +1,4 @@
-export type NutritionView = "today" | "log" | "library" | "ai";
+export type NutritionView = "today" | "log" | "library";
 
 export interface LogEntry {
   timestamp: string;
@@ -44,6 +44,6 @@ export interface FoodEntry {
 export function parseNutritionView(
   value: string | null | undefined,
 ): NutritionView {
-  if (value === "log" || value === "library" || value === "ai") return value;
+  if (value === "log" || value === "library") return value;
   return "today";
 }

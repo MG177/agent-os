@@ -5,10 +5,7 @@ import Link from "next/link";
 import ProgressRing from "@/components/ProgressRing";
 import { ActivityRow } from "@/components/ui/ActivityRow";
 import { StatCard } from "@/components/ui/StatCard";
-import { QuickActionChip } from "@/components/ui/QuickActionChip";
-import { QuickActionCard } from "@/components/ui/QuickActionCard";
 import type { ActivityEvent } from "@/lib/activity";
-import { QuickCaptureField } from "@/components/QuickCaptureField";
 import { TodayScheduleCard } from "@/components/calendar/TodayScheduleCard";
 
 interface HomeData {
@@ -20,49 +17,6 @@ interface HomeData {
   recentActivity: ActivityEvent[];
 }
 
-const QUICK_ACTIONS = [
-  {
-    href: "/capture",
-    label: "Quick note",
-    title: "Quick note",
-    description: "Save to vault · Inbox",
-    variant: "blue" as const,
-    icon: "✎",
-  },
-  {
-    href: "/nutrition?view=log",
-    label: "Log meal",
-    title: "Log meal",
-    description: "Manual entry",
-    variant: "emerald" as const,
-    icon: "+",
-  },
-  {
-    href: "/nutrition?view=ai",
-    label: "Photo meal",
-    title: "Photo meal",
-    description: "AI vision extract",
-    variant: "violet" as const,
-    icon: "📷",
-  },
-  {
-    href: "/nutrition",
-    label: "Daily summary",
-    title: "Daily summary",
-    description: "Today totals",
-    variant: "indigo" as const,
-    icon: "✦",
-  },
-  {
-    href: "/calendar",
-    label: "Calendar",
-    title: "Calendar",
-    description: "Google schedule",
-    variant: "blue" as const,
-    icon: "📅",
-  },
-];
-
 export default function HomePage() {
   const [data, setData] = useState<HomeData | null>(null);
 
@@ -73,6 +27,14 @@ export default function HomePage() {
 
   useEffect(() => {
     load();
+  }, [load]);
+
+  // Capture / meal now live in the right sidebar — refresh stats + activity
+  // when one lands so Home stays in sync.
+  useEffect(() => {
+    const onUpdate = () => load();
+    window.addEventListener("inbox:updated", onUpdate);
+    return () => window.removeEventListener("inbox:updated", onUpdate);
   }, [load]);
 
   const calories = data ? Math.round(data.totals.calories) : 0;
@@ -108,24 +70,24 @@ export default function HomePage() {
       </header>
 
       {/* Hero — full width; stats beside ring on desktop */}
-      <section className="app-hero md:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <section className="app-hero md:p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
           <div className="min-w-0 flex-1">
             <p className="app-section-label-invert">
               Today&apos;s overview
             </p>
-            <div className="mt-4 flex items-center gap-6 md:gap-8">
+            <div className="mt-3 flex items-center gap-5 md:gap-6">
               <div className="shrink-0 md:hidden">
                 <ProgressRing
                   value={calories}
                   max={goal}
                   color="rgba(255,255,255,0.92)"
                   trackColor="rgba(255,255,255,0.22)"
-                  size={96}
-                  strokeWidth={9}
+                  size={84}
+                  strokeWidth={8}
                 >
                   <div className="text-center">
-                    <p className="text-xl font-bold tabular-nums text-white">
+                    <p className="text-lg font-bold tabular-nums text-white">
                       {calories}
                     </p>
                     <p className="text-[10px] text-white/70">kcal</p>
@@ -138,8 +100,8 @@ export default function HomePage() {
                   max={goal}
                   color="rgba(255,255,255,0.92)"
                   trackColor="rgba(255,255,255,0.22)"
-                  size={120}
-                  strokeWidth={10}
+                  size={104}
+                  strokeWidth={9}
                 >
                   <div className="text-center">
                     <p className="text-2xl font-bold tabular-nums text-white">
@@ -150,19 +112,11 @@ export default function HomePage() {
                 </ProgressRing>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-3xl font-bold tabular-nums leading-none text-white md:text-4xl lg:text-5xl">
+                <p className="text-3xl font-bold tabular-nums leading-none text-white md:text-4xl">
                   {remaining}
                 </p>
-                <p className="mt-1 text-sm text-white/75 md:text-base">
-                  kcal remaining
-                </p>
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/20 md:max-w-md">
-                  <div
-                    className="h-full rounded-full bg-white transition-all duration-700"
-                    style={{ width: `${Math.min(100, calPct * 100)}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-xs text-white/55 md:text-sm">
+                <p className="mt-1 text-sm text-white/75">kcal remaining</p>
+                <p className="mt-2 text-xs text-white/55">
                   {Math.round(calPct * 100)}% of {goal} kcal goal ·{" "}
                   {data?.mealsToday ?? 0} meals · {data?.capturesToday ?? 0}{" "}
                   captures
@@ -172,33 +126,33 @@ export default function HomePage() {
           </div>
 
           {/* Inline stats inside hero on large screens */}
-          <div className="hidden shrink-0 lg:grid lg:w-72 lg:grid-cols-2 lg:gap-3">
-            <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur-sm">
-              <p className="text-2xl font-bold tabular-nums text-white">
+          <div className="hidden shrink-0 lg:grid lg:grid-cols-2 lg:gap-2.5 xl:grid-cols-4">
+            <div className="rounded-2xl bg-white/15 px-3.5 py-2.5 backdrop-blur-sm xl:min-w-[7rem]">
+              <p className="text-xl font-bold tabular-nums text-white">
                 {data?.capturesToday ?? "—"}
               </p>
               <p className="app-section-label-invert">
                 Captures
               </p>
             </div>
-            <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur-sm">
-              <p className="text-2xl font-bold tabular-nums text-white">
+            <div className="rounded-2xl bg-white/15 px-3.5 py-2.5 backdrop-blur-sm xl:min-w-[7rem]">
+              <p className="text-xl font-bold tabular-nums text-white">
                 {data?.mealsToday ?? "—"}
               </p>
               <p className="app-section-label-invert">
                 Meals
               </p>
             </div>
-            <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur-sm">
-              <p className="text-2xl font-bold tabular-nums text-white">
+            <div className="rounded-2xl bg-white/15 px-3.5 py-2.5 backdrop-blur-sm xl:min-w-[7rem]">
+              <p className="text-xl font-bold tabular-nums text-white">
                 {calories || "—"}
               </p>
               <p className="app-section-label-invert">
                 Calories
               </p>
             </div>
-            <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur-sm">
-              <p className="text-2xl font-bold tabular-nums text-white">{goal}</p>
+            <div className="rounded-2xl bg-white/15 px-3.5 py-2.5 backdrop-blur-sm xl:min-w-[7rem]">
+              <p className="text-xl font-bold tabular-nums text-white">{goal}</p>
               <p className="app-section-label-invert">
                 Goal
               </p>
@@ -226,91 +180,50 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Desktop main grid: actions | activity */}
-      <div className="md:grid md:grid-cols-12 md:items-start md:gap-6 lg:gap-8">
-        <div className="space-y-5 md:col-span-6 lg:col-span-5">
-          <section className="space-y-3">
-            <p className="app-section-label">Quick actions</p>
-            {/* Mobile / narrow: horizontal chips */}
-            <div className="flex gap-2 overflow-x-auto pb-1 md:hidden">
-              {QUICK_ACTIONS.map((a) => (
-                <QuickActionChip
-                  key={`${a.href}-${a.title}`}
-                  href={a.href}
-                  label={a.label}
-                  variant={a.variant}
-                  icon={a.icon}
-                />
-              ))}
-            </div>
-            {/* Tablet+: compact grid that scales for more actions */}
-            <div className="hidden grid-cols-2 gap-2.5 md:grid md:auto-rows-fr">
-              {QUICK_ACTIONS.map((a) => (
-                <QuickActionCard
-                  key={`${a.href}-${a.title}`}
-                  href={a.href}
-                  title={a.title}
-                  description={a.description}
-                  variant={a.variant}
-                  icon={a.icon}
-                  layout="grid"
-                />
-              ))}
-            </div>
-          </section>
-
-          <div className="hidden rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-5 shadow-lg shadow-indigo-200/60 md:block lg:p-6">
-            <p className="text-sm font-bold text-white">Coming soon</p>
-            <p className="mt-2 text-xs leading-relaxed text-white/75">
-              Finance dashboards, project health, and agent status will land here
-              — same PWA, more domains.
-            </p>
-          </div>
+      {/* Desktop main grid: today's schedule | recent activity */}
+      <div className="md:grid md:grid-cols-12 md:items-start md:gap-5 lg:gap-6">
+        <div className="md:col-span-6 lg:col-span-7">
+          <TodayScheduleCard />
         </div>
 
-        <div className="mt-2 space-y-5 md:col-span-6 md:mt-0 lg:col-span-7">
-          <QuickCaptureField onSaved={load} />
-
-          <TodayScheduleCard />
-
-          <section className="space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <p className="app-section-label">Recent activity</p>
-              <Link
-                href="/activity"
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700"
-              >
-                View all →
-              </Link>
-            </div>
-            <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-              {!data?.recentActivity.length ? (
-                <p className="px-6 py-16 text-center text-sm text-slate-400">
-                  No activity yet — capture a note or log a meal
-                </p>
-              ) : (
-                <div className="divide-y divide-slate-50 px-5 py-2">
-                  {data.recentActivity.map((event) => (
-                    <ActivityRow key={event.id} event={event} />
-                  ))}
-                </div>
-              )}
-            </div>
+        <section className="mt-4 space-y-3 md:col-span-6 md:mt-0 lg:col-span-5">
+          <div className="flex items-center justify-between gap-2">
+            <p className="app-section-label">Recent activity</p>
             <Link
               href="/activity"
-              className="block text-center text-xs font-semibold text-blue-600 hover:text-blue-700 md:hidden"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-700"
             >
-              View all activity →
+              View all →
             </Link>
-          </section>
-        </div>
+          </div>
+          <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+            {!data?.recentActivity.length ? (
+              <p className="px-6 py-16 text-center text-sm text-slate-400">
+                No activity yet — capture a note or log a meal
+              </p>
+            ) : (
+              <div className="divide-y divide-slate-50 px-4 py-1">
+                {data.recentActivity.map((event) => (
+                  <ActivityRow key={event.id} event={event} />
+                ))}
+              </div>
+            )}
+          </div>
+          <Link
+            href="/activity"
+            className="block text-center text-xs font-semibold text-blue-600 hover:text-blue-700 md:hidden"
+          >
+            View all activity →
+          </Link>
+        </section>
       </div>
 
-      {/* Coming soon — mobile only */}
-      <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-4 text-center shadow-lg shadow-indigo-200/60 md:hidden">
+      {/* Coming soon — full width */}
+      <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-4 shadow-lg shadow-indigo-200/60 md:p-5">
         <p className="text-sm font-bold text-white">Coming soon</p>
-        <p className="mt-1 text-xs text-white/75">
-          Finance · Projects · Agent status
+        <p className="mt-1.5 text-xs leading-relaxed text-white/75">
+          Finance dashboards, project health, and agent status will land here —
+          same PWA, more domains.
         </p>
       </div>
     </div>

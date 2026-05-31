@@ -30,8 +30,20 @@ body {
   @apply lg:px-10;
 }
 
+/* Wide, high-res-utilizing content width — list / dashboard screens.
+   Reading + form screens keep plain `.app-screen` (narrower, comfortable). */
+.app-screen-wide {
+  @apply md:max-w-6xl md:mx-auto lg:max-w-7xl 2xl:max-w-[1600px];
+}
+
 .app-screen-home {
-  @apply md:max-w-6xl md:mx-auto lg:max-w-7xl;
+  @apply md:max-w-6xl md:mx-auto lg:max-w-7xl 2xl:max-w-[1600px];
+}
+
+/* Comfortable reading / single-column form width — caps on desktop so a
+   lone textarea or article doesn't stretch the full main column. */
+.app-screen-read {
+  @apply md:max-w-2xl md:mx-auto lg:max-w-3xl;
 }
 
 .app-section-label {

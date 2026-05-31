@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Broccoli } from "lucide-react";
 import SearchField from "@/components/ui/SearchField";
 import type { FoodEntry } from "../types";
 
@@ -182,7 +183,7 @@ export default function LibraryPanel() {
       <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center py-12 text-center">
-            <div className="mb-3 text-4xl">🥦</div>
+            <Broccoli strokeWidth={1.6} className="mb-3 h-10 w-10 text-slate-300" aria-hidden />
             <p className="text-sm font-medium text-slate-600">
               {query ? "No foods match your search" : "No foods yet"}
             </p>

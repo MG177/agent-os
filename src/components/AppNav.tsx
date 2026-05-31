@@ -2,14 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useQuickPanel } from "@/components/QuickPanelContext";
 import {
   IconActivity,
+  IconAssistant,
   IconCapture,
   IconHome,
   IconNutrition,
 } from "@/components/ui/icons";
 
-const TABS = [
+type Tab = {
+  label: string;
+  Icon: typeof IconHome;
+} & (
+  | { href: string; match: (p: string) => boolean; panel?: never }
+  | { panel: "capture"; href?: never; match?: never }
+);
+
+const TABS: Tab[] = [
   {
     href: "/",
     label: "Home",
@@ -17,9 +27,8 @@ const TABS = [
     Icon: IconHome,
   },
   {
-    href: "/capture",
+    panel: "capture",
     label: "Capture",
-    match: (p: string) => p.startsWith("/capture"),
     Icon: IconCapture,
   },
   {
@@ -34,42 +43,89 @@ const TABS = [
     match: (p: string) => p === "/activity",
     Icon: IconActivity,
   },
-] as const;
+];
 
-/** Wireframe §5: persistent 4-tab bar on main screens */
+const ITEM_CLASS =
+  "flex min-h-11 min-w-[4.5rem] flex-col items-center justify-center gap-1 rounded-2xl px-2 transition-colors";
+
+function TabInner({
+  label,
+  Icon,
+  active,
+}: {
+  label: string;
+  Icon: typeof IconHome;
+  active: boolean;
+}) {
+  return (
+    <>
+      <div className={`rounded-lg p-1 ${active ? "bg-blue-50" : ""}`}>
+        <Icon active={active} className="h-4 w-4" />
+      </div>
+      <span
+        className={`text-[10px] font-semibold tracking-wide ${
+          active ? "text-blue-600" : "text-slate-400"
+        }`}
+      >
+        {label}
+      </span>
+    </>
+  );
+}
+
+/** Wireframe §5: persistent 4-tab bar on main screens, plus a floating Assistant button */
 export default function AppNav() {
   const pathname = usePathname();
+  const { active: panel, toggle, close } = useQuickPanel();
+  const assistantActive = pathname.startsWith("/assistant");
 
   return (
-    <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/90 backdrop-blur-md md:hidden"
-      aria-label="Main"
-    >
-      <div className="mx-auto flex h-16 max-w-2xl items-center justify-around px-2">
-        {TABS.map(({ href, label, match, Icon }) => {
-          const active = match(pathname);
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex min-h-11 min-w-[4.5rem] flex-col items-center justify-center gap-1 rounded-2xl px-2 transition-colors ${
-                active ? "text-blue-600" : "text-slate-400"
-              }`}
-            >
-              <div className={`rounded-lg p-1 ${active ? "bg-blue-50" : ""}`}>
-                <Icon active={active} className="h-4 w-4" />
-              </div>
-              <span
-                className={`text-[10px] font-semibold tracking-wide ${
-                  active ? "text-blue-600" : "text-slate-400"
-                }`}
+    <>
+      <Link
+        href="/assistant"
+        aria-label="Open Assistant"
+        aria-current={assistantActive ? "page" : undefined}
+        className={`fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-lg shadow-blue-300/50 transition-transform active:scale-95 md:hidden ${
+          panel ? "hidden" : ""
+        } ${assistantActive ? "ring-2 ring-blue-300 ring-offset-2" : ""}`}
+      >
+        <IconAssistant className="h-6 w-6" />
+      </Link>
+
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/90 backdrop-blur-md md:hidden"
+        aria-label="Main"
+      >
+        <div className="mx-auto flex h-16 max-w-2xl items-center justify-around px-2">
+          {TABS.map((tab) => {
+            if (tab.panel) {
+              const active = panel === tab.panel;
+              return (
+                <button
+                  key={tab.panel}
+                  type="button"
+                  onClick={() => toggle("capture")}
+                  aria-pressed={active}
+                  className={`${ITEM_CLASS} ${active ? "text-blue-600" : "text-slate-400"}`}
+                >
+                  <TabInner label={tab.label} Icon={tab.Icon} active={active} />
+                </button>
+              );
+            }
+            const active = tab.match(pathname);
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                onClick={() => panel && close()}
+                className={`${ITEM_CLASS} ${active ? "text-blue-600" : "text-slate-400"}`}
               >
-                {label}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+                <TabInner label={tab.label} Icon={tab.Icon} active={active} />
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </>
   );
 }
