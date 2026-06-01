@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import AppNav from "@/components/AppNav";
 import QuickPanel from "@/components/QuickPanel";
 import { QuickPanelProvider } from "@/components/QuickPanelContext";
@@ -7,6 +8,12 @@ import DesktopSidebar from "@/components/DesktopSidebar";
 import { SidebarProvider } from "@/components/SidebarContext";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  if (pathname === "/dev-lock") {
+    return <>{children}</>;
+  }
+
   return (
     <SidebarProvider>
       <QuickPanelProvider>
