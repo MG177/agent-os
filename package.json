@@ -12,6 +12,8 @@
     "@cursor/sdk": "^1.0.17",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@tailwindcss/postcss": "^4.3.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "googleapis": "^172.0.0",
     "gray-matter": "^4.0.3",
     "lucide-react": "^1.17.0",
