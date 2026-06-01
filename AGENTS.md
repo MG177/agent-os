@@ -64,3 +64,52 @@ Technical markdown: repo `docs/README.md`; vault `context/` holds narrative only
 - Do not run `eslint` or full production builds unless explicitly requested.
 - Scoped vault writes: agents must not write outside `Inbox/` on the PARA satellite path.
 - Solo-user MVP — no multi-tenant or approval-queue patterns.
+
+## Cursor Cloud specific instructions
+
+### Minimal local stack (Cloud VM)
+
+1. **MongoDB** — not bundled in the repo. Start a local `mongod` (systemd may be unavailable in Cloud VMs):
+
+   ```bash
+   mkdir -p /tmp/mongodb-data
+   mongod --dbpath /tmp/mongodb-data --bind_ip 127.0.0.1 --port 27017 --fork --logpath /tmp/mongod.log
+   ```
+
+2. **`.env.local`** — copy from `.env.example` and set at least:
+
+   - `VAULT_PATH=/workspace/.dev-vault` (create `Inbox/`, `Projects/`, `Areas/`, `Resources/`, `Ideas/` under it)
+   - `MONGODB_URI=mongodb://127.0.0.1:27017/nutrition-tracker`
+   - `AGENT_OS_DATA_PATH=/workspace/.agent-os-data` (optional; audit log)
+
+3. **Dev server** — `npm run dev` → http://localhost:3003 (see `package.json`; not port 3000).
+
+### Services
+
+| Service | Required for | Notes |
+|---------|----------------|-------|
+| Next.js (`npm run dev`) | All UI/API | Port **3003** |
+| MongoDB | Nutrition + integration tokens + `/api/home` | `MONGODB_URI` mandatory |
+| PARA vault dir | Capture, browse, inbox | Writable **`Inbox/`** only for agents |
+| Cursor API | `/assistant`, `POST /api/chat` | `CURSOR_API_KEY` — optional for PARA/nutrition smoke |
+| Google / ClickUp / WAHA | Integrations routes | Optional; connect via Settings or env |
+
+### Verify without a full Obsidian vault
+
+```bash
+curl -s -X POST http://localhost:3003/api/inbox -H 'Content-Type: application/json' \
+  -d '{"title":"Smoke","body":"test","source":"capture-ui"}'
+curl -s http://localhost:3003/api/home | jq '.status, .capturesToday, .mealsToday'
+```
+
+### Lint / tests
+
+- No ESLint config or `npm test` script in this repo.
+- Typecheck: `npx tsc --noEmit`.
+- WhatsApp webhook smoke: `node scripts/waha-webhook-smoke.mjs` (needs `WAHA_WEBHOOK_SECRET` in `.env.local`).
+
+### Gotchas
+
+- **Timezone:** defaults to `Asia/Jakarta` for “today” in nutrition and home stats (`TZ` in `.env.example`).
+- **Mongo in Docker:** production image starts embedded `mongod` via `docker-entrypoint.sh`; local Cloud dev uses a separate `mongod` process as above.
+- **Assistant:** requires outbound network + `CURSOR_API_KEY`; MCP child is `npx tsx scripts/assistant-mcp-server.ts`.
