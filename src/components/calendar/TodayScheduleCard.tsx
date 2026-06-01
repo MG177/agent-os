@@ -10,9 +10,11 @@ import {
 import { CalendarEventRow } from "@/components/calendar/CalendarEventRow";
 import {
   buildHomeScheduleWindow,
+  filterEventsByVisibleCalendars,
   getTimedEventTemporalState,
   sortEventsWithinDay,
 } from "@/components/calendar/calendar-utils";
+import { useHiddenCalendars } from "@/components/calendar/useHiddenCalendars";
 import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
 
 /** Max height of the schedule card on Home (scroll inside). */
@@ -126,6 +128,7 @@ function HomeScheduleEventList({
 export function TodayScheduleCard() {
   const [state, setState] = useState<ScheduleState>({ kind: "loading" });
   const now = useScheduleClock();
+  const { hiddenCalendarIds } = useHiddenCalendars();
 
   useEffect(() => {
     let cancelled = false;
@@ -174,6 +177,12 @@ export function TodayScheduleCard() {
     return null;
   }
 
+  const visibleEvents =
+    state.kind === "events"
+      ? filterEventsByVisibleCalendars(state.events, hiddenCalendarIds)
+      : [];
+  const hasVisibleEvents = visibleEvents.length > 0;
+
   return (
     <section className="space-y-2">
       <div className="flex shrink-0 items-center justify-between gap-2">
@@ -199,14 +208,15 @@ export function TodayScheduleCard() {
           <CalendarConnectionEmpty variant="compact" />
         )}
 
-        {state.kind === "empty" && (
+        {(state.kind === "empty" ||
+          (state.kind === "events" && !hasVisibleEvents)) && (
           <p className="px-4 py-6 text-center text-xs text-slate-400">
             No events today
           </p>
         )}
 
-        {state.kind === "events" && (
-          <HomeScheduleEventList events={state.events} now={now} />
+        {state.kind === "events" && hasVisibleEvents && (
+          <HomeScheduleEventList events={visibleEvents} now={now} />
         )}
       </div>
     </section>

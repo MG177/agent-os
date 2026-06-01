@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SearchField from "@/components/ui/SearchField";
-import type { FoodEntry, LogEntry } from "../types";
+import type { FoodEntry } from "../types";
 
 const FREQUENT_PREVIEW = 5;
 
@@ -14,7 +14,7 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [allFoods, setAllFoods] = useState<FoodEntry[]>([]);
-  const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
+  const [foodFrequency, setFoodFrequency] = useState<{ food_name: string; count: number }[]>([]);
   const [showAllFrequent, setShowAllFrequent] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -24,22 +24,22 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
       .then((d) => setAllFoods(d.foods || []));
   }, []);
 
-  const loadLog = useCallback(() => {
-    fetch("/api/nutrition/log")
+  const loadFrequency = useCallback(() => {
+    fetch("/api/nutrition/log?alltime=true")
       .then((r) => r.json())
-      .then((d) => setLogEntries(d.entries || []))
+      .then((d) => setFoodFrequency(d.frequency || []))
       .catch(() => {});
   }, []);
 
   useEffect(() => {
-    loadLog();
-  }, [loadLog]);
+    loadFrequency();
+  }, [loadFrequency]);
 
   useEffect(() => {
-    const onUpdate = () => loadLog();
+    const onUpdate = () => loadFrequency();
     window.addEventListener("nutrition:updated", onUpdate);
     return () => window.removeEventListener("nutrition:updated", onUpdate);
-  }, [loadLog]);
+  }, [loadFrequency]);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -61,21 +61,15 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
     );
   }, [query, allFoods, selected]);
 
-  /** Foods ranked by how often they appear in the log, mapped to library items. */
+  /** Foods ranked by all-time log frequency, mapped to library items. */
   const frequent = useMemo(() => {
-    if (!allFoods.length || !logEntries.length) return [];
+    if (!allFoods.length || !foodFrequency.length) return [];
     const byName = new Map<string, FoodEntry>();
     for (const f of allFoods) byName.set(f.display_name.toLowerCase(), f);
-    const counts = new Map<string, number>();
-    for (const e of logEntries) {
-      const key = e.food_name?.toLowerCase();
-      if (!key || !byName.has(key)) continue;
-      counts.set(key, (counts.get(key) ?? 0) + 1);
-    }
-    return [...counts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .map(([key, count]) => ({ food: byName.get(key)!, count }));
-  }, [allFoods, logEntries]);
+    return foodFrequency
+      .filter((r) => byName.has(r.food_name.toLowerCase()))
+      .map((r) => ({ food: byName.get(r.food_name.toLowerCase())!, count: r.count }));
+  }, [allFoods, foodFrequency]);
 
   const showFrequent = !query.trim() && !selected && frequent.length > 0;
   const visibleFrequent = showAllFrequent
@@ -119,17 +113,17 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
       setQuery("");
       setSelected(null);
       setQuantity(250);
-      loadLog();
+      loadFrequency();
       onSuccess();
     } else {
       const d = await res.json();
       setError(d.error || "Failed to save");
     }
     setSaving(false);
-  }, [selected, quantity, loadLog, onSuccess]);
+  }, [selected, quantity, loadFrequency, onSuccess]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       <SearchField
         ref={inputRef}
         value={query}
@@ -147,29 +141,38 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
       />
 
       {allFoods.length === 0 && (
-        <p className="text-xs text-slate-600">
-          No foods in library yet — add items under the Library tab first.
+        <p className="text-xs text-slate-500">
+          No foods in library yet — visit the{" "}
+          <a href="/nutrition" className="font-semibold text-blue-600 hover:underline">
+            Nutrition page
+          </a>{" "}
+          to add items.
         </p>
       )}
 
       {/* Tap-to-log: most frequently logged foods, no search needed. */}
       {showFrequent && (
         <section className="space-y-2">
-          <p className="text-sm font-semibold text-slate-800">Most logged</p>
-          <div className="max-h-80 space-y-2 overflow-y-auto pr-1 lg:max-h-[28rem]">
+          <p className="app-section-label">Most logged</p>
+          <div className="max-h-72 space-y-1.5 overflow-y-auto">
             {visibleFrequent.map(({ food, count }) => (
               <button
                 key={food.key}
                 type="button"
                 onClick={() => selectFood(food)}
-                className="app-card flex w-full items-center justify-between gap-3 text-left transition-colors hover:border-blue-200"
+                className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-blue-200"
               >
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-medium text-slate-800">
                     {food.display_name}
                   </span>
-                  <span className="mt-0.5 block text-xs text-slate-400">
-                    {food.per_100g.calories} kcal per 100g
+                  <span className="mt-0.5 flex gap-2 text-[11px]">
+                    <span className="font-semibold text-blue-600">{food.per_100g.protein_g}g</span>
+                    <span className="text-slate-300">·</span>
+                    <span className="font-semibold text-emerald-600">{food.per_100g.carb_g}g</span>
+                    <span className="text-slate-300">·</span>
+                    <span className="font-semibold text-amber-600">{food.per_100g.fat_g}g</span>
+                    <span className="text-slate-400">· {food.per_100g.calories} kcal</span>
                   </span>
                 </span>
                 <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-slate-500">
@@ -182,7 +185,7 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
             <button
               type="button"
               onClick={() => setShowAllFrequent((v) => !v)}
-              className="w-full rounded-xl py-2 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-50"
+              className="w-full rounded-xl py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-50"
             >
               {showAllFrequent
                 ? "Show less"
@@ -193,25 +196,26 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
       )}
 
       {!showFrequent && !selected && allFoods.length > 0 && !query.trim() && (
-        <p className="text-xs text-slate-500">
-          Search your food library to log a meal.
-        </p>
+        <p className="text-xs text-slate-400">Search your food library to log a meal.</p>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {results.map((f) => (
           <button
             key={f.key}
             type="button"
             onClick={() => selectFood(f)}
-            className="app-card w-full text-left transition-colors hover:border-blue-200"
+            className="flex w-full flex-col rounded-2xl border border-slate-100 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-blue-200"
           >
-            <p className="text-sm font-medium text-slate-800">
-              {f.display_name}
-            </p>
-            <p className="mt-0.5 text-xs text-slate-400">
-              {f.per_100g.calories} kcal per 100g
-            </p>
+            <p className="text-sm font-medium text-slate-800">{f.display_name}</p>
+            <span className="mt-0.5 flex gap-2 text-[11px]">
+              <span className="font-semibold text-blue-600">{f.per_100g.protein_g}g</span>
+              <span className="text-slate-300">·</span>
+              <span className="font-semibold text-emerald-600">{f.per_100g.carb_g}g</span>
+              <span className="text-slate-300">·</span>
+              <span className="font-semibold text-amber-600">{f.per_100g.fat_g}g</span>
+              <span className="text-slate-400">· {f.per_100g.calories} kcal</span>
+            </span>
           </button>
         ))}
       </div>
@@ -219,32 +223,43 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
       {selected && (
         <>
           <section className="space-y-2">
-            <p className="text-sm font-semibold text-slate-800">Portion</p>
-            <div className="app-card flex items-center justify-between">
+            <p className="app-section-label">Portion</p>
+            <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white px-2 py-2 shadow-sm">
               <button
                 type="button"
                 onClick={() => setQuantity((q) => Math.max(0, q - 25))}
-                className="flex h-11 w-11 items-center justify-center rounded-xl text-xl text-slate-600 hover:bg-slate-50"
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-lg text-slate-600 hover:bg-slate-50"
                 aria-label="Decrease portion"
               >
                 −
               </button>
-              <span className="text-lg font-semibold tabular-nums text-slate-900">
-                {quantity} g
-              </span>
+              <div className="flex items-baseline gap-1">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  value={quantity === 0 ? "" : quantity}
+                  onChange={(e) => {
+                    const n = parseInt(e.target.value, 10);
+                    setQuantity(Number.isNaN(n) ? 0 : Math.max(0, n));
+                  }}
+                  placeholder="0"
+                  aria-label="Portion in grams"
+                  className="w-14 bg-transparent text-center text-base font-semibold tabular-nums text-slate-900 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                />
+                <span className="text-base font-semibold text-slate-900">g</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setQuantity((q) => q + 25)}
-                className="flex h-11 w-11 items-center justify-center rounded-xl text-xl text-slate-600 hover:bg-slate-50"
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-lg text-slate-600 hover:bg-slate-50"
                 aria-label="Increase portion"
               >
                 +
               </button>
             </div>
             {preview && (
-              <p className="text-center text-xs text-slate-500">
-                ≈ {preview.calories} kcal
-              </p>
+              <p className="text-center text-xs text-slate-400">≈ {preview.calories} kcal</p>
             )}
           </section>
 

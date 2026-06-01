@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  countEventsToday,
   deriveCalendarVisual,
   deriveCalendarsFromEvents,
   findHappeningTimedEvent,
@@ -25,8 +24,6 @@ export function CalendarRightRail({
   onToggleCalendar: (calendarId: string) => void;
   nowMs: number;
 }) {
-  const todayCount = countEventsToday(events);
-  const weekCount = events.length;
   const happening = findHappeningTimedEvent(events, nowMs);
   const next = findNextTimedEvent(events, nowMs);
   const calendars = deriveCalendarsFromEvents(allEvents);
@@ -106,19 +103,6 @@ export function CalendarRightRail({
           </ul>
         </div>
       )}
-
-      <div className="app-hero p-5">
-        <p className="app-section-label-invert">
-          This week
-        </p>
-        <p className="mt-2 text-3xl font-bold tabular-nums text-white">
-          {weekCount}
-        </p>
-        <p className="text-sm text-white/75">events across visible calendars</p>
-        <p className="mt-3 text-xs text-white/60">
-          {todayCount} today · {Math.max(0, weekCount - todayCount)} later
-        </p>
-      </div>
 
       <div className="app-card space-y-2 p-4">
         <p className="app-section-label">Quick links</p>

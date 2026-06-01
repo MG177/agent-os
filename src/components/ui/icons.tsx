@@ -8,6 +8,7 @@ import {
   Folder,
   House,
   Inbox,
+  ListChecks,
   Plus,
   Sparkles,
   type LucideIcon,
@@ -41,3 +42,5 @@ export const IconBrowse = makeIcon(Columns3, "h-4 w-4");
 export const IconInbox = makeIcon(Inbox, "h-5 w-5");
 export const IconCalendar = makeIcon(Calendar, "h-5 w-5");
 export const IconCheck = makeIcon(Check, "h-4 w-4");
+/** ClickUp tasks surface */
+export const IconTasks = makeIcon(ListChecks, "h-5 w-5");

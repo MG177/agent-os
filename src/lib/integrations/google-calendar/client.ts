@@ -152,7 +152,7 @@ export async function listCalendarEvents(
     skipCache?: boolean;
   },
 ): Promise<CalendarEventSummary[]> {
-  const refreshToken = getRefreshToken();
+  const refreshToken = await getRefreshToken();
   if (!refreshToken) {
     throw new CalendarNotConnectedError();
   }

@@ -24,6 +24,7 @@ import {
   startOfMonthKey,
   startOfWeekKey,
 } from "@/components/calendar/calendar-utils";
+import { useHiddenCalendars } from "@/components/calendar/useHiddenCalendars";
 import { useScheduleClock } from "@/components/calendar/useScheduleClock";
 import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
 
@@ -78,9 +79,7 @@ export default function CalendarPage() {
   const [mobileView, setMobileView] = useState<MobileView>("detail");
   const [listMode, setListMode] = useState(false);
   const [selectedDay, setSelectedDay] = useState(() => localDateKey());
-  const [hiddenCalendarIds, setHiddenCalendarIds] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const { hiddenCalendarIds, toggleCalendar } = useHiddenCalendars();
   const nowMs = useScheduleClock();
   const today = useMemo(() => localDateKey(), []);
   const hasLoadedRef = useRef(false);
@@ -162,15 +161,6 @@ export default function CalendarPage() {
       })),
     [detailDays, filteredEvents],
   );
-
-  const toggleCalendar = useCallback((calendarId: string) => {
-    setHiddenCalendarIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(calendarId)) next.delete(calendarId);
-      else next.add(calendarId);
-      return next;
-    });
-  }, []);
 
   // Month cell click: focus that day at the current detail span (mobile → detail).
   const selectFromMonth = useCallback((day: string) => {
@@ -375,7 +365,7 @@ export default function CalendarPage() {
           </div>
 
           {/* Rail (md+): mini-month navigator on top, then Now / Next / Calendars */}
-          <div className="hidden min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain md:flex md:col-span-5 lg:col-span-4 xl:col-span-3">
+          <div className="hidden min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain px-1 py-1 md:flex md:col-span-5 lg:col-span-4 xl:col-span-3">
             {miniMonth}
             {rail}
           </div>

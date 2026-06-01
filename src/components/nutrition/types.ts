@@ -1,4 +1,4 @@
-export type NutritionView = "today" | "log" | "library";
+export type NutritionView = "today" | "foods";
 
 export interface LogEntry {
   timestamp: string;
@@ -44,6 +44,9 @@ export interface FoodEntry {
 export function parseNutritionView(
   value: string | null | undefined,
 ): NutritionView {
-  if (value === "log" || value === "library") return value;
+  // "log"/"library" are the legacy tabs, now merged into "foods".
+  if (value === "foods" || value === "log" || value === "library") {
+    return "foods";
+  }
   return "today";
 }

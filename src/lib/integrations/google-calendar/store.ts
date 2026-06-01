@@ -1,6 +1,4 @@
-import fs from "fs";
-import path from "path";
-import { AGENT_OS_DATA } from "@/lib/data-paths";
+import { getDb } from "@/lib/mongo";
 import {
   decryptSecret,
   encryptSecret,
@@ -8,25 +6,25 @@ import {
 } from "@/lib/integrations/token-crypto";
 import type { GoogleCalendarTokenRecord } from "@/lib/integrations/google-calendar/types";
 
-const TOKEN_DIR = path.join(AGENT_OS_DATA, "integrations");
-const TOKEN_PATH = path.join(TOKEN_DIR, "google-calendar.json");
+const INTEGRATION_ID = "google-calendar";
 
-function ensureTokenDir() {
-  fs.mkdirSync(TOKEN_DIR, { recursive: true, mode: 0o700 });
+type TokenDoc = GoogleCalendarTokenRecord & { _id: string };
+
+async function collection() {
+  const db = await getDb();
+  return db.collection<TokenDoc>("integrations");
 }
 
-export function loadTokenRecord(): GoogleCalendarTokenRecord | null {
-  if (!fs.existsSync(TOKEN_PATH)) return null;
-  try {
-    const raw = fs.readFileSync(TOKEN_PATH, "utf8");
-    return JSON.parse(raw) as GoogleCalendarTokenRecord;
-  } catch {
-    return null;
-  }
+export async function loadTokenRecord(): Promise<GoogleCalendarTokenRecord | null> {
+  const col = await collection();
+  const doc = await col.findOne({ _id: INTEGRATION_ID });
+  if (!doc) return null;
+  const { _id: _ignored, ...record } = doc;
+  return record as GoogleCalendarTokenRecord;
 }
 
-export function getRefreshToken(): string | null {
-  const record = loadTokenRecord();
+export async function getRefreshToken(): Promise<string | null> {
+  const record = await loadTokenRecord();
   if (!record?.encryptedRefreshToken || !hasEncryptionKey()) return null;
   try {
     return decryptSecret(record.encryptedRefreshToken);
@@ -35,35 +33,35 @@ export function getRefreshToken(): string | null {
   }
 }
 
-export function saveTokenRecord(input: {
+export async function saveTokenRecord(input: {
   refreshToken: string;
   email?: string;
-}): GoogleCalendarTokenRecord {
+}): Promise<GoogleCalendarTokenRecord> {
   if (!hasEncryptionKey()) {
     throw new Error("TOKEN_ENCRYPTION_KEY is not configured");
   }
-  ensureTokenDir();
+  const col = await collection();
   const now = new Date().toISOString();
-  const existing = loadTokenRecord();
+  const existing = await loadTokenRecord();
   const record: GoogleCalendarTokenRecord = {
     encryptedRefreshToken: encryptSecret(input.refreshToken),
     email: input.email ?? existing?.email,
     connectedAt: existing?.connectedAt ?? now,
     updatedAt: now,
   };
-  fs.writeFileSync(TOKEN_PATH, JSON.stringify(record, null, 2), {
-    encoding: "utf8",
-    mode: 0o600,
-  });
+  await col.replaceOne(
+    { _id: INTEGRATION_ID },
+    { _id: INTEGRATION_ID, ...record } as unknown as TokenDoc,
+    { upsert: true },
+  );
   return record;
 }
 
-export function deleteTokenRecord(): void {
-  if (fs.existsSync(TOKEN_PATH)) {
-    fs.unlinkSync(TOKEN_PATH);
-  }
+export async function deleteTokenRecord(): Promise<void> {
+  const col = await collection();
+  await col.deleteOne({ _id: INTEGRATION_ID });
 }
 
-export function isCalendarConnected(): boolean {
-  return getRefreshToken() !== null;
+export async function isCalendarConnected(): Promise<boolean> {
+  return (await getRefreshToken()) !== null;
 }

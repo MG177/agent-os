@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import {
   readLog,
+  readFoodFrequency,
   insertMeal,
   readFoodDb,
   calculateTotals,
@@ -12,14 +13,20 @@ import { appendAudit, hashPayload, type AuditSource } from '@/lib/audit'
 const ALLOWED_SOURCES: AuditSource[] = ['nutrition-form', 'nutrition-chat']
 
 export async function GET(request: NextRequest) {
+  if (request.nextUrl.searchParams.get('alltime') === 'true') {
+    const frequency = await readFoodFrequency()
+    return Response.json({ frequency })
+  }
   const date = request.nextUrl.searchParams.get('date') || todayISO()
   const entries = await readLog(date)
   return Response.json({ date, entries, totals: calculateTotals(entries) })
 }
 
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+
 export async function POST(request: NextRequest) {
   const body = await request.json()
-  const { food_name, quantity_grams, nutrition_per_100g: overrideNutrition, source } = body
+  const { food_name, quantity_grams, nutrition_per_100g: overrideNutrition, source, date: bodyDate } = body
 
   if (!food_name || !quantity_grams) {
     return Response.json({ error: 'food_name and quantity_grams are required' }, { status: 400 })
@@ -55,7 +62,9 @@ export async function POST(request: NextRequest) {
     },
   }
 
-  const date = todayISO()
+  // Log against the provided day (the UI may be reviewing a past date); the
+  // timestamp stays "now", so back-logged meals sort by when they were added.
+  const date = typeof bodyDate === 'string' && DATE_RE.test(bodyDate) ? bodyDate : todayISO()
   await insertMeal(date, entry, resolvedSource)
 
   appendAudit({

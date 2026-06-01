@@ -11,6 +11,7 @@ import {
   formatEventTimeRange,
   formatEventTimeShort,
 } from "@/components/calendar/calendar-utils";
+import { useScheduleClock } from "@/components/calendar/useScheduleClock";
 import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
 
 const HOURS = Array.from(
@@ -222,6 +223,14 @@ export function CalendarTimeGrid({
   const gridHeight = (TIMELINE_END_HOUR - TIMELINE_START_HOUR) * slotPx;
   const gridTemplate = `repeat(${days.length}, minmax(0, 1fr))`;
 
+  const nowMs = useScheduleClock();
+  const nowDate = new Date(nowMs);
+  const nowMinutes = nowDate.getHours() * 60 + nowDate.getMinutes();
+  const nowTop = ((nowMinutes - TIMELINE_START_HOUR * 60) / 60) * slotPx;
+  const nowInRange =
+    nowMinutes >= TIMELINE_START_HOUR * 60 &&
+    nowMinutes <= TIMELINE_END_HOUR * 60;
+
   const zoomIndex = useMemo(() => {
     const idx = ZOOM_LEVELS.indexOf(zoom as (typeof ZOOM_LEVELS)[number]);
     return idx >= 0 ? idx : ZOOM_LEVELS.indexOf(DEFAULT_ZOOM);
@@ -344,7 +353,7 @@ export function CalendarTimeGrid({
       )}
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-        <div className="flex" style={{ minHeight: gridHeight }}>
+        <div className="flex" style={{ minHeight: `max(${gridHeight}px, 100%)` }}>
           <div
             className="sticky left-0 z-10 w-12 shrink-0 border-r border-slate-100 bg-slate-50/80"
             style={{ minHeight: gridHeight }}
@@ -360,7 +369,10 @@ export function CalendarTimeGrid({
             ))}
           </div>
 
-          <div className="grid flex-1" style={{ gridTemplateColumns: gridTemplate }}>
+          <div
+            className="grid flex-1 grid-rows-1"
+            style={{ gridTemplateColumns: gridTemplate }}
+          >
             {columns.map((col) => (
               <div
                 key={col.day}
@@ -400,6 +412,15 @@ export function CalendarTimeGrid({
                 {col.positioned.map((block) => (
                   <TimeBlock key={block.event.id} block={block} />
                 ))}
+
+                {col.day === today && nowInRange && (
+                  <div
+                    className="pointer-events-none absolute left-0 right-0 z-30 border-t-2 border-red-500"
+                    style={{ top: nowTop }}
+                  >
+                    <span className="absolute -left-1 -top-[5px] h-2 w-2 rounded-full bg-red-500" />
+                  </div>
+                )}
               </div>
             ))}
           </div>

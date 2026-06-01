@@ -13,6 +13,7 @@ export type AuditAction =
   | "capture.create"
   | "capture.revert"
   | "nutrition.create"
+  | "nutrition.update"
   | "nutrition.revert";
 
 export type AuditSource =

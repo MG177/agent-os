@@ -58,6 +58,18 @@ export async function readLogMongo(date: string): Promise<LogEntry[]> {
   return docs.map(mealToLogEntry);
 }
 
+export async function readFoodFrequencyMongo(): Promise<{ food_name: string; count: number; last_logged: string }[]> {
+  await ready();
+  const meals = await mealsCollection();
+  const rows = await meals
+    .aggregate<{ _id: string; count: number; last_logged: string }>([
+      { $group: { _id: "$food_name", count: { $sum: 1 }, last_logged: { $max: "$timestamp" } } },
+      { $sort: { count: -1 } },
+    ])
+    .toArray();
+  return rows.map((r) => ({ food_name: r._id, count: r.count, last_logged: r.last_logged }));
+}
+
 export async function insertMealMongo(
   date: string,
   entry: LogEntry,

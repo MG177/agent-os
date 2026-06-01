@@ -5,10 +5,12 @@ import {
 } from "@/lib/integrations/google-calendar/store";
 import type { GoogleCalendarStatus } from "@/lib/integrations/google-calendar/types";
 
-export function getGoogleCalendarStatus(): GoogleCalendarStatus {
+export async function getGoogleCalendarStatus(): Promise<GoogleCalendarStatus> {
   const configured = isGoogleOAuthConfigured();
-  const connected = configured && isCalendarConnected();
-  const record = loadTokenRecord();
+  const [connected, record] = await Promise.all([
+    configured ? isCalendarConnected() : Promise.resolve(false),
+    loadTokenRecord(),
+  ]);
 
   return {
     connected,

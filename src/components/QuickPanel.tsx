@@ -65,7 +65,7 @@ function Rail({
 /** Shared panel body — the active tool plus its scroll container. */
 function PanelBody({ shown }: { shown: QuickPanelId }) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col px-4 py-4">
+    <div className="flex min-h-0 flex-1 flex-col px-3 py-3">
       {shown === "capture" && <QuickCapturePanel />}
       {shown === "meal" && <QuickMealPanel />}
       {shown === "assistant" && <AssistantChat />}

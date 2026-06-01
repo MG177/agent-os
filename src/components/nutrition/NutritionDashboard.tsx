@@ -1,13 +1,13 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Settings } from "lucide-react";
+import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
+import { addDaysToKey, localDateKey } from "@/components/calendar/calendar-utils";
 import NutritionGoalsSheet from "./NutritionGoalsSheet";
 import NutritionSegments from "./NutritionSegments";
 import NutritionSummary from "./NutritionSummary";
-import LibraryPanel from "./panels/LibraryPanel";
-import LogPanel from "./panels/LogPanel";
+import FoodWorkspace from "./panels/FoodWorkspace";
 import TodayPanel from "./panels/TodayPanel";
 import {
   parseNutritionView,
@@ -32,23 +32,14 @@ const DEFAULT_GOALS: MacroGoals = {
   fat_g: 73,
 };
 
-type WorkspaceView = Exclude<NutritionView, "today">;
-
-function WorkspacePanel({
-  panel,
-  onLogSuccess,
-}: {
-  panel: WorkspaceView;
-  onLogSuccess: () => void;
-}) {
-  switch (panel) {
-    case "log":
-      return <LogPanel onSuccess={onLogSuccess} />;
-    case "library":
-      return <LibraryPanel />;
-    default:
-      return null;
-  }
+function formatDayLabel(key: string, todayKey: string): string {
+  if (key === todayKey) return "Today";
+  if (key === addDaysToKey(todayKey, -1)) return "Yesterday";
+  return new Date(`${key}T12:00:00`).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function NutritionDashboardInner() {
@@ -62,8 +53,9 @@ function NutritionDashboardInner() {
     if (searchParams.get("view") === "ai") router.replace("/assistant");
   }, [searchParams, router]);
 
-  const desktopPanel: WorkspaceView =
-    view === "today" ? "log" : view;
+  const today = useMemo(() => localDateKey(), []);
+  const [selectedDate, setSelectedDate] = useState(today);
+  const isToday = selectedDate === today;
 
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [goals, setGoals] = useState<MacroGoals>(DEFAULT_GOALS);
@@ -71,15 +63,9 @@ function NutritionDashboardInner() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const todayLabel = new Date().toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-
   const refresh = useCallback(async () => {
     const [logRes, goalsRes] = await Promise.all([
-      fetch("/api/nutrition/log"),
+      fetch(`/api/nutrition/log?date=${selectedDate}`),
       fetch("/api/nutrition/goals"),
     ]);
     const logData = await logRes.json();
@@ -88,7 +74,7 @@ function NutritionDashboardInner() {
     setTotals(logData.totals || EMPTY_TOTALS);
     setGoals(goalsData);
     setLoading(false);
-  }, []);
+  }, [selectedDate]);
 
   useEffect(() => {
     refresh();
@@ -107,7 +93,6 @@ function NutritionDashboardInner() {
       if (next === "today") params.delete("view");
       else params.set("view", next);
       params.delete("goals");
-      params.delete("tab");
       const q = params.toString();
       router.replace(q ? `/nutrition?${q}` : "/nutrition", { scroll: false });
     },
@@ -127,9 +112,10 @@ function NutritionDashboardInner() {
 
   async function handleDelete(id: string) {
     setDeleting(id);
-    const res = await fetch(`/api/nutrition/log/${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    });
+    const res = await fetch(
+      `/api/nutrition/log/${encodeURIComponent(id)}?date=${selectedDate}`,
+      { method: "DELETE" },
+    );
     if (res.ok) {
       const data = await res.json();
       setEntries(data.entries);
@@ -138,33 +124,78 @@ function NutritionDashboardInner() {
     setDeleting(null);
   }
 
+  async function handleEdit(id: string, quantityGrams: number): Promise<boolean> {
+    const res = await fetch(
+      `/api/nutrition/log/${encodeURIComponent(id)}?date=${selectedDate}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity_grams: quantityGrams }),
+      },
+    );
+    if (!res.ok) return false;
+    const data = await res.json();
+    setEntries(data.entries);
+    setTotals(data.totals);
+    return true;
+  }
+
   function handleMealLoggedMobile() {
     refresh();
     setView("today");
   }
 
-  function handleMealLoggedDesktop() {
-    refresh();
-  }
-
-  const workspaceClass = "min-h-0 flex-1 overflow-y-auto";
-
   return (
-    <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col overflow-hidden md:max-w-none">
-      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3 md:px-8 lg:px-10">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 md:text-2xl md:tracking-tight">Nutrition</h1>
-          <p className="text-xs text-slate-400">{todayLabel}</p>
+    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3 md:px-8 lg:px-10">
+        <div className="flex items-center gap-3 md:gap-4">
+          <h1 className="text-xl font-bold text-slate-900 md:text-2xl md:tracking-tight">
+            Nutrition
+          </h1>
+          <div className="inline-flex items-center gap-0.5">
+            <button
+              type="button"
+              onClick={() => setSelectedDate((d) => addDaysToKey(d, -1))}
+              aria-label="Previous day"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+            >
+              <ChevronLeft strokeWidth={2} className="h-4 w-4" aria-hidden />
+            </button>
+            <span className="min-w-[6.5rem] text-center text-sm font-semibold text-slate-700">
+              {formatDayLabel(selectedDate, today)}
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedDate((d) => addDaysToKey(d, 1))}
+              disabled={isToday}
+              aria-label="Next day"
+              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:opacity-30 disabled:hover:bg-transparent"
+            >
+              <ChevronRight strokeWidth={2} className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setGoalsOpen(true)}
-          className="flex min-h-11 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
-          aria-label="Edit daily goals"
-        >
-          <Settings strokeWidth={1.8} className="h-4 w-4" aria-hidden />
-          Goals
-        </button>
+
+        <div className="flex items-center gap-2">
+          {!isToday && (
+            <button
+              type="button"
+              onClick={() => setSelectedDate(today)}
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+            >
+              Today
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setGoalsOpen(true)}
+            className="flex min-h-9 items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3.5 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900"
+            aria-label="Edit daily goals"
+          >
+            <Settings strokeWidth={1.8} className="h-4 w-4" aria-hidden />
+            Goals
+          </button>
+        </div>
       </header>
 
       {loading ? (
@@ -172,67 +203,56 @@ function NutritionDashboardInner() {
           Loading…
         </div>
       ) : (
-        <>
-          {/* Mobile: stacked dashboard + all tabs */}
-          <div className="flex min-h-0 flex-1 flex-col md:hidden">
-            <NutritionSummary totals={totals} goals={goals} />
-            <NutritionSegments view={view} onChange={setView} mode="mobile" />
-            <div
-              className={`px-4 py-4 ${workspaceClass}`}
-              role="tabpanel"
-            >
-              {view === "today" ? (
-                <TodayPanel
-                  entries={entries}
-                  deleting={deleting}
-                  onDelete={handleDelete}
-                  onLogMeal={() => setView("log")}
-                />
-              ) : (
-                <WorkspacePanel
-                  panel={view}
-                  onLogSuccess={handleMealLoggedMobile}
-                />
-              )}
-            </div>
+        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col overflow-y-auto px-4 py-4 md:overflow-hidden md:px-0 md:py-0 lg:max-w-7xl 2xl:max-w-[1600px]">
+          {/* Mobile: summary at top, then tabs + panels */}
+          <div className="flex flex-col gap-4 md:hidden">
+            <NutritionSummary
+              totals={totals}
+              goals={goals}
+              heroLabel={isToday ? "Today's calories" : "Calories"}
+            />
+            <NutritionSegments view={view} onChange={setView} />
+            {view === "today" ? (
+              <TodayPanel
+                entries={entries}
+                deleting={deleting}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+                onLogMeal={() => setView("foods")}
+              />
+            ) : (
+              <FoodWorkspace
+                logDate={selectedDate}
+                onLogged={handleMealLoggedMobile}
+              />
+            )}
           </div>
 
-          {/* Desktop: left = Log · Library · AI, right = summary + meals */}
-          <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-12 md:gap-0 md:overflow-hidden lg:gap-0">
-            <section className="col-span-7 flex min-h-0 flex-col overflow-hidden border-r border-slate-100 px-6 py-5 lg:col-span-8 lg:px-8">
-              <NutritionSegments
-                view={desktopPanel}
-                onChange={setView}
-                mode="desktop"
+          {/* Desktop: food workspace (left) · summary + meals today (right) */}
+          <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-12 md:gap-5 md:overflow-hidden md:px-8 md:py-5 lg:gap-6 lg:px-10">
+            <section className="flex min-h-0 flex-col md:col-span-7 xl:col-span-8">
+              <FoodWorkspace
+                logDate={selectedDate}
+                onLogged={refresh}
               />
-              <div
-                className={`pt-4 ${workspaceClass}`}
-                role="tabpanel"
-              >
-                <WorkspacePanel
-                  panel={desktopPanel}
-                  onLogSuccess={handleMealLoggedDesktop}
-                />
-              </div>
             </section>
-
-            <aside className="col-span-5 flex min-h-0 flex-col gap-4 overflow-hidden px-6 py-5 lg:col-span-4 lg:px-8">
+            <aside className="flex min-h-0 flex-col gap-3 overflow-y-auto px-1 py-1 md:col-span-5 xl:col-span-4">
               <NutritionSummary
                 totals={totals}
                 goals={goals}
-                embedded
+                heroLabel={isToday ? "Today's calories" : "Calories"}
+                stacked
               />
-              <div className="min-h-0 flex-1 overflow-y-auto">
-                <TodayPanel
-                  entries={entries}
-                  deleting={deleting}
-                  onDelete={handleDelete}
-                  onLogMeal={() => setView("log")}
-                />
-              </div>
+              <TodayPanel
+                entries={entries}
+                deleting={deleting}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+                onLogMeal={() => {}}
+              />
             </aside>
           </div>
-        </>
+        </div>
       )}
 
       <NutritionGoalsSheet

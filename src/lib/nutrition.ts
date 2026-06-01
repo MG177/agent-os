@@ -3,6 +3,7 @@ import {
   deleteMealMongo,
   insertMealMongo,
   readFoodDbMongo,
+  readFoodFrequencyMongo,
   readGoalsMongo,
   readLogMongo,
   upsertFoodMongo,
@@ -60,6 +61,10 @@ export interface DailyTotals extends ConsumedNutrition {
 
 export async function readLog(date: string): Promise<LogEntry[]> {
   return readLogMongo(date);
+}
+
+export async function readFoodFrequency(): Promise<{ food_name: string; count: number; last_logged: string }[]> {
+  return readFoodFrequencyMongo();
 }
 
 export async function insertMeal(

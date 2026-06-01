@@ -362,12 +362,18 @@ export default function ColumnBrowser({
   }
 
   function goUp() {
-    const path = file ? activePath.slice(0, -1) : activePath;
+    const hasFile = !!file;
+    const path = hasFile ? activePath.slice(0, -1) : activePath;
+    // At a section root with nothing deeper open → back to the Browse landing.
+    if (path.length <= 1 && !hasFile) {
+      router.replace("/browse", { scroll: false });
+      return;
+    }
     if (path.length <= 1) {
-      router.replace(
-        buildBrowseUrl(path.length ? path : ["Projects"]),
-        { scroll: false }
-      );
+      // File open directly under a section → drop back to that section's column.
+      router.replace(buildBrowseUrl(path.length ? path : ["Projects"]), {
+        scroll: false,
+      });
       return;
     }
     router.replace(buildBrowseUrl(path.slice(0, -1)), { scroll: false });

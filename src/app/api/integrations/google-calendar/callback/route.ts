@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       redirectUri,
       code,
     );
-    saveTokenRecord({ refreshToken, email });
+    await saveTokenRecord({ refreshToken, email });
     clearEventsCache();
 
     const res = NextResponse.redirect(

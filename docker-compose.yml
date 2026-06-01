@@ -23,6 +23,9 @@ services:
       # Required for /assistant (Cursor SDK)
       - CURSOR_API_KEY=${CURSOR_API_KEY}
       - CURSOR_ASSISTANT_MODEL=${CURSOR_ASSISTANT_MODEL:-composer-2.5}
+      # Host used to build the Google OAuth redirect when calendar tools run via
+      # the assistant/MCP (no HTTP request); ignored if GOOGLE_OAUTH_REDIRECT_URI is set.
+      - ASSISTANT_OAUTH_HOST=${ASSISTANT_OAUTH_HOST:-personal.lumen-dev.com}
       # WAHA webhook → /api/webhooks/whatsapp
       - WAHA_WEBHOOK_SECRET=${WAHA_WEBHOOK_SECRET}
       - WAHA_BASE_URL=${WAHA_BASE_URL:-http://waha:3000}

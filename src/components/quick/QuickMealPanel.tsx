@@ -44,19 +44,38 @@ export default function QuickMealPanel() {
     setDeleting(null);
   }
 
+  async function handleEdit(
+    timestamp: string,
+    quantityGrams: number,
+  ): Promise<boolean> {
+    const res = await fetch(
+      `/api/nutrition/log/${encodeURIComponent(timestamp)}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity_grams: quantityGrams }),
+      },
+    );
+    if (!res.ok) return false;
+    const data = await res.json();
+    setEntries(data.entries);
+    window.dispatchEvent(new CustomEvent("nutrition:updated"));
+    return true;
+  }
+
   function handleLogged() {
     load();
     window.dispatchEvent(new CustomEvent("nutrition:updated"));
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto">
+    <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pb-1">
       <LogPanel onSuccess={handleLogged} />
       <TodayPanel
         entries={entries}
         deleting={deleting}
         onDelete={handleDelete}
-        onLogMeal={() => {}}
+        onEdit={handleEdit}
       />
     </div>
   );

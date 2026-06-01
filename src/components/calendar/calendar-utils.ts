@@ -284,7 +284,7 @@ export function eventDurationMinutes(event: CalendarEventSummary): number {
 }
 
 export const TIMELINE_START_HOUR = 6;
-export const TIMELINE_END_HOUR = 22;
+export const TIMELINE_END_HOUR = 24;
 export const TIMELINE_SLOT_PX = 48;
 
 export type CalendarSource = {

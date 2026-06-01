@@ -7,14 +7,20 @@ import { useSidebar } from "@/components/SidebarContext";
 import {
   IconActivity,
   IconHome,
-  IconInbox,
   IconCalendar,
   IconNutrition,
   IconBrowse,
+  IconTasks,
 } from "@/components/ui/icons";
 
-const PRIMARY = [
-  { href: "/", label: "Home", match: (p: string) => p === "/", Icon: IconHome },
+const HOME = {
+  href: "/",
+  label: "Home",
+  match: (p: string) => p === "/",
+  Icon: IconHome,
+} as const;
+
+const TRACK = [
   {
     href: "/nutrition",
     label: "Nutrition",
@@ -22,12 +28,25 @@ const PRIMARY = [
     Icon: IconNutrition,
   },
   {
-    href: "/activity",
-    label: "Activity",
-    match: (p: string) => p === "/activity",
-    Icon: IconActivity,
+    href: "/calendar",
+    label: "Calendar",
+    match: (p: string) => p.startsWith("/calendar"),
+    Icon: IconCalendar,
+  },
+  {
+    href: "/tasks",
+    label: "Tasks",
+    match: (p: string) => p.startsWith("/tasks"),
+    Icon: IconTasks,
   },
 ] as const;
+
+const ACTIVITY = {
+  href: "/activity",
+  label: "Activity",
+  match: (p: string) => p === "/activity",
+  Icon: IconActivity,
+} as const;
 
 const VAULT_SECTIONS = [
   { href: "/browse/Projects", label: "Projects", dot: "bg-blue-500" },
@@ -120,13 +139,28 @@ export default function DesktopSidebar() {
       </div>
 
       <nav className="flex-1 overflow-x-hidden overflow-y-auto px-2 py-4">
+        {/* Home — top anchor */}
+        <ul className="space-y-0.5">
+          <li>
+            <NavItem
+              href={HOME.href}
+              label={HOME.label}
+              active={HOME.match(pathname)}
+              Icon={HOME.Icon}
+              collapsed={collapsed}
+            />
+          </li>
+        </ul>
+
+        {/* Track — daily surfaces */}
         {!collapsed && (
-          <p className="mb-2 px-3 app-section-label">
-            Main
+          <p className="mb-2 mt-6 px-3 app-section-label">
+            Track
           </p>
         )}
+        {collapsed && <div className="my-3 border-t border-slate-100" aria-hidden />}
         <ul className="space-y-0.5">
-          {PRIMARY.map(({ href, label, match, Icon }) => (
+          {TRACK.map(({ href, label, match, Icon }) => (
             <li key={href}>
               <NavItem
                 href={href}
@@ -139,6 +173,7 @@ export default function DesktopSidebar() {
           ))}
         </ul>
 
+        {/* Vault — Obsidian PARA */}
         {!collapsed && (
           <p className="mb-2 mt-6 px-3 app-section-label">
             Vault
@@ -149,25 +184,7 @@ export default function DesktopSidebar() {
         <ul className="space-y-0.5">
           <li>
             <NavItem
-              href="/calendar"
-              label="Calendar"
-              active={pathname.startsWith("/calendar")}
-              Icon={IconCalendar}
-              collapsed={collapsed}
-            />
-          </li>
-          <li>
-            <NavItem
-              href="/inbox"
-              label="Inbox"
-              active={pathname.startsWith("/inbox")}
-              Icon={IconInbox}
-              collapsed={collapsed}
-            />
-          </li>
-          <li className={collapsed ? "" : "pt-1"}>
-            <NavItem
-              href="/browse/Projects"
+              href="/browse"
               label="Browse"
               active={vaultActive}
               Icon={IconBrowse}
@@ -193,6 +210,16 @@ export default function DesktopSidebar() {
       </nav>
 
       <div className={`border-t border-slate-100 ${collapsed ? "p-2" : "p-4"}`}>
+        <div className={collapsed ? "mb-2" : "mb-3"}>
+          <NavItem
+            href={ACTIVITY.href}
+            label={ACTIVITY.label}
+            active={ACTIVITY.match(pathname)}
+            Icon={ACTIVITY.Icon}
+            collapsed={collapsed}
+          />
+        </div>
+
         {collapsed ? (
           <div
             className="flex justify-center py-1"
