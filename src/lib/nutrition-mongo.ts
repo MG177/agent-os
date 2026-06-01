@@ -139,6 +139,13 @@ export async function upsertFoodMongo(
   await foods.replaceOne({ _id: key }, doc, { upsert: true });
 }
 
+export async function deleteFoodMongo(key: string): Promise<boolean> {
+  await ready();
+  const foods = await foodsCollection();
+  const result = await foods.deleteOne({ _id: key });
+  return result.deletedCount === 1;
+}
+
 export async function readGoalsMongo(): Promise<MacroGoals> {
   await ready();
   const goals = await goalsCollection();

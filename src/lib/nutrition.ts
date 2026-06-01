@@ -1,5 +1,6 @@
 import type { AuditSource } from "@/lib/audit";
 import {
+  deleteFoodMongo,
   deleteMealMongo,
   insertMealMongo,
   readFoodDbMongo,
@@ -85,6 +86,10 @@ export async function readFoodDb(): Promise<FoodDb> {
 
 export async function upsertFood(key: string, entry: FoodDbEntry): Promise<void> {
   await upsertFoodMongo(key, entry);
+}
+
+export async function deleteFood(key: string): Promise<boolean> {
+  return deleteFoodMongo(key);
 }
 
 export async function writeFoodDb(db: FoodDb): Promise<void> {
