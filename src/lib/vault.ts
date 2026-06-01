@@ -7,6 +7,7 @@ import {
   isWithinUndoWindow,
   type AuditSource,
 } from "@/lib/audit";
+import { assertFileWritesEnabled } from "@/lib/deployment";
 
 export const VAULT_PATH = process.env.VAULT_PATH || "/root/PARA";
 export const INBOX_PATH = path.join(VAULT_PATH, "Inbox");
@@ -133,6 +134,7 @@ export function createInboxItem(
   source: AuditSource = "capture-ui",
   auditMeta?: Record<string, unknown>,
 ): InboxItem {
+  assertFileWritesEnabled();
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10);
   const safeTitle = title.replace(/[/\0:]/g, "-").trim();
@@ -185,6 +187,7 @@ export function archiveInboxItem(
   slug: string,
   source: AuditSource = "capture-ui",
 ): ArchiveResult {
+  assertFileWritesEnabled();
   const filename = slugToFilename(slug);
   const srcPath = path.join(INBOX_PATH, filename);
   if (!fs.existsSync(srcPath)) return { ok: false, reason: "not-found" };

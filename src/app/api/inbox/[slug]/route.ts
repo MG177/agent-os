@@ -1,5 +1,9 @@
 import { NextRequest } from "next/server";
 import { getInboxItem, archiveInboxItem } from "@/lib/vault";
+import {
+  fileWritesDisabledResponse,
+  isFileWritesDisabledError,
+} from "@/lib/deployment";
 
 export async function GET(
   _request: NextRequest,
@@ -16,7 +20,13 @@ export async function DELETE(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
-  const result = archiveInboxItem(slug);
+  let result;
+  try {
+    result = archiveInboxItem(slug);
+  } catch (error) {
+    if (isFileWritesDisabledError(error)) return fileWritesDisabledResponse();
+    throw error;
+  }
   if (!result.ok) {
     if (result.reason === "expired") {
       return Response.json(
