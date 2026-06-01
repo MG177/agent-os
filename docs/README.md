@@ -24,6 +24,8 @@ http://localhost:3003
 
 Set `AGENT_OS_DEPLOYMENT=full` on Vercel only if you add persistent storage and intend writes.
 
+**Vercel Web Analytics & Speed Insights** — `@vercel/analytics` and `@vercel/speed-insights` are wired in `src/app/layout.tsx`. Enable both products for the Vercel project in the dashboard (Analytics → Web Analytics; Observability → Speed Insights).
+
 ## Routes (wireframe IA)
 
 Main mobile tabs: **Home · Capture · Nutrition · Activity** (see `Personal Agent OS Wireframes.html` + `Design System — Nutrition & PARA.html`).

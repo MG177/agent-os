@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import AppShell from "@/components/AppShell";
 import ParaShell from "@/components/ParaShell";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
@@ -37,6 +39,8 @@ export default function RootLayout({
           <ParaShell>{children}</ParaShell>
         </AppShell>
         <ServiceWorkerRegister />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
