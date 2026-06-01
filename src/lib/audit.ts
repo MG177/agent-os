@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import { AGENT_OS_DATA } from "@/lib/data-paths";
+import { fileWritesEnabled } from "@/lib/deployment";
 
 export { AGENT_OS_DATA } from "@/lib/data-paths";
 
@@ -33,7 +34,8 @@ export interface AuditEntry {
   meta?: Record<string, unknown>;
 }
 
-function ensureDir() {
+function ensureDir(): void {
+  if (!fileWritesEnabled()) return;
   fs.mkdirSync(AGENT_OS_DATA, { recursive: true });
 }
 
@@ -49,14 +51,16 @@ function newId(ts: number): string {
 export function appendAudit(
   entry: Omit<AuditEntry, "id" | "ts"> & { ts?: number },
 ): AuditEntry {
-  ensureDir();
   const ts = entry.ts ?? Date.now();
   const full: AuditEntry = { id: newId(ts), ts, ...entry };
+  if (!fileWritesEnabled()) return full;
+  ensureDir();
   fs.appendFileSync(AUDIT_LOG_PATH, JSON.stringify(full) + "\n", "utf-8");
   return full;
 }
 
 export function readAudit(): AuditEntry[] {
+  if (!fileWritesEnabled()) return [];
   if (!fs.existsSync(AUDIT_LOG_PATH)) return [];
   const raw = fs.readFileSync(AUDIT_LOG_PATH, "utf-8");
   const entries: AuditEntry[] = [];

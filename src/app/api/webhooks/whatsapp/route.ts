@@ -2,6 +2,10 @@ import { NextRequest } from "next/server";
 import { createInboxItem } from "@/lib/vault";
 import { titleFromCapture, bodyFromWhatsApp } from "@/lib/inbox-capture";
 import {
+  fileWritesDisabledResponse,
+  isFileWritesDisabledError,
+} from "@/lib/deployment";
+import {
   verifyWahaHmac,
   shouldCaptureMessage,
   isDuplicateMessage,
@@ -63,11 +67,17 @@ export async function POST(request: NextRequest) {
   const body = bodyFromWhatsApp(text, payload.from);
   const session = event.session ?? getWahaSession();
 
-  const item = createInboxItem(title, body, "whatsapp", {
-    waMessageId: payload.id,
-    waFrom: payload.from,
-    waSession: session,
-  });
+  let item;
+  try {
+    item = createInboxItem(title, body, "whatsapp", {
+      waMessageId: payload.id,
+      waFrom: payload.from,
+      waSession: session,
+    });
+  } catch (error) {
+    if (isFileWritesDisabledError(error)) return fileWritesDisabledResponse();
+    throw error;
+  }
 
   void sendWhatsAppText({
     session,
