@@ -18,6 +18,14 @@ Load vault skills when editing vault-side artifacts: `vault-projects`, `project-
 
 See vault ADR: `Projects/lumendev-personal-agent-os/decisions/adr-2026-05-26-agent-os-boundaries.md`.
 
+## Deployment split
+
+- **Vercel** — current public deployment. Nutrition, ClickUp, Google Calendar, Settings only. Vault/inbox/assistant features are disabled (no filesystem, no persistent Cursor process).
+- **Local dev (this Mac)** — full features including vault browse, inbox capture, and `/assistant`. Use for all development.
+- **VPS** — deferred; not currently running. Docker Compose + embedded mongod setup is preserved in repo.
+
+When suggesting features or changes, do not assume vault/inbox/assistant are available in the Vercel deployment.
+
 ## Design system
 
 UI work must follow **`Design System — Nutrition & PARA.html`** (repo root). Open in a browser for live reference.

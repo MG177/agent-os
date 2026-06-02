@@ -8,6 +8,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import type { ActivityEvent } from "@/lib/activity";
 import { TodayScheduleCard } from "@/components/calendar/TodayScheduleCard";
 import { TodayTasksCard } from "@/components/clickup/TodayTasksCard";
+import { DueTodosCard } from "@/components/todos/DueTodosCard";
 
 interface HomeData {
   status: string;
@@ -186,6 +187,7 @@ export default function HomePage() {
         <div className="space-y-4 md:col-span-6 lg:col-span-7">
           <TodayScheduleCard />
           <TodayTasksCard />
+          <DueTodosCard />
         </div>
 
         <section className="mt-4 space-y-3 md:col-span-6 md:mt-0 lg:col-span-5">

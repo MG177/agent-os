@@ -11,6 +11,7 @@ import {
   IconNutrition,
   IconBrowse,
   IconTasks,
+  IconReminders,
 } from "@/components/ui/icons";
 
 const HOME = {
@@ -38,6 +39,12 @@ const TRACK = [
     label: "Tasks",
     match: (p: string) => p.startsWith("/tasks"),
     Icon: IconTasks,
+  },
+  {
+    href: "/todo",
+    label: "Reminders",
+    match: (p: string) => p.startsWith("/todo"),
+    Icon: IconReminders,
   },
 ] as const;
 

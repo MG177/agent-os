@@ -12,6 +12,7 @@
     "@cursor/sdk": "^1.0.17",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@tailwindcss/postcss": "^4.3.0",
+    "cron-parser": "^5.5.0",
     "googleapis": "^172.0.0",
     "gray-matter": "^4.0.3",
     "lucide-react": "^1.17.0",

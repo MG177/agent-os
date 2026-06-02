@@ -74,24 +74,48 @@ Type `/` in the assistant input for autocomplete. Optional `command` field on `P
 | `DELETE /api/integrations/google-calendar` | Disconnect |
 | `GET /api/calendar/events` | List events from **all account calendars** (`range=today\|week`, optional `refresh=1`) |
 
-## Data paths
+## Deployment
 
-| Domain | Default path | Env override |
-|--------|--------------|----------------|
-| Vault (read + `Inbox/` write only) | `VAULT_PATH` | `/Users/mg/Obsidian` locally · `/root/PARA` in prod |
-| Audit log | `~/.local/share/agent-os/audit.jsonl` | `AGENT_OS_DATA_PATH` |
-| Nutrition (required) | MongoDB `nutrition-tracker` (`foods`, `meals`, `goals`) | `MONGODB_URI` |
-| Google Calendar tokens | `$AGENT_OS_DATA/integrations/google-calendar.json` (encrypted) | `TOKEN_ENCRYPTION_KEY`, `GOOGLE_OAUTH_*`, `OAUTH_STATE_SECRET` |
+Two targets with different feature sets.
 
-Vault git push/pull is **out of scope** — an external sync system keeps `VAULT_PATH` in sync with the remote.
+### Vercel (current public deployment)
 
-## Deploy (VPS)
+Point `MONGODB_URI` at MongoDB Atlas. All other env vars from `.env.example` apply normally.
+
+| Feature | Works on Vercel |
+|---------|----------------|
+| Nutrition (`/nutrition/*`) | ✅ |
+| ClickUp tasks (`/tasks`) | ✅ |
+| Google Calendar (`/calendar`) | ✅ |
+| Settings / integrations | ✅ |
+| WhatsApp webhook endpoint | ✅ (WAHA must run elsewhere) |
+| Vault browse (`/browse`) | ❌ requires `VAULT_PATH` on filesystem |
+| Inbox capture (`/inbox`, `POST /api/inbox`) | ❌ writes to `VAULT_PATH/Inbox/` |
+| Assistant chat (`/assistant`) | ❌ spawns local Cursor process |
+| Activity feed | ❌ reads local `audit.jsonl` |
+
+### Local dev (full features)
+
+All features available. `VAULT_PATH` points at the local Obsidian checkout. `CURSOR_API_KEY` enables `/assistant`.
+
+### VPS (deferred)
+
+Original production target; not in use while VPS is down. Compose file and embedded-mongod image remain in repo for when it returns.
 
 - Domain: `personal.lumen-dev.com` (Traefik via `dokploy-network`)
 - Compose: single `agent-os` service; embedded `mongod` via `docker-entrypoint.sh`; data under `/var/lib/agent-os/mongodb`
-- `MONGODB_URI` required; default in compose: `mongodb://127.0.0.1:27017/nutrition-tracker`
-- Host env required: `CURSOR_API_KEY` (assistant), `MONGODB_URI` (nutrition)
 - One-shot legacy import: `LEGACY_NUTRITION_IMPORT_DIR=... npm run migrate:nutrition`
+
+## Data paths
+
+| Domain | Storage | Env |
+|--------|---------|-----|
+| Vault (read + `Inbox/` write only) | Local filesystem | `VAULT_PATH` |
+| Audit log | `~/.local/share/agent-os/audit.jsonl` | `AGENT_OS_DATA_PATH` |
+| Nutrition | MongoDB (`foods`, `meals`, `goals`) | `MONGODB_URI` |
+| Integration tokens (Google Calendar, ClickUp) | MongoDB `integrations` collection (encrypted at rest) | `TOKEN_ENCRYPTION_KEY`, `OAUTH_STATE_SECRET` |
+
+Vault git push/pull is **out of scope** — an external sync system keeps `VAULT_PATH` in sync with the remote.
 
 ## Legacy repos
 

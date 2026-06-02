@@ -1,5 +1,6 @@
 import {
   Apple,
+  BellRing,
   Calendar,
   Check,
   ChevronLeft,
@@ -44,3 +45,5 @@ export const IconCalendar = makeIcon(Calendar, "h-5 w-5");
 export const IconCheck = makeIcon(Check, "h-4 w-4");
 /** ClickUp tasks surface */
 export const IconTasks = makeIcon(ListChecks, "h-5 w-5");
+/** Reminders / recurring todos */
+export const IconReminders = makeIcon(BellRing, "h-5 w-5");
