@@ -147,6 +147,7 @@ export async function sendWhatsAppText(params: {
       chatId: params.chatId,
       text: params.text,
     }),
+    signal: AbortSignal.timeout(15_000),
   });
 
   if (!res.ok) {

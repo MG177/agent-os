@@ -416,7 +416,7 @@ export default function FoodWorkspace({
                 onClick={() => openAddForm(query.trim())}
                 className="mt-3 text-sm font-semibold text-blue-600 hover:text-blue-700"
               >
-                + Add "{query.trim()}" to your library
+                + Add &quot;{query.trim()}&quot; to your library
               </button>
             )}
           </div>

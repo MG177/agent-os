@@ -3,14 +3,19 @@ import {
   Calendar,
   Check,
   ChevronLeft,
+  ChevronRight,
   ClipboardList,
   Columns3,
   Folder,
+  Hash,
   House,
   Inbox,
   ListChecks,
+  Pencil,
   Plus,
+  Send,
   Sparkles,
+  X,
   type LucideIcon,
 } from "lucide-react";
 
@@ -36,6 +41,7 @@ export const IconNutrition = makeIcon(Apple, "h-5 w-5");
 export const IconAssistant = makeIcon(Sparkles, "h-5 w-5");
 export const IconActivity = makeIcon(ClipboardList, "h-5 w-5");
 export const IconBack = makeIcon(ChevronLeft, "h-4 w-4");
+export const IconForward = makeIcon(ChevronRight, "h-4 w-4");
 export const IconVault = makeIcon(Folder, "h-5 w-5");
 /** Finder-style column browser */
 export const IconBrowse = makeIcon(Columns3, "h-4 w-4");
@@ -44,6 +50,10 @@ export const IconCalendar = makeIcon(Calendar, "h-5 w-5");
 export const IconCheck = makeIcon(Check, "h-4 w-4");
 /** Recurring todos / task checklist */
 export const IconTasks = makeIcon(ListChecks, "h-5 w-5");
+export const IconClose = makeIcon(X, "h-4 w-4");
+export const IconEdit = makeIcon(Pencil, "h-4 w-4");
+export const IconSend = makeIcon(Send, "h-4 w-4");
+export const IconHash = makeIcon(Hash, "h-4 w-4");
 /** ClickUp brand logo (full-color gradient) */
 export function IconClickUp({ className }: IconProps) {
   return (

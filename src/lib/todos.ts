@@ -24,13 +24,24 @@ export interface TodoDoc {
   updatedAt: Date;
 }
 
+let indexesReady: Promise<void> | null = null;
+
+async function ready(): Promise<void> {
+  if (!indexesReady) {
+    indexesReady = ensureTodosIndex();
+  }
+  await indexesReady;
+}
+
 export async function todosCollection(): Promise<Collection<TodoDoc>> {
+  await ready();
   const db = await getDb();
   return db.collection<TodoDoc>("todos");
 }
 
 export async function ensureTodosIndex(): Promise<void> {
-  const col = await todosCollection();
+  const db = await getDb();
+  const col = db.collection<TodoDoc>("todos");
   await col.createIndex({ nextRunAt: 1 });
   await col.createIndex({ enabled: 1, completedAt: 1 });
 }

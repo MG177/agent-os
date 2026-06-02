@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         session,
         chatId,
         text: "Text only for now — send a message with words to capture.",
-      });
+      }).catch(console.error);
     }
     return Response.json({ ok: true, skipped: decision.reason });
   }
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     session,
     chatId: payload.from,
     text: getWhatsAppAckMessage(),
-  });
+  }).catch(console.error);
 
   return Response.json({ item }, { status: 201 });
 }

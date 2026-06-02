@@ -63,7 +63,8 @@ export async function fetchClickUpIdentity(
 ): Promise<ClickUpIdentity> {
   const headers = { Authorization: token };
 
-  const userRes = await fetch(`${API_BASE}/user`, { headers });
+  const signal = AbortSignal.timeout(15_000);
+  const userRes = await fetch(`${API_BASE}/user`, { headers, signal });
   if (!userRes.ok) {
     throw new ClickUpApiError(userRes.status, "Invalid ClickUp token");
   }
@@ -75,7 +76,7 @@ export async function fetchClickUpIdentity(
     throw new ClickUpApiError(400, "Could not resolve ClickUp user");
   }
 
-  const teamRes = await fetch(`${API_BASE}/team`, { headers });
+  const teamRes = await fetch(`${API_BASE}/team`, { headers, signal });
   if (!teamRes.ok) {
     throw new ClickUpApiError(teamRes.status, "Could not load ClickUp workspace");
   }
@@ -110,6 +111,7 @@ async function clickupRequest<T>(
     method: init?.method ?? "GET",
     headers: { ...headers, ...(init?.headers as Record<string, string>) },
     body,
+    signal: AbortSignal.timeout(15_000),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => "");

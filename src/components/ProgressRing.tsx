@@ -10,6 +10,7 @@ interface ProgressRingProps {
   label?: string
   unit?: string
   children?: React.ReactNode
+  className?: string
 }
 
 export default function ProgressRing({
@@ -22,6 +23,7 @@ export default function ProgressRing({
   label,
   unit,
   children,
+  className,
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
@@ -30,7 +32,7 @@ export default function ProgressRing({
   const center = size / 2
 
   return (
-    <div className="flex flex-col items-center gap-1.5">
+    <div className={`flex flex-col items-center gap-1.5${className ? ` ${className}` : ""}`}>
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
           <circle cx={center} cy={center} r={radius} fill="none" stroke={trackColor} strokeWidth={strokeWidth} />
