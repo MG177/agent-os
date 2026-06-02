@@ -4,14 +4,22 @@ import {
   readGoals,
   calculateTotals,
   todayISO,
+  type MacroGoals,
 } from "@/lib/nutrition";
 import { buildActivityFeed, countCapturesToday } from "@/lib/activity";
 
+const DEFAULT_GOALS: MacroGoals = { calories: 2200, protein_g: 160, carb_g: 220, fat_g: 73 };
+
 export async function GET() {
   const date = todayISO();
-  const entries = await readLog(date);
+
+  const [entries, goals, recentActivity] = await Promise.all([
+    readLog(date).catch(() => []),
+    readGoals().catch(() => DEFAULT_GOALS),
+    buildActivityFeed(8).catch(() => []),
+  ]);
+
   const totals = calculateTotals(entries);
-  const goals = await readGoals();
 
   return Response.json({
     status: "online",
@@ -19,7 +27,7 @@ export async function GET() {
     mealsToday: totals.meal_count,
     totals,
     goals,
-    recentActivity: await buildActivityFeed(8),
+    recentActivity,
     inboxCount: listInbox().length,
   });
 }

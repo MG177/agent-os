@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import ProgressRing from "@/components/ProgressRing";
 import { RecentActivityButton } from "@/components/activity/RecentActivityButton";
 import { StatCard } from "@/components/ui/StatCard";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import type { ActivityEvent } from "@/lib/activity";
 import { TodayScheduleCard } from "@/components/calendar/TodayScheduleCard";
 import { TodayTasksCard } from "@/components/clickup/TodayTasksCard";
@@ -97,7 +98,7 @@ export default function HomePage() {
               Today&apos;s overview
             </p>
             <div className="mt-3 flex items-center gap-5 md:gap-6">
-              <div className="shrink-0 md:hidden">
+              <div className="shrink-0">
                 <ProgressRing
                   value={calories}
                   max={goal}
@@ -105,6 +106,7 @@ export default function HomePage() {
                   trackColor="rgba(255,255,255,0.22)"
                   size={84}
                   strokeWidth={8}
+                  className="md:hidden"
                 >
                   <div className="text-center">
                     <p className="text-lg font-bold tabular-nums text-white">
@@ -113,8 +115,6 @@ export default function HomePage() {
                     <p className="text-[10px] text-white/70">kcal</p>
                   </div>
                 </ProgressRing>
-              </div>
-              <div className="hidden shrink-0 md:block">
                 <ProgressRing
                   value={calories}
                   max={goal}
@@ -122,6 +122,7 @@ export default function HomePage() {
                   trackColor="rgba(255,255,255,0.22)"
                   size={104}
                   strokeWidth={9}
+                  className="hidden md:flex"
                 >
                   <div className="text-center">
                     <p className="text-2xl font-bold tabular-nums text-white">
@@ -184,27 +185,41 @@ export default function HomePage() {
       {/* Stats row — mobile + tablet (hidden on lg where stats live in hero) */}
       <section className="space-y-3 lg:hidden">
         <p className="app-section-label">Today at a glance</p>
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-2.5">
-          <StatCard
-            label="Captures"
-            value={data?.capturesToday ?? "—"}
-            variant="blue"
-          />
-          <StatCard
-            label="Meals logged"
-            value={data?.mealsToday ?? "—"}
-            variant="emerald"
-          />
-          <StatCard label="Calories" value={calories || "—"} variant="violet" />
-          <StatCard label="Goal" value={goal} variant="amber" />
-        </div>
+        {data === null ? (
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-2.5">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="app-card h-16 animate-pulse bg-slate-100" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-2.5">
+            <StatCard
+              label="Captures"
+              value={data.capturesToday}
+              variant="blue"
+            />
+            <StatCard
+              label="Meals logged"
+              value={data.mealsToday}
+              variant="emerald"
+            />
+            <StatCard label="Calories" value={calories || "—"} variant="violet" />
+            <StatCard label="Goal" value={goal} variant="amber" />
+          </div>
+        )}
       </section>
 
       {/* Today's cards — fill the viewport now that activity moved to the top bar */}
       <div className="grid items-start gap-4 md:gap-5 lg:grid-cols-2 lg:gap-6 xl:grid-cols-3">
-        <TodayScheduleCard />
-        <TodayTasksCard />
-        <DueTodosCard />
+        <ErrorBoundary>
+          <TodayScheduleCard />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <TodayTasksCard />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <DueTodosCard />
+        </ErrorBoundary>
       </div>
 
       {/* Coming soon — full width */}

@@ -1,20 +1,39 @@
 import { NextRequest } from "next/server";
+import { z } from "zod";
 import { runAssistantChat } from "@/lib/assistant/runtime";
 import { textStreamResponse, errorJsonResponse } from "@/lib/cursor-sdk/stream";
-import type {
-  AssistantChatMessage,
-  AssistantChatImage,
-} from "@/lib/assistant/types";
+
+const MessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().max(50_000),
+});
+
+const ImageSchema = z.object({
+  base64: z.string(),
+  mediaType: z.string(),
+});
+
+const ChatSchema = z.object({
+  messages: z.array(MessageSchema).min(1).max(100),
+  image: ImageSchema.optional(),
+  command: z.string().max(200).nullable().optional(),
+});
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { messages, image, command } = body as {
-      messages: AssistantChatMessage[];
-      image?: AssistantChatImage;
-      command?: string | null;
-    };
+    let raw: unknown;
+    try {
+      raw = await req.json();
+    } catch {
+      return errorJsonResponse("Invalid JSON", 400);
+    }
 
+    const parsed = ChatSchema.safeParse(raw);
+    if (!parsed.success) {
+      return errorJsonResponse("Invalid request body", 400);
+    }
+
+    const { messages, image, command } = parsed.data;
     const outcome = await runAssistantChat({ messages, image, command });
 
     if (!outcome.ok) {

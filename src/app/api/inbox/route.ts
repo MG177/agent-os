@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { z } from "zod";
 import { listInbox, createInboxItem } from "@/lib/vault";
 import { titleFromCapture } from "@/lib/inbox-capture";
 import type { AuditSource } from "@/lib/audit";
@@ -9,22 +10,35 @@ import {
 
 const ALLOWED_SOURCES: AuditSource[] = ["capture-ui", "whatsapp"];
 
+const InboxCreateSchema = z.object({
+  title: z.string().max(300).optional(),
+  body: z.string().max(10_000).optional(),
+  tags: z.array(z.string().max(50)).max(20).optional(),
+  source: z.string().max(50).optional(),
+});
+
 export async function GET() {
   const items = listInbox();
   return Response.json({ items });
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { title, body: content, tags, source } = body as {
-    title?: string;
-    body?: string;
-    tags?: string[];
-    source?: string;
-  };
+  let raw: unknown;
+  try {
+    raw = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const parsed = InboxCreateSchema.safeParse(raw);
+  if (!parsed.success) {
+    return Response.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const { title, body: content, tags, source } = parsed.data;
 
   const text = content?.trim() ?? title?.trim() ?? "";
-  if (!text && !title?.trim()) {
+  if (!text) {
     return Response.json({ error: "Note text is required" }, { status: 400 });
   }
 

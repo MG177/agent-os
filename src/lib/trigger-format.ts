@@ -115,10 +115,11 @@ function parseField(field: string, min: number, max: number): Set<number> {
       const step = Number(part.slice(2));
       if (step > 0) for (let i = min; i <= max; i += step) set.add(i);
     } else if (part.includes("-")) {
-      let [a, b] = part.split("-");
+      const [a, rawB] = part.split("-") as [string, string | undefined];
+      let b = rawB;
       let step = 1;
-      if (b?.includes("/")) {
-        const x = b.split("/");
+      if (rawB?.includes("/")) {
+        const x = rawB.split("/");
         b = x[0];
         step = Number(x[1]);
       }
