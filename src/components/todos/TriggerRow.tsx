@@ -8,11 +8,19 @@ import {
 } from "@/lib/trigger-format";
 
 const TYPE_OPTIONS = [
-  { value: "hourly", label: "Hourly" },
+  { value: "interval", label: "Every…" },
   { value: "daily", label: "Daily" },
   { value: "weekly", label: "Weekly" },
   { value: "monthly", label: "Monthly" },
   { value: "cron", label: "Custom cron" },
+] as const;
+
+const UNIT_OPTIONS = [
+  { value: "minute", label: "minutes" },
+  { value: "hour", label: "hours" },
+  { value: "day", label: "days" },
+  { value: "week", label: "weeks" },
+  { value: "month", label: "months" },
 ] as const;
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -29,6 +37,27 @@ const CELL =
 
 function minuteLabel(m: number) {
   return `:${String(m).padStart(2, "0")}`;
+}
+
+// ISO (stored) ↔ datetime-local (input) for the interval start anchor.
+function toLocalInput(iso?: string): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function localToIso(local: string): string | undefined {
+  if (!local) return undefined;
+  const d = new Date(local);
+  return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+}
+
+function defaultStartIso(): string {
+  const d = new Date();
+  d.setSeconds(0, 0);
+  return d.toISOString();
 }
 
 interface Props {
@@ -52,10 +81,15 @@ export function TriggerRow({ trigger, onChange, onRemove, canRemove }: Props) {
           onChange={(e) => {
             const nextType = e.target.value as TriggerDoc["type"];
             const patch: Partial<TriggerDoc> = { type: nextType };
-            // Seed a real default so the UI (which shows Mon active) matches the
-            // data — otherwise "Next" is blank and save fails validation.
+            // Seed real defaults so the "Next" preview + validation work
+            // immediately on switching type.
             if (nextType === "weekly" && !trigger.weeklyDays?.length) {
               patch.weeklyDays = [1];
+            }
+            if (nextType === "interval") {
+              if (!trigger.intervalValue) patch.intervalValue = 30;
+              if (!trigger.intervalUnit) patch.intervalUnit = "minute";
+              if (!trigger.startAt) patch.startAt = defaultStartIso();
             }
             set(patch);
           }}
@@ -70,6 +104,35 @@ export function TriggerRow({ trigger, onChange, onRemove, canRemove }: Props) {
 
       {/* Schedule */}
       <div className="col-span-7 flex flex-wrap items-center gap-1.5 text-sm text-slate-600">
+        {trigger.type === "interval" && (
+          <>
+            <span className="text-slate-500">Every</span>
+            <input
+              type="number"
+              min={1}
+              className={`w-16 ${CELL}`}
+              value={trigger.intervalValue ?? 30}
+              onChange={(e) => set({ intervalValue: Math.max(1, Math.floor(Number(e.target.value)) || 1) })}
+            />
+            <select
+              className={CELL}
+              value={trigger.intervalUnit ?? "minute"}
+              onChange={(e) => set({ intervalUnit: e.target.value as TriggerDoc["intervalUnit"] })}
+            >
+              {UNIT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+            <span className="text-slate-400">from</span>
+            <input
+              type="datetime-local"
+              className={CELL}
+              value={toLocalInput(trigger.startAt)}
+              onChange={(e) => set({ startAt: localToIso(e.target.value) })}
+            />
+          </>
+        )}
+
         {trigger.type === "hourly" && (
           <>
             <span className="text-slate-500">Every</span>

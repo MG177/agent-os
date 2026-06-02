@@ -2,10 +2,9 @@ import { getDb } from "./mongo";
 import type { Collection } from "mongodb";
 import {
   type TriggerDoc,
-  triggerToCronExpr,
   triggerToLabel,
   computeTriggersNextRun,
-  nextCronOccurrence,
+  triggerNextRun,
 } from "./cron-parse";
 
 export type { TriggerDoc };
@@ -74,7 +73,7 @@ function hydrateTriggers(triggers: TriggerDoc[], from: Date): TriggerDoc[] {
   return triggers.map((t) => ({
     ...t,
     label: triggerToLabel(t),
-    nextRunAt: nextCronOccurrence(triggerToCronExpr(t), from),
+    nextRunAt: triggerNextRun(t, from),
   }));
 }
 
@@ -121,8 +120,13 @@ export async function doneTodo(id: string): Promise<TodoDoc | null> {
     return { ...doc, completedAt: now, updatedAt: now };
   }
 
-  const triggers = doc.triggers ? hydrateTriggers(doc.triggers, now) : undefined;
-  const nextRunAt = triggers ? computeTriggersNextRun(triggers, now) : undefined;
+  // Completing early should retire the *upcoming* occurrence, not recompute
+  // the same one. Advance from the later of `now` / the current due time so an
+  // ahead-of-schedule "done" skips the occurrence it just satisfied.
+  const base =
+    doc.nextRunAt && doc.nextRunAt.getTime() > now.getTime() ? doc.nextRunAt : now;
+  const triggers = doc.triggers ? hydrateTriggers(doc.triggers, base) : undefined;
+  const nextRunAt = triggers ? computeTriggersNextRun(triggers, base) : undefined;
   await col.updateOne(
     { _id: id },
     { $set: { triggers, lastDoneAt: now, nextRunAt, updatedAt: now } },

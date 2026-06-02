@@ -96,6 +96,14 @@ export function AddTodoSheet({ open, onClose, onSaved, editing }: Props) {
     if (t.type === "cron" && !t.cronExpr?.trim()) {
       return "Enter a cron expression";
     }
+    if (t.type === "interval") {
+      if (!t.intervalValue || t.intervalValue < 1) {
+        return "Enter how often the reminder repeats";
+      }
+      if (!t.startAt) {
+        return "Pick a start date & time for the interval";
+      }
+    }
     return null;
   }
 

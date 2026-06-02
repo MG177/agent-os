@@ -74,8 +74,8 @@ export default function TodoPage() {
         ))}
       </div>
 
-      {/* Body */}
-      <div className="mt-4">
+      {/* Body — owns the scroll region at md+ (shell clips overflow there) */}
+      <div className="mt-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:pb-2">
         {loading ? (
           <div className="flex flex-col gap-2">
             {Array.from({ length: 3 }).map((_, i) => (

@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import ProgressRing from "@/components/ProgressRing";
-import { ActivityRow } from "@/components/ui/ActivityRow";
+import { RecentActivityButton } from "@/components/activity/RecentActivityButton";
 import { StatCard } from "@/components/ui/StatCard";
 import type { ActivityEvent } from "@/lib/activity";
 import { TodayScheduleCard } from "@/components/calendar/TodayScheduleCard";
@@ -21,10 +20,18 @@ interface HomeData {
 
 export default function HomePage() {
   const [data, setData] = useState<HomeData | null>(null);
+  const [vpsOnline, setVpsOnline] = useState<boolean | null>(null);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/home");
     if (res.ok) setData(await res.json());
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((d) => setVpsOnline(d.vps === "online"))
+      .catch(() => setVpsOnline(false));
   }, []);
 
   useEffect(() => {
@@ -66,9 +73,20 @@ export default function HomePage() {
             {todayLabel}
           </p>
         </div>
-        <span className="rounded-full bg-emerald-500 px-3 py-1.5 text-[10px] font-bold text-white shadow-sm shadow-emerald-200 md:hidden">
-          VPS online
-        </span>
+        <div className="flex items-center gap-2">
+          {vpsOnline !== null && (
+            <span
+              className={`rounded-full px-3 py-1.5 text-[10px] font-bold text-white shadow-sm md:hidden ${
+                vpsOnline
+                  ? "bg-emerald-500 shadow-emerald-200"
+                  : "bg-red-500 shadow-red-200"
+              }`}
+            >
+              {vpsOnline ? "VPS online" : "VPS offline"}
+            </span>
+          )}
+          <RecentActivityButton events={data?.recentActivity ?? []} />
+        </div>
       </header>
 
       {/* Hero — full width; stats beside ring on desktop */}
@@ -182,44 +200,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Desktop main grid: today's schedule | recent activity */}
-      <div className="md:grid md:grid-cols-12 md:items-start md:gap-5 lg:gap-6">
-        <div className="space-y-4 md:col-span-6 lg:col-span-7">
-          <TodayScheduleCard />
-          <TodayTasksCard />
-          <DueTodosCard />
-        </div>
-
-        <section className="mt-4 space-y-3 md:col-span-6 md:mt-0 lg:col-span-5">
-          <div className="flex items-center justify-between gap-2">
-            <p className="app-section-label">Recent activity</p>
-            <Link
-              href="/activity"
-              className="text-xs font-semibold text-blue-600 hover:text-blue-700"
-            >
-              View all →
-            </Link>
-          </div>
-          <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-            {!data?.recentActivity.length ? (
-              <p className="px-6 py-16 text-center text-sm text-slate-400">
-                No activity yet — capture a note or log a meal
-              </p>
-            ) : (
-              <div className="divide-y divide-slate-50 px-4 py-1">
-                {data.recentActivity.map((event) => (
-                  <ActivityRow key={event.id} event={event} />
-                ))}
-              </div>
-            )}
-          </div>
-          <Link
-            href="/activity"
-            className="block text-center text-xs font-semibold text-blue-600 hover:text-blue-700 md:hidden"
-          >
-            View all activity →
-          </Link>
-        </section>
+      {/* Today's cards — fill the viewport now that activity moved to the top bar */}
+      <div className="grid items-start gap-4 md:gap-5 lg:grid-cols-2 lg:gap-6 xl:grid-cols-3">
+        <TodayScheduleCard />
+        <TodayTasksCard />
+        <DueTodosCard />
       </div>
 
       {/* Coming soon — full width */}

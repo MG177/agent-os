@@ -7,10 +7,12 @@
  * lightweight client preview over the same cron strings.
  */
 
+export type IntervalUnit = "minute" | "hour" | "day" | "week" | "month";
+
 export interface TriggerDoc {
   id: string;
-  type: "hourly" | "daily" | "weekly" | "monthly" | "cron";
-  // hourly
+  type: "hourly" | "daily" | "weekly" | "monthly" | "cron" | "interval";
+  // hourly (legacy — superseded by "interval"; kept for existing docs)
   hourlyInterval?: number; // 1–24
   // daily
   dailyHour?: number; // 0–23
@@ -23,6 +25,10 @@ export interface TriggerDoc {
   monthlyDay?: number; // 1–31
   monthlyHour?: number;
   monthlyMinute?: number;
+  // interval — "every N units" stepping from a start anchor
+  intervalUnit?: IntervalUnit;
+  intervalValue?: number; // ≥ 1
+  startAt?: string; // ISO anchor (first occurrence); editable later
   // custom
   cronExpr?: string;
   // computed — always stored server-side
@@ -63,6 +69,8 @@ export function triggerToCronExpr(t: TriggerDoc): string {
       return `${m(t.monthlyMinute)} ${h(t.monthlyHour)} ${t.monthlyDay ?? 1} * *`;
     case "cron":
       return t.cronExpr ?? "0 9 * * *";
+    case "interval":
+      return ""; // interval triggers are anchor-based, not cron — handled separately
   }
 }
 
@@ -88,6 +96,11 @@ export function triggerToLabel(t: TriggerDoc): string {
       return `${ordinal(t.monthlyDay ?? 1)} of month at ${formatHour12(h(t.monthlyHour), m(t.monthlyMinute))}`;
     case "cron":
       return t.cronExpr ?? "";
+    case "interval": {
+      const n = t.intervalValue ?? 1;
+      const unit = t.intervalUnit ?? "minute";
+      return n === 1 ? `Every ${unit}` : `Every ${n} ${unit}s`;
+    }
   }
 }
 
@@ -152,8 +165,81 @@ export function nextCronClient(expr: string, from: Date = new Date()): Date | nu
   return null;
 }
 
-/** Client preview of a trigger's next fire time. Returns null for an incomplete weekly/cron trigger. */
+// ── Interval ("every N units" from a start anchor) ──────────────────────
+
+function addDays(d: Date, n: number): Date {
+  const r = new Date(d);
+  r.setDate(r.getDate() + n);
+  return r;
+}
+
+function addMonths(d: Date, n: number): Date {
+  const r = new Date(d);
+  const day = r.getDate();
+  r.setMonth(r.getMonth() + n);
+  if (r.getDate() < day) r.setDate(0); // clamp e.g. Jan 31 + 1mo → Feb 28/29
+  return r;
+}
+
+function addIntervalUnits(start: Date, unit: IntervalUnit, n: number): Date {
+  switch (unit) {
+    case "minute":
+      return new Date(start.getTime() + n * 60_000);
+    case "hour":
+      return new Date(start.getTime() + n * 3_600_000);
+    case "day":
+      return addDays(start, n);
+    case "week":
+      return addDays(start, n * 7);
+    case "month":
+      return addMonths(start, n);
+  }
+}
+
+function estimateUnits(start: Date, from: Date, unit: IntervalUnit): number {
+  const ms = from.getTime() - start.getTime();
+  switch (unit) {
+    case "minute":
+      return ms / 60_000;
+    case "hour":
+      return ms / 3_600_000;
+    case "day":
+      return ms / 86_400_000;
+    case "week":
+      return ms / 604_800_000;
+    case "month":
+      return (from.getFullYear() - start.getFullYear()) * 12 + (from.getMonth() - start.getMonth());
+  }
+}
+
+/**
+ * First occurrence strictly after `from` for an "every N units" schedule
+ * anchored at `startAt`. Returns the anchor itself when `from` precedes it.
+ */
+export function nextIntervalOccurrence(
+  startAt: string | Date | undefined,
+  unit: IntervalUnit | undefined,
+  value: number | undefined,
+  from: Date = new Date(),
+): Date | null {
+  if (!startAt || !unit || !value || value < 1) return null;
+  const start = new Date(startAt);
+  if (Number.isNaN(start.getTime())) return null;
+  if (from.getTime() <= start.getTime()) return new Date(start);
+
+  const occ = (k: number) => addIntervalUnits(start, unit, value * k);
+  let k = Math.max(0, Math.floor(estimateUnits(start, from, unit) / value));
+  let guard = 0;
+  while (k > 0 && occ(k).getTime() > from.getTime() && guard++ < 10_000) k--;
+  guard = 0;
+  while (occ(k).getTime() <= from.getTime() && guard++ < 100_000) k++;
+  return occ(k);
+}
+
+/** Client preview of a trigger's next fire time. Returns null for an incomplete trigger. */
 export function nextTriggerRun(t: TriggerDoc, from: Date = new Date()): Date | null {
+  if (t.type === "interval")
+    return nextIntervalOccurrence(t.startAt, t.intervalUnit, t.intervalValue, from);
   if (t.type === "weekly" && !(t.weeklyDays && t.weeklyDays.length)) return null;
   if (t.type === "cron" && !t.cronExpr?.trim()) return null;
   return nextCronClient(triggerToCronExpr(t), from);
