@@ -19,6 +19,28 @@ interface HomeData {
   recentActivity: ActivityEvent[];
 }
 
+/** A single inline hero stat tile (lg+), with a pulse placeholder while loading. */
+function HeroStat({
+  loading,
+  value,
+  label,
+}: {
+  loading: boolean;
+  value: string | number;
+  label: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-white/15 px-3.5 py-2.5 backdrop-blur-sm xl:min-w-[7rem]">
+      {loading ? (
+        <span className="block h-6 w-10 animate-pulse rounded bg-white/25" />
+      ) : (
+        <p className="text-xl font-bold tabular-nums text-white">{value}</p>
+      )}
+      <p className="app-section-label-invert">{label}</p>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const [data, setData] = useState<HomeData | null>(null);
   const [vpsOnline, setVpsOnline] = useState<boolean | null>(null);
@@ -51,6 +73,7 @@ export default function HomePage() {
   const goal = data?.goals.calories ?? 2200;
   const remaining = Math.max(0, goal - calories);
   const calPct = goal > 0 ? calories / goal : 0;
+  const loading = data === null;
 
   const todayLabel = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -109,10 +132,16 @@ export default function HomePage() {
                   className="md:hidden"
                 >
                   <div className="text-center">
-                    <p className="text-lg font-bold tabular-nums text-white">
-                      {calories}
-                    </p>
-                    <p className="text-[10px] text-white/70">kcal</p>
+                    {loading ? (
+                      <span className="mx-auto block h-5 w-9 animate-pulse rounded bg-white/30" />
+                    ) : (
+                      <>
+                        <p className="text-lg font-bold tabular-nums text-white">
+                          {calories}
+                        </p>
+                        <p className="text-[10px] text-white/70">kcal</p>
+                      </>
+                    )}
                   </div>
                 </ProgressRing>
                 <ProgressRing
@@ -125,59 +154,57 @@ export default function HomePage() {
                   className="hidden md:flex"
                 >
                   <div className="text-center">
-                    <p className="text-2xl font-bold tabular-nums text-white">
-                      {calories}
-                    </p>
-                    <p className="text-[10px] text-white/70">kcal eaten</p>
+                    {loading ? (
+                      <span className="mx-auto block h-7 w-12 animate-pulse rounded bg-white/30" />
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold tabular-nums text-white">
+                          {calories}
+                        </p>
+                        <p className="text-[10px] text-white/70">kcal eaten</p>
+                      </>
+                    )}
                   </div>
                 </ProgressRing>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-3xl font-bold tabular-nums leading-none text-white md:text-4xl">
-                  {remaining}
-                </p>
-                <p className="mt-1 text-sm text-white/75">kcal remaining</p>
-                <p className="mt-2 text-xs text-white/55">
-                  {Math.round(calPct * 100)}% of {goal} kcal goal ·{" "}
-                  {data?.mealsToday ?? 0} meals · {data?.capturesToday ?? 0}{" "}
-                  captures
-                </p>
+                {loading ? (
+                  <>
+                    <span className="block h-8 w-28 animate-pulse rounded-lg bg-white/25 md:h-10" />
+                    <p className="mt-1 text-sm text-white/75">kcal remaining</p>
+                    <span className="mt-2 block h-3 w-44 max-w-full animate-pulse rounded bg-white/15" />
+                  </>
+                ) : (
+                  <>
+                    <p className="text-3xl font-bold tabular-nums leading-none text-white md:text-4xl">
+                      {remaining}
+                    </p>
+                    <p className="mt-1 text-sm text-white/75">kcal remaining</p>
+                    <p className="mt-2 text-xs text-white/55">
+                      {Math.round(calPct * 100)}% of {goal} kcal goal ·{" "}
+                      {data?.mealsToday ?? 0} meals · {data?.capturesToday ?? 0}{" "}
+                      captures
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           {/* Inline stats inside hero on large screens */}
           <div className="hidden shrink-0 lg:grid lg:grid-cols-2 lg:gap-2.5 xl:grid-cols-4">
-            <div className="rounded-2xl bg-white/15 px-3.5 py-2.5 backdrop-blur-sm xl:min-w-[7rem]">
-              <p className="text-xl font-bold tabular-nums text-white">
-                {data?.capturesToday ?? "—"}
-              </p>
-              <p className="app-section-label-invert">
-                Captures
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/15 px-3.5 py-2.5 backdrop-blur-sm xl:min-w-[7rem]">
-              <p className="text-xl font-bold tabular-nums text-white">
-                {data?.mealsToday ?? "—"}
-              </p>
-              <p className="app-section-label-invert">
-                Meals
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/15 px-3.5 py-2.5 backdrop-blur-sm xl:min-w-[7rem]">
-              <p className="text-xl font-bold tabular-nums text-white">
-                {calories || "—"}
-              </p>
-              <p className="app-section-label-invert">
-                Calories
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white/15 px-3.5 py-2.5 backdrop-blur-sm xl:min-w-[7rem]">
-              <p className="text-xl font-bold tabular-nums text-white">{goal}</p>
-              <p className="app-section-label-invert">
-                Goal
-              </p>
-            </div>
+            <HeroStat
+              loading={loading}
+              value={data?.capturesToday ?? "—"}
+              label="Captures"
+            />
+            <HeroStat
+              loading={loading}
+              value={data?.mealsToday ?? "—"}
+              label="Meals"
+            />
+            <HeroStat loading={loading} value={calories || "—"} label="Calories" />
+            <HeroStat loading={loading} value={goal} label="Goal" />
           </div>
         </div>
       </section>

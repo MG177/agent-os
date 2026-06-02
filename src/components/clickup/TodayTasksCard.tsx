@@ -19,6 +19,22 @@ type State =
 
 const MAX_ROWS = 6;
 
+function TasksLoadingSkeleton() {
+  return (
+    <ul className="min-h-0 flex-1 divide-y divide-slate-50">
+      {[0, 1, 2].map((i) => (
+        <li key={i} className="flex items-center gap-2 px-4 py-2.5">
+          <div className="h-[18px] w-[18px] shrink-0 animate-pulse rounded-full bg-slate-100" />
+          <div className="flex-1 space-y-1.5">
+            <div className="h-3 w-3/4 animate-pulse rounded bg-slate-100" />
+            <div className="h-2 w-1/2 animate-pulse rounded bg-slate-100" />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function TodayTasksCard() {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [completingId, setCompletingId] = useState<string | null>(null);
@@ -61,7 +77,9 @@ export function TodayTasksCard() {
     setCompletingId(null);
   }
 
-  if (state.kind === "loading" || state.kind === "hidden") return null;
+  // Not configured (e.g. Vercel without ClickUp) — stay out of the way.
+  // Loading still renders a skeleton so the grid slot holds its place.
+  if (state.kind === "hidden") return null;
 
   return (
     <section className="space-y-2">
@@ -76,7 +94,9 @@ export function TodayTasksCard() {
       </div>
 
       <div className="app-card flex max-h-[min(40vh,18rem)] min-h-[5.5rem] flex-col overflow-hidden p-0">
-        {state.kind === "not_connected" ? (
+        {state.kind === "loading" ? (
+          <TasksLoadingSkeleton />
+        ) : state.kind === "not_connected" ? (
           <Link
             href="/settings/integrations"
             className="flex flex-1 items-center justify-center px-4 py-6 text-center text-xs font-medium text-blue-600 hover:text-blue-700"
