@@ -1,4 +1,5 @@
 import type { AuditSource } from "@/lib/audit";
+import { getAppTimeZone } from "@/lib/timezone";
 import {
   deleteFoodMongo,
   deleteMealMongo,
@@ -129,6 +130,6 @@ export function calculateTotals(entries: LogEntry[]): DailyTotals {
 
 export function todayISO(): string {
   return new Date().toLocaleDateString("en-CA", {
-    timeZone: process.env.TZ || "Asia/Jakarta",
+    timeZone: getAppTimeZone(),
   });
 }

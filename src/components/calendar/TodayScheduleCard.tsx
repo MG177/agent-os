@@ -149,7 +149,12 @@ export function TodayScheduleCard() {
         return;
       }
 
-      const eventsRes = await fetch("/api/calendar/events?range=today");
+      const clientTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const eventsParams = new URLSearchParams({ range: "today" });
+      if (clientTz) eventsParams.set("tz", clientTz);
+      const eventsRes = await fetch(
+        `/api/calendar/events?${eventsParams.toString()}`,
+      );
       if (eventsRes.status === 401) {
         if (!cancelled) setState({ kind: "not_connected" });
         return;

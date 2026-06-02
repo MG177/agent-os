@@ -98,6 +98,8 @@ export default function CalendarPage() {
       else setLoading(true);
 
       const params = new URLSearchParams({ from, to });
+      const clientTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (clientTz) params.set("tz", clientTz);
       if (refresh) params.set("refresh", "1");
 
       const res = await fetch(`/api/calendar/events?${params.toString()}`);

@@ -5,11 +5,12 @@ import type {
   ClickUpStatusGroup,
   ClickUpTask,
 } from "@/lib/integrations/clickup/types";
+import { getAppTimeZone } from "@/lib/timezone";
 
 export type DueFilter = "all" | "overdue" | "today" | "week";
 
 function getTimeZone(): string {
-  return process.env.TZ || "Asia/Jakarta";
+  return getAppTimeZone();
 }
 
 /** Folder names (lowercased) configured to be treated as sprints. */

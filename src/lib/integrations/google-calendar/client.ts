@@ -8,10 +8,7 @@ import { resolveRedirectUri } from "@/lib/integrations/google-calendar/config";
 import { getAuthenticatedClient } from "@/lib/integrations/google-calendar/oauth";
 import { getRefreshToken } from "@/lib/integrations/google-calendar/store";
 import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
-
-function getTimeZone(): string {
-  return process.env.TZ || "Asia/Jakarta";
-}
+import { resolveTimeZone } from "@/lib/timezone";
 
 function startOfDayIso(date: Date, tz: string): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -54,8 +51,9 @@ export function resolveEventRange(
   range: string | null,
   fromParam: string | null,
   toParam: string | null,
+  tzOverride?: string | null,
 ): { timeMin: string; timeMax: string; timeZone: string } {
-  const tz = getTimeZone();
+  const tz = resolveTimeZone(tzOverride);
   const now = new Date();
 
   if (fromParam && toParam) {
@@ -150,6 +148,7 @@ export async function listCalendarEvents(
     from?: string | null;
     to?: string | null;
     skipCache?: boolean;
+    tz?: string | null;
   },
 ): Promise<CalendarEventSummary[]> {
   const refreshToken = await getRefreshToken();
@@ -161,6 +160,7 @@ export async function listCalendarEvents(
     options.range ?? "week",
     options.from ?? null,
     options.to ?? null,
+    options.tz ?? null,
   );
 
   const cacheKey = `all|${timeMin}|${timeMax}|${timeZone}`;

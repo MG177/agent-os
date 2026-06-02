@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
   const range = searchParams.get("range");
   const from = searchParams.get("from");
   const to = searchParams.get("to");
+  const tz = searchParams.get("tz");
   const refresh = searchParams.get("refresh") === "1";
 
   try {
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
       range,
       from,
       to,
+      tz,
       skipCache: refresh,
     });
     return Response.json({ events });
@@ -34,6 +36,7 @@ export async function GET(request: NextRequest) {
         { status: 401 },
       );
     }
+    console.error("[calendar/events] failed to load events", err);
     const message = err instanceof Error ? err.message : "Failed to load events";
     return Response.json({ error: message }, { status: 500 });
   }
