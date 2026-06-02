@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Broccoli, Plus } from "lucide-react";
+import { Broccoli, Pencil, Plus } from "lucide-react";
 import SearchField from "@/components/ui/SearchField";
 import type { FoodEntry } from "../types";
 
@@ -51,6 +51,7 @@ export default function FoodWorkspace({
   const [logError, setLogError] = useState("");
 
   const [showForm, setShowForm] = useState(false);
+  const [editingKey, setEditingKey] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
@@ -210,13 +211,47 @@ export default function FoodWorkspace({
     setLogging(false);
   }
 
+  function foodToForm(food: FoodEntry): FormState {
+    const { per_100g } = food;
+    return {
+      name: food.display_name,
+      calories: String(per_100g.calories),
+      protein_g: String(per_100g.protein_g),
+      carb_g: String(per_100g.carb_g),
+      fat_g: String(per_100g.fat_g),
+      fiber_g: per_100g.fiber_g != null ? String(per_100g.fiber_g) : "",
+      sugar_g: per_100g.sugar_g != null ? String(per_100g.sugar_g) : "",
+    };
+  }
+
+  function closeForm() {
+    setShowForm(false);
+    setEditingKey(null);
+    setForm(EMPTY_FORM);
+    setFormError("");
+  }
+
   function openAddForm(prefillName = "") {
+    setEditingKey(null);
     setForm({ ...EMPTY_FORM, name: prefillName });
     setFormError("");
+    setSelectedKey(null);
+    setPopoverFood(null);
+    setPopoverPos(null);
     setShowForm(true);
   }
 
-  async function handleAddFood() {
+  function openEditForm(food: FoodEntry) {
+    setEditingKey(food.key);
+    setForm(foodToForm(food));
+    setFormError("");
+    setSelectedKey(null);
+    setPopoverFood(null);
+    setPopoverPos(null);
+    setShowForm(true);
+  }
+
+  async function handleSaveFood() {
     setFormError("");
     if (!form.name.trim()) {
       setFormError("Food name is required");
@@ -235,14 +270,16 @@ export default function FoodWorkspace({
     }
 
     setSaving(true);
-    const res = await fetch("/api/nutrition/foods", {
-      method: "POST",
+    const url = editingKey
+      ? `/api/nutrition/foods/${encodeURIComponent(editingKey)}`
+      : "/api/nutrition/foods";
+    const res = await fetch(url, {
+      method: editingKey ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ food_name: form.name.trim(), per_100g }),
     });
     if (res.ok) {
-      setForm(EMPTY_FORM);
-      setShowForm(false);
+      closeForm();
       loadFoods();
     } else {
       const d = await res.json().catch(() => ({}));
@@ -291,22 +328,38 @@ export default function FoodWorkspace({
         </div>
         <button
           type="button"
-          onClick={() => (showForm ? setShowForm(false) : openAddForm())}
+          onClick={() => (showForm && !editingKey ? closeForm() : openAddForm())}
+          disabled={showForm && !!editingKey}
           className={`flex items-center gap-1.5 rounded-2xl px-3 py-3 text-xs font-semibold shadow-sm transition-colors ${
-            showForm
+            showForm && !editingKey
               ? "bg-slate-100 text-slate-600"
-              : "bg-blue-600 text-white shadow-blue-200 hover:bg-blue-700"
+              : "bg-blue-600 text-white shadow-blue-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           }`}
         >
-          {!showForm && <Plus strokeWidth={2} className="h-3.5 w-3.5" aria-hidden />}
-          {showForm ? "Cancel" : "Add food"}
+          {!(showForm && !editingKey) && (
+            <Plus strokeWidth={2} className="h-3.5 w-3.5" aria-hidden />
+          )}
+          {showForm && !editingKey ? "Cancel" : "Add food"}
         </button>
       </div>
 
       {/* Add food form */}
       {showForm && (
         <div className="space-y-4 rounded-3xl border border-slate-100 bg-white p-4 shadow-sm md:p-5">
-          <p className="app-section-label">New food (per 100g)</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="app-section-label">
+              {editingKey ? "Edit food (per 100g)" : "New food (per 100g)"}
+            </p>
+            {editingKey && (
+              <button
+                type="button"
+                onClick={closeForm}
+                className="text-xs font-semibold text-slate-500 hover:text-slate-700"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
           <input
             type="text"
             placeholder="Food name e.g. Chicken Breast"
@@ -340,11 +393,11 @@ export default function FoodWorkspace({
           )}
           <button
             type="button"
-            onClick={handleAddFood}
+            onClick={handleSaveFood}
             disabled={saving}
             className="w-full rounded-2xl bg-blue-600 py-3 text-sm font-bold text-white shadow-sm shadow-blue-200 transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-60"
           >
-            {saving ? "Saving…" : "Save food"}
+            {saving ? "Saving…" : editingKey ? "Save changes" : "Save food"}
           </button>
         </div>
       )}
@@ -381,6 +434,7 @@ export default function FoodWorkspace({
                   <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">
                     kcal
                   </th>
+                  <th className="w-10 px-2 py-3" aria-label="Actions" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -409,11 +463,24 @@ export default function FoodWorkspace({
                         <td className="px-4 py-3 text-right font-bold tabular-nums text-violet-600">
                           {food.per_100g.calories}
                         </td>
+                        <td className="px-2 py-3 text-right">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditForm(food);
+                            }}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600"
+                            aria-label={`Edit ${food.display_name}`}
+                          >
+                            <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden />
+                          </button>
+                        </td>
                       </tr>
 
                       {active && (
                         <tr className="bg-blue-50/60 md:hidden">
-                          <td colSpan={5} className="border-t border-blue-100 px-3 py-3.5">
+                          <td colSpan={6} className="border-t border-blue-100 px-3 py-3.5">
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
@@ -455,9 +522,20 @@ export default function FoodWorkspace({
                               )}
                               <button
                                 type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openEditForm(food);
+                                }}
+                                className="ml-auto inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                              >
+                                <Pencil className="h-3 w-3" strokeWidth={1.8} aria-hidden />
+                                Edit
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => logMeal(food)}
                                 disabled={logging}
-                                className="ml-auto rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm shadow-blue-200 transition-colors hover:bg-blue-700 disabled:opacity-60"
+                                className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm shadow-blue-200 transition-colors hover:bg-blue-700 disabled:opacity-60"
                               >
                                 {logging ? "Logging…" : "Log"}
                               </button>
@@ -525,14 +603,26 @@ export default function FoodWorkspace({
           {logError && (
             <p className="mt-1 text-xs text-red-500" role="alert">{logError}</p>
           )}
-          <button
-            type="button"
-            onClick={() => logMeal(popoverFood)}
-            disabled={logging}
-            className="mt-2.5 w-full rounded-xl bg-blue-600 py-2 text-xs font-bold text-white shadow-sm shadow-blue-200 transition-colors hover:bg-blue-700 disabled:opacity-60"
-          >
-            {logging ? "Logging…" : "Log meal"}
-          </button>
+          <div className="mt-2.5 flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                openEditForm(popoverFood);
+              }}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden />
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => logMeal(popoverFood)}
+              disabled={logging}
+              className="flex-[2] rounded-xl bg-blue-600 py-2 text-xs font-bold text-white shadow-sm shadow-blue-200 transition-colors hover:bg-blue-700 disabled:opacity-60"
+            >
+              {logging ? "Logging…" : "Log meal"}
+            </button>
+          </div>
         </div>
       )}
     </div>

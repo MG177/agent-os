@@ -15,6 +15,17 @@ npm run dev
 
 http://localhost:3003
 
+## Deployments
+
+| Target | Mode | Filesystem |
+|--------|------|------------|
+| VPS / Docker | `full` (default) | Writes `Inbox/`, `audit.jsonl` under `AGENT_OS_DATA` |
+| Vercel (lite) | `lite` (auto when `VERCEL=1`) | Read-only — no capture, undo, or audit log; nutrition/calendar via MongoDB still work |
+
+Set `AGENT_OS_DEPLOYMENT=full` on Vercel only if you add persistent storage and intend writes.
+
+**Vercel Web Analytics & Speed Insights** — `@vercel/analytics` and `@vercel/speed-insights` are wired in `src/app/layout.tsx`. Enable both products for the Vercel project in the dashboard (Analytics → Web Analytics; Observability → Speed Insights).
+
 ## Routes (wireframe IA)
 
 Main mobile tabs: **Home · Capture · Nutrition · Activity** (see `Personal Agent OS Wireframes.html` + `Design System — Nutrition & PARA.html`).

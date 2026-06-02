@@ -2,6 +2,10 @@ import { NextRequest } from "next/server";
 import { listInbox, createInboxItem } from "@/lib/vault";
 import { titleFromCapture } from "@/lib/inbox-capture";
 import type { AuditSource } from "@/lib/audit";
+import {
+  fileWritesDisabledResponse,
+  isFileWritesDisabledError,
+} from "@/lib/deployment";
 
 const ALLOWED_SOURCES: AuditSource[] = ["capture-ui", "whatsapp"];
 
@@ -36,6 +40,11 @@ export async function POST(request: NextRequest) {
       ? (source as AuditSource)
       : "capture-ui";
 
-  const item = createInboxItem(resolvedTitle, noteBody, resolvedSource);
-  return Response.json({ item }, { status: 201 });
+  try {
+    const item = createInboxItem(resolvedTitle, noteBody, resolvedSource);
+    return Response.json({ item }, { status: 201 });
+  } catch (error) {
+    if (isFileWritesDisabledError(error)) return fileWritesDisabledResponse();
+    throw error;
+  }
 }

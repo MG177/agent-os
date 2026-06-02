@@ -10,6 +10,7 @@ import {
   searchVaultNotes,
 } from "@/lib/assistant/tools/vault-search";
 import type { AssistantToolDefinition } from "@/lib/assistant/types";
+import { FILE_WRITES_DISABLED_MESSAGE, fileWritesEnabled } from "@/lib/deployment";
 
 const captureSchema = z.object({
   text: z.string(),
@@ -52,6 +53,9 @@ export const vaultTools: AssistantToolDefinition[] = [
       required: ["text"],
     },
     execute: async (args) => {
+      if (!fileWritesEnabled()) {
+        return { error: FILE_WRITES_DISABLED_MESSAGE, code: "FILE_WRITES_DISABLED" };
+      }
       const { text, title, tags } = captureSchema.parse(args);
       const noteTitle =
         title?.trim() ||
