@@ -9,6 +9,7 @@ import {
   priorityLevel,
 } from "@/components/clickup/clickup-format";
 import { StatusPill } from "@/components/clickup/StatusPill";
+import { DateTimePopover } from "@/components/todos/DateTimePopover";
 import type {
   ClickUpComment,
   ClickUpTask,
@@ -221,17 +222,22 @@ export function TaskDetailPanel({
         <div>
           <p className="app-section-label mb-1.5">Due date</p>
           <div className="flex items-center gap-2">
-            <input
-              type="date"
-              value={toDateInput(task.dueDate)}
-              disabled={saving}
-              onChange={(e) => {
-                const [y, m, d] = e.target.value.split("-").map(Number);
-                patch({
-                  dueDate: y && m && d ? new Date(y, m - 1, d).getTime() : null,
-                });
+            <DateTimePopover
+              value={task.dueDate != null ? `${toDateInput(task.dueDate)}T00:00` : ""}
+              onChange={(v) => {
+                if (!v) {
+                  patch({ dueDate: null });
+                  return;
+                }
+                const [y, m, d] = v.slice(0, 10).split("-").map(Number);
+                patch({ dueDate: y && m && d ? new Date(y, m - 1, d).getTime() : null });
               }}
-              className="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              mode="date"
+              allowClear
+              disabled={saving}
+              emptyLabel="Set due date"
+              summaryLabel="Due"
+              className="justify-between text-sm font-medium"
             />
             {due && (
               <span className={`text-xs font-medium ${DUE_TONE_CLASS[due.tone]}`}>

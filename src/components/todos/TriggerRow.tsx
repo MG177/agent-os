@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { DateTimePopover } from "./DateTimePopover";
 import {
   type TriggerDoc,
   nextTriggerRun,
@@ -72,7 +73,7 @@ export function TriggerRow({ trigger, onChange, onRemove, canRemove }: Props) {
   const next = nextTriggerRun(trigger);
 
   return (
-    <div className="grid grid-cols-12 items-center gap-2 border-t border-slate-100 px-3 py-2.5">
+    <div className="grid grid-cols-12 items-start gap-2 border-t border-slate-100 px-3 py-2.5">
       {/* Type */}
       <div className="col-span-3">
         <select
@@ -106,30 +107,36 @@ export function TriggerRow({ trigger, onChange, onRemove, canRemove }: Props) {
       <div className="col-span-7 flex flex-wrap items-center gap-1.5 text-sm text-slate-600">
         {trigger.type === "interval" && (
           <>
-            <span className="text-slate-500">Every</span>
-            <input
-              type="number"
-              min={1}
-              className={`w-16 ${CELL}`}
-              value={trigger.intervalValue ?? 30}
-              onChange={(e) => set({ intervalValue: Math.max(1, Math.floor(Number(e.target.value)) || 1) })}
-            />
-            <select
-              className={CELL}
-              value={trigger.intervalUnit ?? "minute"}
-              onChange={(e) => set({ intervalUnit: e.target.value as TriggerDoc["intervalUnit"] })}
-            >
-              {UNIT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-            <span className="text-slate-400">from</span>
-            <input
-              type="datetime-local"
-              className={CELL}
-              value={toLocalInput(trigger.startAt)}
-              onChange={(e) => set({ startAt: localToIso(e.target.value) })}
-            />
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-500">Every</span>
+              <input
+                type="number"
+                min={1}
+                className={`w-16 ${CELL}`}
+                value={trigger.intervalValue ?? 30}
+                onChange={(e) => set({ intervalValue: Math.max(1, Math.floor(Number(e.target.value)) || 1) })}
+              />
+              <select
+                className={CELL}
+                value={trigger.intervalUnit ?? "minute"}
+                onChange={(e) => set({ intervalUnit: e.target.value as TriggerDoc["intervalUnit"] })}
+              >
+                {UNIT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex w-full items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                Starts
+              </span>
+              <DateTimePopover
+                value={toLocalInput(trigger.startAt)}
+                onChange={(local) => set({ startAt: localToIso(local) })}
+                minDate={new Date()}
+                className="min-w-0 flex-1 justify-between text-sm font-medium"
+              />
+            </div>
           </>
         )}
 

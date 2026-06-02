@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { addDaysToKey, localDateKey } from "@/components/calendar/calendar-utils";
+import { DateTimePopover } from "@/components/todos/DateTimePopover";
 import NutritionGoalsSheet from "./NutritionGoalsSheet";
 import NutritionSegments from "./NutritionSegments";
 import NutritionSummary from "./NutritionSummary";
@@ -161,9 +162,17 @@ function NutritionDashboardInner() {
             >
               <ChevronLeft strokeWidth={2} className="h-4 w-4" aria-hidden />
             </button>
-            <span className="min-w-[6.5rem] text-center text-sm font-semibold text-slate-700">
-              {formatDayLabel(selectedDate, today)}
-            </span>
+            <DateTimePopover
+              value={`${selectedDate}T00:00`}
+              onChange={(v) => {
+                if (v) setSelectedDate(v.slice(0, 10));
+              }}
+              mode="date"
+              maxDate={new Date()}
+              triggerLabel={formatDayLabel(selectedDate, today)}
+              summaryLabel="Day"
+              className="min-w-[6.5rem] justify-center text-sm font-semibold"
+            />
             <button
               type="button"
               onClick={() => setSelectedDate((d) => addDaysToKey(d, 1))}

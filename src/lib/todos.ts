@@ -5,6 +5,7 @@ import {
   triggerToLabel,
   computeTriggersNextRun,
   triggerNextRun,
+  addIntervalUnits,
 } from "./cron-parse";
 
 export type { TriggerDoc };
@@ -77,6 +78,53 @@ function hydrateTriggers(triggers: TriggerDoc[], from: Date): TriggerDoc[] {
   }));
 }
 
+/**
+ * Recompute each trigger's next run after a "done", branching on cadence kind:
+ *  - interval ("every N units"): the cadence *floats* — the next occurrence is
+ *    exactly the interval measured from the completion time. We re-anchor
+ *    `startAt` forward so e.g. "every 30 min" checked at 9:42 fires at 10:12,
+ *    not on the original 9:00 grid.
+ *  - daily / weekly / monthly / cron: fixed wall-clock grid. Advance past the
+ *    occurrence just satisfied, measuring from the later of `now` / the current
+ *    due time so an ahead-of-schedule "done" skips the upcoming slot instead of
+ *    recomputing the same one.
+ */
+function advanceTriggersAfterDone(
+  triggers: TriggerDoc[],
+  now: Date,
+  currentNextRunAt: Date | undefined,
+): TriggerDoc[] {
+  const fixedBase =
+    currentNextRunAt && currentNextRunAt.getTime() > now.getTime()
+      ? currentNextRunAt
+      : now;
+  return triggers.map((t) => {
+    if (t.type === "interval" && t.intervalUnit && t.intervalValue) {
+      const startAt = addIntervalUnits(now, t.intervalUnit, t.intervalValue);
+      return {
+        ...t,
+        startAt: startAt.toISOString(),
+        label: triggerToLabel(t),
+        nextRunAt: startAt,
+      };
+    }
+    return {
+      ...t,
+      label: triggerToLabel(t),
+      nextRunAt: triggerNextRun(t, fixedBase),
+    };
+  });
+}
+
+/** Earliest of the triggers' already-computed next runs (the todo's due time). */
+function earliestNextRun(triggers: TriggerDoc[]): Date | undefined {
+  let earliest: Date | undefined;
+  for (const t of triggers) {
+    if (t.nextRunAt && (!earliest || t.nextRunAt < earliest)) earliest = t.nextRunAt;
+  }
+  return earliest;
+}
+
 export async function createTodo(input: CreateTodoInput): Promise<TodoDoc> {
   const col = await todosCollection();
   const now = new Date();
@@ -120,13 +168,12 @@ export async function doneTodo(id: string): Promise<TodoDoc | null> {
     return { ...doc, completedAt: now, updatedAt: now };
   }
 
-  // Completing early should retire the *upcoming* occurrence, not recompute
-  // the same one. Advance from the later of `now` / the current due time so an
-  // ahead-of-schedule "done" skips the occurrence it just satisfied.
-  const base =
-    doc.nextRunAt && doc.nextRunAt.getTime() > now.getTime() ? doc.nextRunAt : now;
-  const triggers = doc.triggers ? hydrateTriggers(doc.triggers, base) : undefined;
-  const nextRunAt = triggers ? computeTriggersNextRun(triggers, base) : undefined;
+  // Interval triggers float from the completion time; fixed schedules keep
+  // their grid (and skip the occurrence an early "done" just satisfied).
+  const triggers = doc.triggers
+    ? advanceTriggersAfterDone(doc.triggers, now, doc.nextRunAt)
+    : undefined;
+  const nextRunAt = triggers ? earliestNextRun(triggers) : undefined;
   await col.updateOne(
     { _id: id },
     { $set: { triggers, lastDoneAt: now, nextRunAt, updatedAt: now } },

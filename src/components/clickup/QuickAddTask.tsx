@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, Plus } from "lucide-react";
+import { DateTimePopover } from "@/components/todos/DateTimePopover";
 import { dateInputToMs } from "@/components/clickup/clickup-format";
 import type { ClickUpListOption } from "@/components/clickup/types";
 
@@ -58,12 +59,14 @@ export function QuickAddTask({
           </option>
         ))}
       </select>
-      <input
-        type="date"
-        value={due}
-        onChange={(e) => setDue(e.target.value)}
-        className="rounded-xl bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        aria-label="Due date"
+      <DateTimePopover
+        value={due ? `${due}T00:00` : ""}
+        onChange={(v) => setDue(v ? v.slice(0, 10) : "")}
+        mode="date"
+        allowClear
+        emptyLabel="Due date"
+        summaryLabel="Due"
+        className="justify-between text-xs font-medium"
       />
       <button
         type="submit"

@@ -216,7 +216,7 @@ export function AddTodoSheet({ open, onClose, onSaved, editing }: Props) {
             {type === "once" && (
               <div>
                 <label className="mb-2 block text-xs font-semibold text-slate-700">When</label>
-                <DateTimePicker value={dueAt} onChange={setDueAt} />
+                <DateTimePicker value={dueAt} onChange={setDueAt} minDate={new Date()} />
               </div>
             )}
 

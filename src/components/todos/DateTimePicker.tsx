@@ -20,10 +20,10 @@ function toLocalInput(d: Date): string {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 
-function startOfToday(): Date {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
+function startOfDay(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
 }
 
 function fmtSummary(d: Date): string {
@@ -35,12 +35,32 @@ function fmtSummary(d: Date): string {
   return `${date} · ${formatHour12(d.getHours(), d.getMinutes())}`;
 }
 
+type PickerMode = "date" | "datetime";
+
 interface Props {
   value: string; // "YYYY-MM-DDTHH:mm" or ""
   onChange: (value: string) => void;
+  /** Heading on the violet summary card. "Fires" for one-off reminders, "Starts" for interval anchors. */
+  summaryLabel?: string;
+  /** "datetime" (default) shows the time row; "date" hides it for date-only fields. */
+  mode?: PickerMode;
+  /** Earliest selectable day, inclusive (day granularity). Omit for no lower bound. */
+  minDate?: Date;
+  /** Latest selectable day, inclusive (day granularity). Omit for no upper bound. */
+  maxDate?: Date;
+  /** Show a "No date" action that clears the value. */
+  allowClear?: boolean;
 }
 
-export function DateTimePicker({ value, onChange }: Props) {
+export function DateTimePicker({
+  value,
+  onChange,
+  summaryLabel = "Fires",
+  mode = "datetime",
+  minDate,
+  maxDate,
+  allowClear = false,
+}: Props) {
   const selected = value ? parseLocal(value) : null;
   const [view, setView] = useState(() => {
     const d = selected ?? new Date();
@@ -57,8 +77,11 @@ export function DateTimePicker({ value, onChange }: Props) {
   const baseHour = selected ? selected.getHours() : 9;
   const baseMin = selected ? selected.getMinutes() : 0;
 
-  const today = startOfToday();
   const now = new Date();
+  const minDay = minDate ? startOfDay(minDate) : null;
+  const maxDay = maxDate ? startOfDay(maxDate) : null;
+  const outOfRange = (d: Date) =>
+    (minDay !== null && d < minDay) || (maxDay !== null && d > maxDay);
 
   function emit(year: number, month: number, day: number, h24: number, min: number) {
     onChange(toLocalInput(new Date(year, month, day, h24, min)));
@@ -74,7 +97,30 @@ export function DateTimePicker({ value, onChange }: Props) {
   }
 
   // ── quick presets ──
-  const presets: { label: string; go: () => void }[] = [
+  function emitDay(d: Date) {
+    onChange(toLocalInput(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0)));
+  }
+  const datePresets: { label: string; go: () => void }[] = [
+    { label: "Today", go: () => emitDay(new Date()) },
+    {
+      label: "Tomorrow",
+      go: () => {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        emitDay(d);
+      },
+    },
+    {
+      label: "Next Mon",
+      go: () => {
+        const d = new Date();
+        const add = (8 - d.getDay()) % 7 || 7;
+        d.setDate(d.getDate() + add);
+        emitDay(d);
+      },
+    },
+  ];
+  const dateTimePresets: { label: string; go: () => void }[] = [
     {
       label: "In 1 hour",
       go: () => {
@@ -112,6 +158,7 @@ export function DateTimePicker({ value, onChange }: Props) {
       },
     },
   ];
+  const presets = mode === "date" ? datePresets : dateTimePresets;
 
   // ── calendar grid ──
   const firstDow = new Date(view.y, view.m, 1).getDay();
@@ -124,7 +171,9 @@ export function DateTimePicker({ value, onChange }: Props) {
     month: "long",
     year: "numeric",
   });
-  const atCurrentMonth = view.y === now.getFullYear() && view.m === now.getMonth();
+  // Disable month-nav when the adjacent month holds no selectable days.
+  const prevDisabled = minDay !== null && new Date(view.y, view.m, 0) < minDay;
+  const nextDisabled = maxDay !== null && new Date(view.y, view.m + 1, 1) > maxDay;
 
   function shiftMonth(delta: number) {
     setView((v) => {
@@ -156,6 +205,15 @@ export function DateTimePicker({ value, onChange }: Props) {
             {p.label}
           </button>
         ))}
+        {allowClear && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+          >
+            No date
+          </button>
+        )}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -165,7 +223,7 @@ export function DateTimePicker({ value, onChange }: Props) {
             <button
               type="button"
               onClick={() => shiftMonth(-1)}
-              disabled={atCurrentMonth}
+              disabled={prevDisabled}
               className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent"
               aria-label="Previous month"
             >
@@ -175,7 +233,8 @@ export function DateTimePicker({ value, onChange }: Props) {
             <button
               type="button"
               onClick={() => shiftMonth(1)}
-              className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              disabled={nextDisabled}
+              className="rounded-lg p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-30 disabled:hover:bg-transparent"
               aria-label="Next month"
             >
               <ChevronRight strokeWidth={2} className="h-4 w-4" />
@@ -190,7 +249,7 @@ export function DateTimePicker({ value, onChange }: Props) {
             {cells.map((c, i) => {
               if (c === null) return <div key={`b${i}`} />;
               const dayDate = new Date(view.y, view.m, c);
-              const isPast = dayDate < today;
+              const disabled = outOfRange(dayDate);
               const isSel =
                 selected &&
                 selected.getFullYear() === view.y &&
@@ -204,12 +263,12 @@ export function DateTimePicker({ value, onChange }: Props) {
                 <button
                   key={c}
                   type="button"
-                  disabled={isPast}
+                  disabled={disabled}
                   onClick={() => pickDay(c)}
                   className={`h-9 rounded-lg text-sm transition-colors ${
                     isSel
                       ? "bg-blue-600 font-semibold text-white"
-                      : isPast
+                      : disabled
                         ? "cursor-not-allowed text-slate-300"
                         : isToday
                           ? "font-semibold text-blue-600 ring-1 ring-inset ring-blue-200 hover:bg-blue-50"
@@ -225,6 +284,7 @@ export function DateTimePicker({ value, onChange }: Props) {
 
         {/* Time + summary */}
         <div className="flex flex-col gap-3">
+          {mode === "datetime" && (
           <div>
             <p className="mb-1.5 text-xs font-semibold text-slate-700">Time</p>
             <div className="flex items-center gap-1.5">
@@ -263,13 +323,24 @@ export function DateTimePicker({ value, onChange }: Props) {
               </div>
             </div>
           </div>
+          )}
 
           <div className="rounded-2xl bg-violet-50 p-3">
             <p className="text-[10px] font-bold uppercase tracking-widest text-violet-400">
-              Fires
+              {summaryLabel}
             </p>
             <p className="mt-1 text-sm font-semibold text-violet-900">
-              {selected ? fmtSummary(selected) : "Pick a date"}
+              {selected
+                ? mode === "date"
+                  ? selected.toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : fmtSummary(selected)
+                : allowClear
+                  ? "No date"
+                  : "Pick a date"}
             </p>
           </div>
         </div>

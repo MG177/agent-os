@@ -10,6 +10,7 @@ export {
   triggerToCronExpr,
   triggerToLabel,
   formatHour12,
+  addIntervalUnits,
 } from "./trigger-format";
 
 /** Authoritative next occurrence (server-side), via cron-parser. */

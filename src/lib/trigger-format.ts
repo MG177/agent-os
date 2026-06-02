@@ -181,7 +181,7 @@ function addMonths(d: Date, n: number): Date {
   return r;
 }
 
-function addIntervalUnits(start: Date, unit: IntervalUnit, n: number): Date {
+export function addIntervalUnits(start: Date, unit: IntervalUnit, n: number): Date {
   switch (unit) {
     case "minute":
       return new Date(start.getTime() + n * 60_000);
