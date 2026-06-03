@@ -19,13 +19,12 @@ function TimeChip({ nextRunAt }: { nextRunAt: Date }) {
 
   return (
     <span
-      className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-        overdue
+      className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${overdue
           ? "bg-red-50 text-red-600"
           : mins < 120
             ? "bg-amber-50 text-amber-700"
             : "bg-slate-100 text-slate-500"
-      }`}
+        }`}
     >
       {label}
     </span>
@@ -36,7 +35,7 @@ export function DueTodosCard() {
   const { todos, loading, markDone } = useDueTodos();
 
   return (
-    <div className="app-card flex flex-col gap-3 p-4 md:p-5">
+    <div className="app-card flex h-full min-h-[5.5rem] flex-col gap-3 p-4 md:p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BellRing strokeWidth={1.8} className="h-4 w-4 text-blue-500" />
@@ -57,17 +56,17 @@ export function DueTodosCard() {
       </div>
 
       {loading ? (
-        <div className="flex flex-col gap-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-2">
           {[1, 2].map((i) => (
             <div key={i} className="h-8 animate-pulse rounded-xl bg-slate-100" />
           ))}
         </div>
       ) : todos.length === 0 ? (
-        <p className="py-2 text-center text-xs text-slate-400">
+        <p className="flex flex-1 items-center justify-center py-2 text-center text-xs text-slate-400">
           Nothing due — you&apos;re on track
         </p>
       ) : (
-        <ul className="flex flex-col gap-1.5">
+        <ul className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto overscroll-contain">
           {todos.slice(0, 5).map((todo) => (
             <li
               key={todo._id}

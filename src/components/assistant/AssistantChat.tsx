@@ -2,17 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Image as ImageIcon, Send, X } from "lucide-react";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 import {
   filterSlashCommands,
   getSlashCommandDefinition,
   type AssistantSlashCommandId,
 } from "@/lib/assistant/commands";
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-  image?: string;
-}
+import { normalizeAssistantDisplayText } from "@/lib/assistant/display-text";
+import {
+  useAssistantSession,
+  type AssistantUiMessage,
+} from "@/components/assistant/AssistantSessionContext";
 
 const QUICK_ACTIONS = [
   {
@@ -54,15 +54,15 @@ function TypingDots() {
   );
 }
 
-function UserBubble({ msg }: { msg: Message }) {
+function UserBubble({ msg }: { msg: AssistantUiMessage }) {
   return (
     <div className="mb-3 flex justify-end">
       <div className="max-w-[80%] space-y-1">
-        {msg.image && (
+        {msg.imagePreview && (
           <div className="flex justify-end">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={msg.image}
+              src={msg.imagePreview}
               alt="uploaded"
               className="max-h-48 rounded-2xl rounded-br-sm object-cover"
             />
@@ -85,19 +85,19 @@ function AssistantBubble({
   content: string;
   pending?: boolean;
 }) {
+  const display = normalizeAssistantDisplayText(content);
+
   return (
-    <div className="mb-3 flex justify-start">
-      <div className="flex max-w-[85%] items-end gap-2">
-        <div className="mb-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-xs text-white">
+    <div className="mb-3 w-full">
+      <div className="grid w-full grid-cols-[1.75rem_minmax(0,1fr)] items-start gap-2">
+        <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-xs text-white">
           AI
         </div>
-        <div className="rounded-3xl rounded-bl-lg border border-slate-100 bg-white px-4 py-3 shadow-sm">
+        <div className="min-w-0 overflow-hidden rounded-3xl rounded-bl-lg border border-slate-100 bg-white px-3.5 py-2.5 shadow-sm">
           {pending ? (
             <TypingDots />
           ) : (
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-800">
-              {content}
-            </p>
+            <MarkdownRenderer content={display} variant="compact" />
           )}
         </div>
       </div>
@@ -106,7 +106,19 @@ function AssistantBubble({
 }
 
 export default function AssistantChat() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const {
+    ready,
+    activeSessionId,
+    messages,
+    loading,
+    streaming,
+    setStreaming,
+    reloadActiveMessages,
+    refreshSessions,
+    registerStreamAbort,
+    abortStream,
+  } = useAssistantSession();
+
   const [input, setInput] = useState("");
   const [activeCommand, setActiveCommand] =
     useState<AssistantSlashCommandId | null>(null);
@@ -114,8 +126,8 @@ export default function AssistantChat() {
   const [slashHighlight, setSlashHighlight] = useState(0);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [streaming, setStreaming] = useState(false);
   const [streamingText, setStreamingText] = useState("");
+  const [sendError, setSendError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -133,6 +145,10 @@ export default function AssistantChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, streamingText, scrollToBottom]);
+
+  useEffect(() => {
+    setSendError(null);
+  }, [activeSessionId]);
 
   useEffect(() => {
     setSlashHighlight(0);
@@ -201,37 +217,33 @@ export default function AssistantChat() {
   async function handleSend(overrideText?: string, overrideCommand?: AssistantSlashCommandId | null) {
     const text = (overrideText ?? input).trim();
     if (!text && !imageBase64) return;
-    if (streaming) return;
+    if (streaming || !activeSessionId) return;
 
     const commandForRequest =
       overrideCommand !== undefined
         ? overrideCommand
         : activeCommand;
 
-    const userMsg: Message = {
-      role: "user",
-      content: text,
-      image: imagePreview ?? undefined,
-    };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
     setInput("");
     setSlashMenuOpen(false);
+    setSendError(null);
     const capturedBase64 = imageBase64;
     const capturedCommand = commandForRequest;
     clearImage();
     setStreaming(true);
     setStreamingText("");
 
+    const controller = new AbortController();
+    registerStreamAbort(controller);
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
-          messages: newMessages.map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
+          sessionId: activeSessionId,
+          content: text,
           image: capturedBase64
             ? { base64: capturedBase64, mediaType: "image/jpeg" }
             : undefined,
@@ -239,17 +251,26 @@ export default function AssistantChat() {
         }),
       });
 
-      if (!res.ok || !res.body) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content: "Sorry, something went wrong. Please try again.",
-          },
-        ]);
-        setStreaming(false);
+      if (!res.ok) {
+        let errMsg = "Sorry, something went wrong. Please try again.";
+        try {
+          const errBody = (await res.json()) as { error?: string };
+          if (errBody.error) errMsg = errBody.error;
+        } catch {
+          /* ignore */
+        }
+        await reloadActiveMessages();
+        setSendError(errMsg);
         return;
       }
+
+      if (!res.body) {
+        await reloadActiveMessages();
+        setSendError("Sorry, something went wrong. Please try again.");
+        return;
+      }
+
+      await reloadActiveMessages();
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -262,20 +283,21 @@ export default function AssistantChat() {
         setStreamingText(full);
       }
 
-      setMessages((prev) => [...prev, { role: "assistant", content: full }]);
       setStreamingText("");
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Connection error. Please try again.",
-        },
-      ]);
+      await reloadActiveMessages();
+      await refreshSessions();
+    } catch (e) {
+      if (e instanceof Error && e.name === "AbortError") {
+        await reloadActiveMessages();
+        return;
+      }
+      await reloadActiveMessages();
+      setSendError("Connection error. Please try again.");
+    } finally {
+      registerStreamAbort(null);
+      setStreaming(false);
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
-
-    setStreaming(false);
-    setTimeout(() => inputRef.current?.focus(), 100);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -313,14 +335,23 @@ export default function AssistantChat() {
     }
   }
 
-  const isEmpty = messages.length === 0 && !streaming;
+  const isEmpty =
+    ready && !loading && messages.length === 0 && !streaming && !sendError;
   const activeDef = activeCommand
     ? getSlashCommandDefinition(activeCommand)
     : null;
 
+  if (!ready || (loading && messages.length === 0)) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center py-12">
+        <p className="text-xs text-slate-400">Loading assistant…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex-1 overflow-y-auto py-2">
+      <div className="flex-1 overflow-y-auto py-2 w-full min-w-0">
         {isEmpty && (
           <div className="flex h-full min-h-[12rem] flex-col items-center justify-center pb-6 text-center">
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 to-blue-500 text-xl font-bold text-white shadow-lg shadow-blue-200">
@@ -352,11 +383,11 @@ export default function AssistantChat() {
           </div>
         )}
 
-        {messages.map((msg, i) =>
+        {messages.map((msg) =>
           msg.role === "user" ? (
-            <UserBubble key={i} msg={msg} />
+            <UserBubble key={msg.id} msg={msg} />
           ) : (
-            <AssistantBubble key={i} content={msg.content} />
+            <AssistantBubble key={msg.id} content={msg.content} />
           ),
         )}
 
@@ -366,6 +397,10 @@ export default function AssistantChat() {
           ) : (
             <AssistantBubble content="" pending />
           ))}
+
+        {sendError && (
+          <AssistantBubble content={sendError} />
+        )}
 
         <div ref={bottomRef} />
       </div>
@@ -387,11 +422,10 @@ export default function AssistantChat() {
                   e.preventDefault();
                   selectSlashCommand(cmd.id);
                 }}
-                className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left transition-colors ${
-                  i === slashHighlight
-                    ? "bg-blue-50 text-blue-900"
-                    : "text-slate-800 hover:bg-slate-50"
-                }`}
+                className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left transition-colors ${i === slashHighlight
+                  ? "bg-blue-50 text-blue-900"
+                  : "text-slate-800 hover:bg-slate-50"
+                  }`}
               >
                 <span className="font-mono text-xs font-semibold">
                   {cmd.slash}
@@ -473,13 +507,18 @@ export default function AssistantChat() {
                 ? `Message (${activeDef?.slash})…`
                 : "Message or type / for commands…"
             }
-            disabled={streaming}
+            disabled={streaming || loading || !activeSessionId}
             className="flex-1 resize-none bg-transparent py-1.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none disabled:opacity-50"
           />
           <button
             type="button"
             onClick={() => handleSend()}
-            disabled={streaming || (!input.trim() && !imageBase64)}
+            disabled={
+              streaming ||
+              loading ||
+              !activeSessionId ||
+              (!input.trim() && !imageBase64)
+            }
             className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:opacity-30 disabled:shadow-none"
             aria-label="Send message"
           >

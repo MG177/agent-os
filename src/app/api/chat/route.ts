@@ -1,12 +1,13 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { runAssistantChat } from "@/lib/assistant/runtime";
+import {
+  appendAssistantMessage,
+  appendUserMessage,
+  AssistantSessionError,
+  loadChatHistoryForTurn,
+} from "@/lib/assistant/sessions";
 import { textStreamResponse, errorJsonResponse } from "@/lib/cursor-sdk/stream";
-
-const MessageSchema = z.object({
-  role: z.enum(["user", "assistant"]),
-  content: z.string().max(50_000),
-});
 
 const ImageSchema = z.object({
   base64: z.string(),
@@ -14,7 +15,8 @@ const ImageSchema = z.object({
 });
 
 const ChatSchema = z.object({
-  messages: z.array(MessageSchema).min(1).max(100),
+  sessionId: z.string().uuid(),
+  content: z.string().max(50_000),
   image: ImageSchema.optional(),
   command: z.string().max(200).nullable().optional(),
 });
@@ -33,11 +35,54 @@ export async function POST(req: NextRequest) {
       return errorJsonResponse("Invalid request body", 400);
     }
 
-    const { messages, image, command } = parsed.data;
-    const outcome = await runAssistantChat({ messages, image, command });
+    const { sessionId, content, image, command } = parsed.data;
+    const trimmed = content.trim();
+
+    if (!trimmed && !image) {
+      return errorJsonResponse("Message cannot be empty", 400);
+    }
+
+    let priorHistory;
+    try {
+      priorHistory = await loadChatHistoryForTurn(sessionId);
+      await appendUserMessage({
+        sessionId,
+        content: trimmed,
+        command: command ?? undefined,
+        image: image
+          ? { base64: image.base64, mediaType: image.mediaType }
+          : undefined,
+      });
+    } catch (err) {
+      if (err instanceof AssistantSessionError) {
+        return errorJsonResponse(err.message, err.status);
+      }
+      throw err;
+    }
+
+    const messages = [
+      ...priorHistory,
+      {
+        role: "user" as const,
+        content: trimmed || "[Photo]",
+      },
+    ];
+
+    const outcome = await runAssistantChat({
+      messages,
+      image,
+      command,
+    });
 
     if (!outcome.ok) {
       return errorJsonResponse(outcome.message, outcome.status);
+    }
+
+    try {
+      await appendAssistantMessage(sessionId, outcome.text);
+    } catch (err) {
+      console.error("Failed to persist assistant message:", err);
+      return errorJsonResponse("Failed to save assistant reply", 500);
     }
 
     return textStreamResponse(outcome.text);

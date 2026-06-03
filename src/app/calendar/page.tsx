@@ -27,6 +27,7 @@ import {
 import { useHiddenCalendars } from "@/components/calendar/useHiddenCalendars";
 import { useScheduleClock } from "@/components/calendar/useScheduleClock";
 import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 type DetailSpan = "day" | "week";
 type MobileView = "month" | "detail";
@@ -57,11 +58,10 @@ function Segmented<T extends string>({
           role="tab"
           aria-selected={value === id}
           onClick={() => onChange(id)}
-          className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors ${
-            value === id
-              ? "bg-white text-blue-600 shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
-          }`}
+          className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors ${value === id
+            ? "bg-white text-blue-600 shadow-sm"
+            : "text-slate-500 hover:text-slate-700"
+            }`}
         >
           {label}
         </button>
@@ -237,151 +237,153 @@ export default function CalendarPage() {
   );
 
   return (
-    <div className="app-screen app-screen-home flex h-full min-h-0! flex-1 flex-col gap-4 overflow-hidden">
-      <header className="flex shrink-0 flex-col gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 md:text-2xl">
-            Calendar
-          </h1>
-          <p className="mt-0.5 text-xs text-slate-400 md:text-sm">
-            {headerSubtitle}
-          </p>
-        </div>
+    <div className="app-screen app-screen-home flex min-h-0 flex-1 flex-col">
+      <PageHeader>
+        <div className="app-screen-inset flex flex-col gap-3 pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between md:pb-5 md:pt-6">
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 md:text-2xl">
+              Calendar
+            </h1>
+            <p className="mt-0.5 text-xs text-slate-400 md:text-sm">
+              {headerSubtitle}
+            </p>
+          </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {showScheduleChrome && (
-            <>
-              <Segmented
-                ariaLabel="Calendar view (mobile)"
-                className="md:hidden"
-                value={mobileTab}
-                onChange={onMobileTab}
-                options={[
-                  { id: "month", label: "Month" },
-                  { id: "week", label: "Week" },
-                  { id: "day", label: "Day" },
-                ]}
-              />
-              <Segmented
-                ariaLabel="Detail span"
-                className="hidden md:inline-flex"
-                value={detailSpan}
-                onChange={setDetailSpan}
-                options={[
-                  { id: "day", label: "Day" },
-                  { id: "week", label: "Week" },
-                ]}
-              />
-              <button
-                type="button"
-                onClick={() => setListMode((v) => !v)}
-                aria-pressed={listMode}
-                className="hidden rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 md:inline-flex"
-              >
-                {listMode ? "Grid" : "List"}
-              </button>
-              <div className="inline-flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            {showScheduleChrome && (
+              <>
+                <Segmented
+                  ariaLabel="Calendar view (mobile)"
+                  className="md:hidden"
+                  value={mobileTab}
+                  onChange={onMobileTab}
+                  options={[
+                    { id: "month", label: "Month" },
+                    { id: "week", label: "Week" },
+                    { id: "day", label: "Day" },
+                  ]}
+                />
+                <Segmented
+                  ariaLabel="Detail span"
+                  className="hidden md:inline-flex"
+                  value={detailSpan}
+                  onChange={setDetailSpan}
+                  options={[
+                    { id: "day", label: "Day" },
+                    { id: "week", label: "Week" },
+                  ]}
+                />
                 <button
                   type="button"
-                  onClick={stepPrev}
-                  aria-label="Previous"
-                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  onClick={() => setListMode((v) => !v)}
+                  aria-pressed={listMode}
+                  className="hidden rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 md:inline-flex"
                 >
-                  ‹
+                  {listMode ? "Grid" : "List"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedDay(today)}
-                  className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-                >
-                  Today
-                </button>
-                <button
-                  type="button"
-                  onClick={stepNext}
-                  aria-label="Next"
-                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
-                >
-                  ›
-                </button>
-              </div>
-            </>
-          )}
-          <button
-            type="button"
-            onClick={() => load(fetchFrom, fetchTo, { refresh: true })}
-            disabled={refreshing || loading}
-            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-          >
-            {refreshing ? "Refreshing…" : "Refresh"}
-          </button>
-        </div>
-      </header>
-
-      {!showScheduleChrome && (
-        <div className="min-h-0 flex-1">
-          {loading && <CalendarLoadingSkeleton rows={6} />}
-          {!loading && error === "not_connected" && <CalendarConnectionEmpty />}
-          {!loading && error && error !== "not_connected" && (
-            <p className="py-16 text-center text-sm text-amber-700">{error}</p>
-          )}
-        </div>
-      )}
-
-      {showScheduleChrome && (
-        <div className="grid min-h-0 flex-1 grid-rows-1 gap-4 md:grid-cols-12 md:gap-5 lg:gap-6">
-          {/* Detail: scalable time-grid (or list) */}
-          <div
-            className={`${
-              mobileView === "detail" ? "flex" : "hidden"
-            } min-h-0 flex-col md:flex md:col-span-7 lg:col-span-8 xl:col-span-9`}
-          >
-            {listMode ? (
-              detailSpan === "week" ? (
-                <CalendarAgendaPanel groups={weekGroups} />
-              ) : (
-                <div className="app-card flex min-h-0 flex-1 flex-col overflow-hidden p-0">
-                  <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-                    <CalendarDayAgendaPanel group={dayGroup} nowMs={nowMs} />
-                  </div>
+                <div className="inline-flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={stepPrev}
+                    aria-label="Previous"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDay(today)}
+                    className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  >
+                    Today
+                  </button>
+                  <button
+                    type="button"
+                    onClick={stepNext}
+                    aria-label="Next"
+                    className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  >
+                    ›
+                  </button>
                 </div>
-              )
-            ) : (
-              <CalendarTimeGrid
-                events={filteredEvents}
-                days={detailDays}
-                today={today}
-                selectedDay={selectedDay}
-                onFocusDay={focusDayDetail}
-              />
+              </>
+            )}
+            <button
+              type="button"
+              onClick={() => load(fetchFrom, fetchTo, { refresh: true })}
+              disabled={refreshing || loading}
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+            >
+              {refreshing ? "Refreshing…" : "Refresh"}
+            </button>
+          </div>
+        </div>
+      </PageHeader>
+
+      <div className="app-screen-inset flex flex-col gap-4 pb-4 md:gap-6 md:pb-8">
+        {!showScheduleChrome && (
+          <div>
+            {loading && <CalendarLoadingSkeleton rows={6} />}
+            {!loading && error === "not_connected" && <CalendarConnectionEmpty />}
+            {!loading && error && error !== "not_connected" && (
+              <p className="py-16 text-center text-sm text-amber-700">{error}</p>
             )}
           </div>
+        )}
 
-          {/* Mobile-only Month tab */}
-          <div
-            className={`${
-              mobileView === "month" ? "flex" : "hidden"
-            } min-h-0 flex-col overflow-y-auto md:hidden`}
+        {showScheduleChrome && (
+          <div className="flex flex-col gap-4 md:grid md:min-h-0 md:flex-1 md:grid-rows-1 md:grid-cols-12 md:gap-5 lg:gap-6">
+            {/* Detail: scalable time-grid (or list) */}
+            <div
+              className={`${mobileView === "detail" ? "flex" : "hidden"
+                } min-h-0 flex-col md:flex md:col-span-7 lg:col-span-8 xl:col-span-9`}
+            >
+              {listMode ? (
+                detailSpan === "week" ? (
+                  <CalendarAgendaPanel groups={weekGroups} />
+                ) : (
+                  <div className="app-card flex min-h-0 flex-col overflow-hidden p-0 md:flex-1">
+                    <div className="min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain">
+                      <CalendarDayAgendaPanel group={dayGroup} nowMs={nowMs} />
+                    </div>
+                  </div>
+                )
+              ) : (
+                <CalendarTimeGrid
+                  events={filteredEvents}
+                  days={detailDays}
+                  today={today}
+                  selectedDay={selectedDay}
+                  onFocusDay={focusDayDetail}
+                />
+              )}
+            </div>
+
+            {/* Mobile-only Month tab */}
+            <div
+              className={`${mobileView === "month" ? "flex" : "hidden"
+                } min-h-0 flex-col md:hidden`}
+            >
+              {miniMonth}
+            </div>
+
+            {/* Rail (md+): mini-month navigator on top, then Now / Next / Calendars */}
+            <div className="hidden min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain px-1 py-1 md:flex md:col-span-5 lg:col-span-4 xl:col-span-3">
+              {miniMonth}
+              {rail}
+            </div>
+          </div>
+        )}
+
+        <p className="shrink-0 text-center text-xs text-slate-400 md:hidden">
+          <Link
+            href="/settings/integrations"
+            className="font-semibold text-blue-600 hover:text-blue-700"
           >
-            {miniMonth}
-          </div>
-
-          {/* Rail (md+): mini-month navigator on top, then Now / Next / Calendars */}
-          <div className="hidden min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain px-1 py-1 md:flex md:col-span-5 lg:col-span-4 xl:col-span-3">
-            {miniMonth}
-            {rail}
-          </div>
-        </div>
-      )}
-
-      <p className="shrink-0 text-center text-xs text-slate-400 md:hidden">
-        <Link
-          href="/settings/integrations"
-          className="font-semibold text-blue-600 hover:text-blue-700"
-        >
-          Integration settings
-        </Link>
-      </p>
+            Integration settings
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

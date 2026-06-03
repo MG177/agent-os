@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { Apple, ChevronRight, Maximize2, Pencil, Sparkles, X } from "lucide-react";
 import AssistantChat from "@/components/assistant/AssistantChat";
+import AssistantSessionList from "@/components/assistant/AssistantSessionList";
+import AssistantSessionToolbar from "@/components/assistant/AssistantSessionToolbar";
+import { useAssistantSession } from "@/components/assistant/AssistantSessionContext";
 import QuickCapturePanel from "@/components/quick/QuickCapturePanel";
 import QuickMealPanel from "@/components/quick/QuickMealPanel";
 import { useQuickPanel, type QuickPanelId } from "@/components/QuickPanelContext";
@@ -31,9 +34,8 @@ function Rail({
 }) {
   return (
     <div
-      className={`relative z-40 hidden w-14 shrink-0 flex-col items-center justify-center gap-2 border-l bg-white md:flex ${
-        active ? "border-slate-100" : "border-slate-200"
-      }`}
+      className={`relative z-40 hidden w-14 shrink-0 flex-col items-center justify-center gap-2 border-l bg-white md:flex ${active ? "border-slate-100" : "border-slate-200"
+        }`}
       role="tablist"
       aria-label="Quick actions"
     >
@@ -48,11 +50,10 @@ function Rail({
             onClick={() => onSelect(id)}
             title={label}
             aria-label={label}
-            className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-colors ${
-              isActive
+            className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-colors ${isActive
                 ? "bg-blue-600 text-white shadow-sm shadow-blue-200"
                 : "text-slate-400 hover:bg-slate-50 hover:text-slate-700"
-            }`}
+              }`}
           >
             <Icon strokeWidth={1.8} className="h-5 w-5" aria-hidden />
           </button>
@@ -62,14 +63,57 @@ function Rail({
   );
 }
 
+function AssistantPanelChrome({ children }: { children: ReactNode }) {
+  const { historyOpen, setHistoryOpen } = useAssistantSession();
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      {historyOpen && (
+        <AssistantSessionList
+          variant="sheet"
+          onClose={() => setHistoryOpen(false)}
+        />
+      )}
+      <div className="flex min-h-0 flex-1 flex-col px-3 py-3">{children}</div>
+    </div>
+  );
+}
+
 /** Shared panel body — the active tool plus its scroll container. */
 function PanelBody({ shown }: { shown: QuickPanelId }) {
+  if (shown === "assistant") {
+    return (
+      <AssistantPanelChrome>
+        <AssistantChat />
+      </AssistantPanelChrome>
+    );
+  }
   return (
     <div className="flex min-h-0 flex-1 flex-col px-3 py-3">
       {shown === "capture" && <QuickCapturePanel />}
       {shown === "meal" && <QuickMealPanel />}
-      {shown === "assistant" && <AssistantChat />}
     </div>
+  );
+}
+
+function AssistantPanelHeaderActions({ onClose }: { onClose?: () => void }) {
+  const { activeSessionId } = useAssistantSession();
+  const fullscreenHref = activeSessionId
+    ? `/assistant/${activeSessionId}`
+    : "/assistant";
+
+  return (
+    <>
+      <AssistantSessionToolbar />
+      <Link
+        href={fullscreenHref}
+        title="Open full screen"
+        aria-label="Open Assistant full screen"
+        onClick={onClose}
+        className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
+      >
+        <Maximize2 strokeWidth={1.8} className="h-4 w-4" aria-hidden />
+      </Link>
+    </>
   );
 }
 
@@ -108,14 +152,19 @@ export default function QuickPanel() {
                 )}
                 <p className="text-sm font-bold text-slate-900">{TITLES[shown]}</p>
               </div>
-              <button
-                type="button"
-                onClick={close}
-                aria-label="Close panel"
-                className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
-              >
-                <X strokeWidth={2} className="h-4 w-4" aria-hidden />
-              </button>
+              <div className="flex items-center gap-1">
+                {shown === "assistant" && (
+                  <AssistantPanelHeaderActions onClose={close} />
+                )}
+                <button
+                  type="button"
+                  onClick={close}
+                  aria-label="Close panel"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                >
+                  <X strokeWidth={2} className="h-4 w-4" aria-hidden />
+                </button>
+              </div>
             </header>
             <PanelBody shown={shown} />
           </div>
@@ -149,15 +198,7 @@ export default function QuickPanel() {
             </div>
             <div className="flex items-center gap-1">
               {shown === "assistant" && (
-                <Link
-                  href="/assistant"
-                  title="Open full screen"
-                  aria-label="Open Assistant full screen"
-                  onClick={close}
-                  className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
-                >
-                  <Maximize2 strokeWidth={1.8} className="h-4 w-4" aria-hidden />
-                </Link>
+                <AssistantPanelHeaderActions onClose={close} />
               )}
               <button
                 type="button"

@@ -12,6 +12,7 @@ import { TaskGroupList } from "@/components/clickup/TaskGroupList";
 import { TaskSidebar } from "@/components/clickup/TaskSidebar";
 import { useClickUpTimer } from "@/components/clickup/useClickUpTimer";
 import type { ClickUpGroupedTasks } from "@/components/clickup/types";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 type ConnState = "loading" | "not_configured" | "not_connected" | "ready";
 type View = "list" | "board";
@@ -359,9 +360,8 @@ export default function TasksScreen() {
             key={v}
             type="button"
             onClick={() => setView(v)}
-            className={`rounded-lg px-3 py-1.5 capitalize transition-colors ${
-              view === v ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
-            }`}
+            className={`rounded-lg px-3 py-1.5 capitalize transition-colors ${view === v ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
+              }`}
           >
             {v}
           </button>
@@ -383,11 +383,10 @@ export default function TasksScreen() {
       <button
         type="button"
         onClick={() => setIncludeClosed((v) => !v)}
-        className={`rounded-xl border px-2.5 py-1.5 text-xs font-medium transition-colors ${
-          includeClosed
-            ? "border-blue-200 bg-blue-50 text-blue-700"
-            : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
-        }`}
+        className={`rounded-xl border px-2.5 py-1.5 text-xs font-medium transition-colors ${includeClosed
+          ? "border-blue-200 bg-blue-50 text-blue-700"
+          : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+          }`}
       >
         Done
       </button>
@@ -421,10 +420,14 @@ export default function TasksScreen() {
   );
 
   return (
-    <div className="app-screen app-screen-home flex h-full min-h-0! flex-1 flex-col gap-4 overflow-hidden">
-      <Header teamName={teamName} counts={data?.counts ?? null} controls={controls} />
+    <div className="app-screen app-screen-home flex min-h-0 flex-1 flex-col">
+      <PageHeader>
+        <div className="app-screen-inset pb-4 pt-5 md:pb-5 md:pt-6">
+          <Header teamName={teamName} counts={data?.counts ?? null} controls={controls} />
+        </div>
+      </PageHeader>
 
-      <div className="flex min-h-0 flex-1 gap-4 md:gap-5">
+      <div className="app-screen-inset flex gap-4 pb-4 md:gap-5 md:pb-8">
         <TaskSidebar
           due={due}
           onDueChange={setDue}
@@ -446,11 +449,7 @@ export default function TasksScreen() {
             creating={creating}
             onCreate={handleCreate}
           />
-          <div
-            className={`min-h-0 flex-1 ${
-              view === "board" ? "overflow-hidden" : "overflow-y-auto"
-            }`}
-          >
+          <div className={view === "board" ? "min-h-96 overflow-hidden" : undefined}>
             {!data ? (
               <p className="py-16 text-center text-sm text-slate-400">Loading tasks…</p>
             ) : !hasTasks ? (
@@ -531,12 +530,12 @@ function Header({
     : "Your ClickUp tasks";
 
   return (
-    <header className="flex shrink-0 flex-col gap-3 border-b border-slate-100 pb-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <div>
         <h1 className="text-xl font-bold text-slate-900 md:text-2xl">Tasks</h1>
         <p className="mt-0.5 text-xs text-slate-400 md:text-sm">{subtitle}</p>
       </div>
       {controls}
-    </header>
+    </div>
   );
 }

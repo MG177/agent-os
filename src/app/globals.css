@@ -23,9 +23,20 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Primary scroll on mobile lives on `main.app-main-scroll` (see AppShell). */
+.app-main-scroll {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 48rem) {
+  .app-main-scroll {
+    padding-bottom: 0;
+  }
+}
+
 /* Wireframe + design-system primitives */
 .app-screen {
-  @apply mx-auto flex min-h-[calc(100dvh-4rem)] w-full max-w-2xl flex-col gap-4 px-4 pb-4 pt-5;
+  @apply mx-auto flex min-h-0 w-full max-w-2xl flex-col gap-4 px-4 pb-4 pt-5;
   @apply md:min-h-0 md:max-w-none md:flex-1 md:gap-6 md:px-8 md:pb-8 md:pt-6;
   @apply lg:px-10;
 }
@@ -36,8 +47,22 @@ body {
   @apply md:max-w-6xl md:mx-auto lg:max-w-7xl 2xl:max-w-[1600px];
 }
 
+/* Dashboard shells fill the main column; max-width lives on `.app-screen-inset`. */
 .app-screen-home {
-  @apply md:max-w-6xl md:mx-auto lg:max-w-7xl 2xl:max-w-[1600px];
+  @apply w-full md:max-w-none md:mx-0;
+}
+
+.app-screen.app-screen-home {
+  @apply gap-0 px-0 pb-0 pt-0 md:gap-0 md:px-0 md:pb-0 md:pt-0;
+}
+
+.app-screen-inset {
+  @apply mx-auto w-full max-w-6xl px-4 lg:max-w-7xl lg:px-10 2xl:max-w-[1600px] md:px-8;
+}
+
+/* Sticky title bar — scroll happens on `main`, not inside this block. */
+.app-page-header {
+  @apply relative sticky top-0 shrink-0 border-b border-slate-100 bg-slate-50;
 }
 
 /* Comfortable reading / single-column form width — caps on desktop so a
@@ -59,7 +84,7 @@ body {
 }
 
 .app-hero {
-  @apply rounded-3xl bg-gradient-to-br from-violet-600 to-blue-600 p-5 text-white shadow-lg shadow-blue-200;
+  @apply rounded-3xl bg-indigo-600 p-5 text-white shadow-lg shadow-indigo-200;
 }
 
 .app-btn-primary {

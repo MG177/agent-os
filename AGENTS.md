@@ -51,7 +51,7 @@ cp .env.example .env.local   # VAULT_PATH=/Users/mg/Obsidian
 npm install && npm run dev   # http://localhost:3003
 ```
 
-Routes: `/` Home · `/assistant` (Cursor SDK + MCP tools) · `/capture` · `/calendar` · `/settings/integrations` · `/inbox` · `/browse/...` (read-only) · `/nutrition/*` · `POST /api/inbox` · `POST /api/chat` · `POST /api/webhooks/whatsapp` (WAHA, HMAC) → `Inbox/` only · `GET /api/calendar/events` (Google read-only). Assistant: **`CURSOR_API_KEY`**, model **`composer-2.5`** (`CURSOR_ASSISTANT_MODEL`). Nutrition: **MongoDB required** (`MONGODB_URI`); calendar tokens live under `AGENT_OS_DATA/integrations/` (not Mongo). See vault runbook `runbook-google-calendar-connect`.
+Routes: `/` Home · `/assistant` · `/assistant/[sessionId]` (Cursor SDK + MCP tools, Mongo session history) · `/capture` · `/calendar` · `/settings/integrations` · `/inbox` · `/browse/...` (read-only) · `/nutrition/*` · `POST /api/inbox` · `POST /api/chat` · `/api/assistant/sessions` · `POST /api/webhooks/whatsapp` (WAHA, HMAC) → `Inbox/` only · `GET /api/calendar/events` (Google read-only). Assistant: **`CURSOR_API_KEY`**, model **`composer-2.5`** (`CURSOR_ASSISTANT_MODEL`). Nutrition + assistant sessions: **MongoDB required** (`MONGODB_URI`); calendar tokens live under `AGENT_OS_DATA/integrations/` (not Mongo). See vault runbook `runbook-google-calendar-connect`.
 
 ## Doc sync
 

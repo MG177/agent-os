@@ -69,6 +69,8 @@ Model default: `composer-2.5` (`CURSOR_ASSISTANT_MODEL`). Local Cursor agent + M
 
 Type `/` in the assistant input for autocomplete. Optional `command` field on `POST /api/chat`.
 
+Assistant chats persist in MongoDB (`assistant_sessions`, `assistant_messages`). Use **New chat** in the UI to start a fresh session; history lists prior threads. Images: max 5 per session, 500KB each.
+
 ### APIs
 
 | Route | Purpose |
@@ -78,7 +80,9 @@ Type `/` in the assistant input for autocomplete. Optional `command` field on `P
 | `/api/home` | Home stats + recent activity |
 | `/api/activity` | Full activity feed |
 | `/api/nutrition/*` | Nutrition REST |
-| `/api/chat` | Assistant chat (Cursor SDK + MCP tools) |
+| `GET/POST /api/assistant/sessions` | List / create assistant chat sessions |
+| `GET/PATCH/DELETE /api/assistant/sessions/[id]` | Load messages, rename, delete session |
+| `POST /api/chat` | Assistant turn: `{ sessionId, content, image?, command? }` (server loads history) |
 | `GET /api/integrations/google-calendar/status` | Calendar connection status |
 | `GET /api/integrations/google-calendar/auth` | Start Google OAuth |
 | `GET /api/integrations/google-calendar/callback` | OAuth callback |

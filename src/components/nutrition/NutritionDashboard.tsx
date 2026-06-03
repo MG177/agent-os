@@ -147,8 +147,8 @@ function NutritionDashboardInner() {
   }
 
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
-      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-white px-4 py-3 md:px-8 lg:px-10">
+    <div className="flex min-h-0 w-full flex-1 flex-col md:overflow-hidden">
+      <header className="app-page-header flex shrink-0 flex-wrap items-center justify-between gap-3 bg-white/80 px-4 py-3 md:px-8 lg:px-10">
         <div className="flex items-center gap-3 md:gap-4">
           <h1 className="text-xl font-bold text-slate-900 md:text-2xl md:tracking-tight">
             Nutrition
@@ -212,7 +212,7 @@ function NutritionDashboardInner() {
           Loading…
         </div>
       ) : (
-        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col overflow-y-auto px-4 py-4 md:overflow-hidden md:px-0 md:py-0 lg:max-w-7xl 2xl:max-w-[1600px]">
+        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 py-4 md:overflow-hidden md:px-0 md:py-0 lg:max-w-7xl 2xl:max-w-[1600px]">
           {/* Mobile: summary at top, then tabs + panels */}
           <div className="flex flex-col gap-4 md:hidden">
             <NutritionSummary
@@ -257,7 +257,7 @@ function NutritionDashboardInner() {
                 deleting={deleting}
                 onDelete={handleDelete}
                 onEdit={handleEdit}
-                onLogMeal={() => {}}
+                onLogMeal={() => { }}
               />
             </aside>
           </div>

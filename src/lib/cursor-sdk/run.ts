@@ -29,6 +29,10 @@ export interface SendAndWaitFailure {
 
 export type SendAndWaitOutcome = SendAndWaitSuccess | SendAndWaitFailure;
 
+/**
+ * Collect assistant prose from streamed SDK messages.
+ * Chunks are usually cumulative snapshots or token deltas — not separate paragraphs.
+ */
 function extractAssistantText(messages: SDKMessage[]): string {
   const parts: string[] = [];
   for (const msg of messages) {
@@ -39,7 +43,20 @@ function extractAssistantText(messages: SDKMessage[]): string {
       }
     }
   }
-  return parts.join("\n\n").trim();
+  if (parts.length === 0) return "";
+  if (parts.length === 1) return parts[0]!.trim();
+
+  const last = parts[parts.length - 1]!;
+  const first = parts[0]!.trim();
+  // Cumulative stream: final chunk contains the full reply.
+  if (
+    last.startsWith(first) ||
+    last.length >= parts.reduce((sum, p) => sum + p.length, 0) * 0.6
+  ) {
+    return last.trim();
+  }
+  // Token deltas: stitch in order (never insert blank lines between chunks).
+  return parts.join("").trim();
 }
 
 /**
@@ -80,8 +97,9 @@ export async function sendAndCollectText(
     }
 
     const fromStream = extractAssistantText(streamed);
-    const text =
-      fromStream || (typeof result.result === "string" ? result.result : "");
+    const fromResult =
+      typeof result.result === "string" ? result.result.trim() : "";
+    const text = fromResult || fromStream;
 
     return { ok: true, run, result, text };
   } catch (err) {

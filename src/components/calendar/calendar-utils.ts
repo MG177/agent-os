@@ -137,18 +137,6 @@ export function countEventsToday(events: CalendarEventSummary[]): number {
   return events.filter((e) => dayKey(e.start) === today).length;
 }
 
-function eventStartMs(event: CalendarEventSummary): number {
-  return new Date(
-    event.start.includes("T") ? event.start : `${event.start}T00:00:00`,
-  ).getTime();
-}
-
-function eventEndMs(event: CalendarEventSummary): number {
-  return new Date(
-    event.end.includes("T") ? event.end : `${event.end}T23:59:59`,
-  ).getTime();
-}
-
 export function findNextEvent(
   events: CalendarEventSummary[],
 ): CalendarEventSummary | null {
@@ -220,6 +208,107 @@ export function getTimedEventTemporalState(
 
 export const HOME_SCHEDULE_WINDOW_AHEAD = 5;
 export const HOME_SCHEDULE_CONTEXT_PAST = 1;
+
+/** Home schedule Gantt span (rolling, centered on now). */
+export const HOME_24H_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+export function minutesFromTimestamp(now: number): number {
+  const d = new Date(now);
+  return d.getHours() * 60 + d.getMinutes();
+}
+
+export function formatMinutesClock(totalMinutes: number): string {
+  const h = Math.floor(totalMinutes / 60);
+  const min = totalMinutes % 60;
+  return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+}
+
+export type Home24HourWindow = {
+  winStartMs: number;
+  winEndMs: number;
+  spanMs: number;
+  nowMs: number;
+};
+
+/** Rolling 24h timeline: 12h before now through 12h after (crosses calendar days). */
+export function buildHome24HourWindow(now: number): Home24HourWindow {
+  const half = HOME_24H_WINDOW_MS / 2;
+  return {
+    winStartMs: now - half,
+    winEndMs: now + half,
+    spanMs: HOME_24H_WINDOW_MS,
+    nowMs: now,
+  };
+}
+
+export function eventStartMs(event: CalendarEventSummary): number {
+  return new Date(
+    event.start.includes("T") ? event.start : `${event.start}T00:00:00`,
+  ).getTime();
+}
+
+export function eventEndMs(event: CalendarEventSummary): number {
+  return new Date(
+    event.end.includes("T") ? event.end : `${event.end}T23:59:59`,
+  ).getTime();
+}
+
+export function eventIntersectsWindow(
+  event: CalendarEventSummary,
+  winStartMs: number,
+  winEndMs: number,
+): boolean {
+  return eventEndMs(event) > winStartMs && eventStartMs(event) < winEndMs;
+}
+
+export function formatHomeScheduleWindowLabel(
+  winStartMs: number,
+  winEndMs: number,
+): string {
+  const timeOpts: Intl.DateTimeFormatOptions = {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  };
+  const start = new Date(winStartMs);
+  const end = new Date(winEndMs);
+  const startDay = start.toLocaleDateString("en-CA");
+  const endDay = end.toLocaleDateString("en-CA");
+  const startTime = start.toLocaleTimeString("en-GB", timeOpts);
+  const endTime = end.toLocaleTimeString("en-GB", timeOpts);
+
+  if (startDay === endDay) {
+    const day = start.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+    return `${day} · ${startTime} – ${endTime}`;
+  }
+
+  const fmt: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  };
+  return `${start.toLocaleString("en-US", fmt)} – ${end.toLocaleString("en-US", fmt)}`;
+}
+
+export function formatTimelineTick(
+  ms: number,
+  anchorDayKey: string,
+): string {
+  const d = new Date(ms);
+  const time = d.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  if (d.toLocaleDateString("en-CA") === anchorDayKey) return time;
+  return `${d.toLocaleDateString("en-US", { weekday: "short" })} ${time}`;
+}
 
 export type HomeScheduleWindow = {
   allDay: CalendarEventSummary[];

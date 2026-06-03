@@ -82,7 +82,7 @@ export function TodayTasksCard() {
   if (state.kind === "hidden") return null;
 
   return (
-    <section className="space-y-2">
+    <section className="flex h-full min-h-0 flex-col space-y-2">
       <div className="flex items-center justify-between gap-2">
         <p className="app-section-label">Tasks due today</p>
         <Link
@@ -93,7 +93,7 @@ export function TodayTasksCard() {
         </Link>
       </div>
 
-      <div className="app-card flex max-h-[min(40vh,18rem)] min-h-[5.5rem] flex-col overflow-hidden p-0">
+      <div className="app-card flex max-h-[min(40vh,18rem)] min-h-[5.5rem] flex-1 flex-col overflow-hidden p-0 lg:max-h-none">
         {state.kind === "loading" ? (
           <TasksLoadingSkeleton />
         ) : state.kind === "not_connected" ? (
@@ -162,11 +162,10 @@ export function TodayTasksCard() {
                     onClick={() => (tracking ? timer.stop() : timer.start(task.id))}
                     disabled={timer.busy}
                     aria-label={tracking ? "Stop timer" : "Start timer"}
-                    className={`mt-0.5 flex shrink-0 items-center gap-1 rounded-lg px-1.5 py-1 text-[10px] font-semibold tabular-nums transition-colors disabled:opacity-50 ${
-                      tracking
+                    className={`mt-0.5 flex shrink-0 items-center gap-1 rounded-lg px-1.5 py-1 text-[10px] font-semibold tabular-nums transition-colors disabled:opacity-50 ${tracking
                         ? "bg-emerald-50 text-emerald-700"
                         : "text-slate-300 opacity-0 hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100"
-                    }`}
+                      }`}
                   >
                     {tracking ? (
                       <>

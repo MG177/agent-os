@@ -154,9 +154,8 @@ function DayHeader({
       type="button"
       onClick={onClick}
       aria-label={`Open ${day}`}
-      className={`flex flex-col items-center gap-0.5 border-l border-slate-50 py-1.5 transition-colors first:border-l-0 hover:bg-slate-50 ${
-        selected ? "bg-blue-50" : ""
-      }`}
+      className={`flex flex-col items-center gap-0.5 border-l border-slate-50 py-1.5 transition-colors first:border-l-0 hover:bg-slate-50 ${selected ? "bg-blue-50" : ""
+        }`}
     >
       <span className="text-[10px] font-semibold uppercase text-slate-400">
         {date.toLocaleDateString("en-US", { weekday: "short" })}
@@ -267,7 +266,7 @@ export function CalendarTimeGrid({
   };
 
   return (
-    <div className="app-card flex min-h-0 flex-1 flex-col overflow-hidden p-0">
+    <div className="app-card flex min-h-0 flex-col overflow-hidden p-0 md:flex-1">
       <div className="flex shrink-0 items-center justify-end gap-1 border-b border-slate-100 px-2.5 py-1.5">
         <button
           type="button"
@@ -352,7 +351,7 @@ export function CalendarTimeGrid({
         </div>
       )}
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div className="min-h-0 md:flex-1 md:overflow-y-auto md:overscroll-contain">
         <div className="flex" style={{ minHeight: `max(${gridHeight}px, 100%)` }}>
           <div
             className="sticky left-0 z-10 w-12 shrink-0 border-r border-slate-100 bg-slate-50/80"
