@@ -85,7 +85,8 @@ export default function AppNav() {
         href="/assistant"
         aria-label="Open Assistant"
         aria-current={assistantActive ? "page" : undefined}
-        className={`fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-lg shadow-blue-300/50 transition-transform active:scale-95 md:hidden ${
+        style={{ bottom: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}
+        className={`fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-lg shadow-blue-300/50 transition-transform active:scale-95 md:hidden ${
           panel ? "hidden" : ""
         } ${assistantActive ? "ring-2 ring-blue-300 ring-offset-2" : ""}`}
       >
@@ -94,6 +95,7 @@ export default function AppNav() {
 
       <nav
         className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/90 backdrop-blur-md md:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Main"
       >
         <div className="mx-auto flex h-16 max-w-2xl items-center justify-around px-2">

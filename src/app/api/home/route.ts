@@ -21,13 +21,20 @@ export async function GET() {
 
   const totals = calculateTotals(entries);
 
-  return Response.json({
-    status: "online",
-    capturesToday: countCapturesToday(),
-    mealsToday: totals.meal_count,
-    totals,
-    goals,
-    recentActivity,
-    inboxCount: listInbox().length,
-  });
+  // Short private cache — stale-while-revalidate lets the browser serve
+  // the last response instantly on revisit while SWR revalidates in background.
+  return Response.json(
+    {
+      status: "online",
+      capturesToday: countCapturesToday(),
+      mealsToday: totals.meal_count,
+      totals,
+      goals,
+      recentActivity,
+      inboxCount: listInbox().length,
+    },
+    {
+      headers: { "Cache-Control": "private, max-age=20, stale-while-revalidate=60" },
+    },
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Circle, CircleCheckBig, Loader2, Play, Square } from "lucide-react";
 import {
@@ -9,13 +9,9 @@ import {
   formatElapsed,
 } from "@/components/clickup/clickup-format";
 import { useClickUpTimer } from "@/components/clickup/useClickUpTimer";
-import type { ClickUpTask } from "@/components/clickup/types";
-
-type State =
-  | { kind: "loading" }
-  | { kind: "hidden" } // not configured — stay out of the way
-  | { kind: "not_connected" }
-  | { kind: "ready"; tasks: ClickUpTask[] };
+import { useResource, mutate } from "@/lib/data/useResource";
+import { KEYS } from "@/lib/data/keys";
+import type { ClickUpGroupedTasks, ClickUpTask } from "@/components/clickup/types";
 
 const MAX_ROWS = 6;
 
@@ -36,35 +32,21 @@ function TasksLoadingSkeleton() {
 }
 
 export function TodayTasksCard() {
-  const [state, setState] = useState<State>({ kind: "loading" });
+  const { data, error, isLoading } = useResource<ClickUpGroupedTasks>(
+    KEYS.tasksDueAll,
+  );
   const [completingId, setCompletingId] = useState<string | null>(null);
   const timer = useClickUpTimer();
 
-  const load = useCallback(async () => {
-    const res = await fetch("/api/clickup/tasks?due=all");
-    if (res.status === 503) {
-      setState({ kind: "hidden" });
-      return;
-    }
-    if (res.status === 401) {
-      setState({ kind: "not_connected" });
-      return;
-    }
-    if (!res.ok) {
-      setState({ kind: "hidden" });
-      return;
-    }
-    const data = await res.json();
-    const tasks = (data.flat as ClickUpTask[]).filter((t) => {
-      const tone = formatDue(t.dueDate)?.tone;
-      return tone === "overdue" || tone === "today";
-    });
-    setState({ kind: "ready", tasks });
-  }, []);
+  // 503 = ClickUp not configured (Vercel without integration) — stay invisible.
+  if (error?.status === 503) return null;
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  const tasks = data
+    ? (data.flat ?? []).filter((t: ClickUpTask) => {
+        const tone = formatDue(t.dueDate)?.tone;
+        return tone === "overdue" || tone === "today";
+      })
+    : null;
 
   async function complete(task: ClickUpTask) {
     setCompletingId(task.id);
@@ -73,13 +55,9 @@ export function TodayTasksCard() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "complete", listId: task.listId }),
     });
-    await load();
+    await mutate(KEYS.tasksDueAll);
     setCompletingId(null);
   }
-
-  // Not configured (e.g. Vercel without ClickUp) — stay out of the way.
-  // Loading still renders a skeleton so the grid slot holds its place.
-  if (state.kind === "hidden") return null;
 
   return (
     <section className="flex h-full min-h-0 flex-col space-y-2">
@@ -94,22 +72,23 @@ export function TodayTasksCard() {
       </div>
 
       <div className="app-card flex max-h-[min(40vh,18rem)] min-h-[5.5rem] flex-1 flex-col overflow-hidden p-0 lg:max-h-none">
-        {state.kind === "loading" ? (
+        {/* Show skeleton only on true cold start (no snapshot, no data) */}
+        {isLoading && !data ? (
           <TasksLoadingSkeleton />
-        ) : state.kind === "not_connected" ? (
+        ) : error?.status === 401 ? (
           <Link
             href="/settings/integrations"
             className="flex flex-1 items-center justify-center px-4 py-6 text-center text-xs font-medium text-blue-600 hover:text-blue-700"
           >
             Connect ClickUp to see your tasks →
           </Link>
-        ) : state.tasks.length === 0 ? (
+        ) : !tasks || tasks.length === 0 ? (
           <p className="px-4 py-6 text-center text-xs text-slate-400">
             Nothing due today 🎉
           </p>
         ) : (
           <ul className="min-h-0 flex-1 divide-y divide-slate-50 overflow-y-auto">
-            {state.tasks.slice(0, MAX_ROWS).map((task) => {
+            {tasks.slice(0, MAX_ROWS).map((task: ClickUpTask) => {
               const due = formatDue(task.dueDate);
               const tracking = timer.entry?.taskId === task.id;
               return (
@@ -139,10 +118,7 @@ export function TodayTasksCard() {
                       </>
                     )}
                   </button>
-                  <Link
-                    href="/tasks"
-                    className="min-w-0 flex-1"
-                  >
+                  <Link href="/tasks" className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-slate-800">
                       {task.name}
                     </p>
@@ -151,7 +127,9 @@ export function TodayTasksCard() {
                         {task.listName}
                       </span>
                       {due && (
-                        <span className={`font-medium ${DUE_TONE_CLASS[due.tone]}`}>
+                        <span
+                          className={`font-medium ${DUE_TONE_CLASS[due.tone]}`}
+                        >
                           {due.label}
                         </span>
                       )}
@@ -159,13 +137,16 @@ export function TodayTasksCard() {
                   </Link>
                   <button
                     type="button"
-                    onClick={() => (tracking ? timer.stop() : timer.start(task.id))}
+                    onClick={() =>
+                      tracking ? timer.stop() : timer.start(task.id)
+                    }
                     disabled={timer.busy}
                     aria-label={tracking ? "Stop timer" : "Start timer"}
-                    className={`mt-0.5 flex shrink-0 items-center gap-1 rounded-lg px-1.5 py-1 text-[10px] font-semibold tabular-nums transition-colors disabled:opacity-50 ${tracking
+                    className={`mt-0.5 flex shrink-0 items-center gap-1 rounded-lg px-1.5 py-1 text-[10px] font-semibold tabular-nums transition-colors disabled:opacity-50 ${
+                      tracking
                         ? "bg-emerald-50 text-emerald-700"
                         : "text-slate-300 opacity-0 hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100"
-                      }`}
+                    }`}
                   >
                     {tracking ? (
                       <>

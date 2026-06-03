@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useScheduleClock } from "@/components/calendar/useScheduleClock";
 import {
   CalendarConnectionEmpty,
@@ -16,85 +15,71 @@ import {
   sortEventsWithinDay,
 } from "@/components/calendar/calendar-utils";
 import { useHiddenCalendars } from "@/components/calendar/useHiddenCalendars";
+import { useResource } from "@/lib/data/useResource";
+import { KEYS } from "@/lib/data/keys";
 import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
+
+type CalendarStatus = { configured: boolean; connected: boolean };
+type EventsResponse = { events: CalendarEventSummary[] };
 
 /** Tall schedule card — no max-height cap; inner chart clips only horizontally. */
 const HOME_SCHEDULE_CARD_CLASS = "min-h-[19rem] lg:min-h-[23rem]";
 
-type ScheduleState =
-  | { kind: "loading" }
-  | { kind: "not_configured" }
-  | { kind: "not_connected" }
-  | { kind: "empty" }
-  | { kind: "events"; events: CalendarEventSummary[] };
+/** Fetches the home 24h window using the current time for the URL, but uses a
+ *  stable synthetic key so SWR/localStorage treats it as the same resource. */
+async function calendarEventsFetcher(_key: string): Promise<EventsResponse> {
+  const clientTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const t0 = Date.now();
+  const half = HOME_24H_WINDOW_MS / 2;
+  const buffer = 60 * 60 * 1000;
+  const params = new URLSearchParams({
+    from: new Date(t0 - half - buffer).toISOString(),
+    to: new Date(t0 + half + buffer).toISOString(),
+  });
+  if (clientTz) params.set("tz", clientTz);
+
+  const res = await fetch(`/api/calendar/events?${params.toString()}`);
+  if (!res.ok) {
+    const err = Object.assign(new Error(res.statusText), { status: res.status });
+    throw err;
+  }
+  return res.json();
+}
 
 export function TodayScheduleCard() {
-  const [state, setState] = useState<ScheduleState>({ kind: "loading" });
+  const {
+    data: statusData,
+    error: statusError,
+    isLoading: statusLoading,
+  } = useResource<CalendarStatus>(KEYS.calendarStatus);
+
   const now = useScheduleClock();
   const { hiddenCalendarIds } = useHiddenCalendars();
 
-  useEffect(() => {
-    let cancelled = false;
+  // Only fetch events when we know the calendar is connected.
+  const eventsKey = statusData?.connected ? KEYS.calendarHomeEvents : null;
+  const {
+    data: eventsData,
+    error: eventsError,
+    isLoading: eventsLoading,
+  } = useResource<EventsResponse>(
+    eventsKey,
+    eventsKey ? calendarEventsFetcher : null,
+  );
 
-    async function load() {
-      const statusRes = await fetch("/api/integrations/google-calendar/status");
-      if (!statusRes.ok) {
-        if (!cancelled) setState({ kind: "not_configured" });
-        return;
-      }
-      const status = await statusRes.json();
-      if (!status.configured) {
-        if (!cancelled) setState({ kind: "not_configured" });
-        return;
-      }
-      if (!status.connected) {
-        if (!cancelled) setState({ kind: "not_connected" });
-        return;
-      }
-
-      const clientTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const t0 = Date.now();
-      const half = HOME_24H_WINDOW_MS / 2;
-      const buffer = 60 * 60 * 1000;
-      const eventsParams = new URLSearchParams({
-        from: new Date(t0 - half - buffer).toISOString(),
-        to: new Date(t0 + half + buffer).toISOString(),
-      });
-      if (clientTz) eventsParams.set("tz", clientTz);
-      const eventsRes = await fetch(
-        `/api/calendar/events?${eventsParams.toString()}`,
-      );
-      if (eventsRes.status === 401) {
-        if (!cancelled) setState({ kind: "not_connected" });
-        return;
-      }
-      if (!eventsRes.ok) {
-        if (!cancelled) setState({ kind: "empty" });
-        return;
-      }
-      const data = await eventsRes.json();
-      const events = sortEventsWithinDay(
-        (data.events ?? []) as CalendarEventSummary[],
-      );
-      if (!cancelled) {
-        setState(events.length ? { kind: "events", events } : { kind: "empty" });
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (state.kind === "not_configured") {
+  // Calendar not configured (no OAuth creds on Vercel, etc.) — stay invisible.
+  if (statusError || statusData?.configured === false) {
     return null;
   }
 
-  const visibleEvents =
-    state.kind === "events"
-      ? filterEventsByVisibleCalendars(state.events, hiddenCalendarIds)
-      : [];
+  const isLoading = statusLoading || (statusData?.connected && eventsLoading);
+
+  const rawEvents =
+    eventsData?.events ? sortEventsWithinDay(eventsData.events) : [];
+  const visibleEvents = filterEventsByVisibleCalendars(
+    rawEvents,
+    hiddenCalendarIds,
+  );
   const window = buildHome24HourWindow(now);
   const hasVisibleEvents = visibleEvents.some((e) =>
     eventIntersectsWindow(e, window.winStartMs, window.winEndMs),
@@ -112,27 +97,31 @@ export function TodayScheduleCard() {
         </Link>
       </div>
 
-      <div
-        className={`app-card flex flex-col p-0 ${HOME_SCHEDULE_CARD_CLASS}`}
-      >
-        {state.kind === "loading" && (
+      <div className={`app-card flex flex-col p-0 ${HOME_SCHEDULE_CARD_CLASS}`}>
+        {isLoading && !eventsData && (
           <div className="p-3">
             <CalendarLoadingSkeleton rows={3} />
           </div>
         )}
 
-        {state.kind === "not_connected" && (
+        {!isLoading && statusData?.connected === false && (
           <CalendarConnectionEmpty variant="compact" />
         )}
 
-        {(state.kind === "empty" ||
-          (state.kind === "events" && !hasVisibleEvents)) && (
+        {eventsError?.status === 401 && (
+          <CalendarConnectionEmpty variant="compact" />
+        )}
+
+        {!isLoading &&
+          !eventsError &&
+          statusData?.connected &&
+          (!hasVisibleEvents) && (
             <p className="px-4 py-8 text-center text-xs text-slate-400">
               No events in the next 24 hours
             </p>
           )}
 
-        {state.kind === "events" && hasVisibleEvents && (
+        {hasVisibleEvents && (
           <HomeScheduleNowWindow events={visibleEvents} now={now} />
         )}
       </div>

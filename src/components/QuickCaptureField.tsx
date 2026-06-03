@@ -138,7 +138,7 @@ export function QuickCaptureField({
             onKeyDown={onKeyDown}
             placeholder="What's on your mind?"
             rows={tall ? 5 : 2}
-            className={`w-full min-w-0 flex-1 resize-none overflow-y-auto rounded-xl bg-slate-50 px-3 py-2.5 text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
+            className={`w-full min-w-0 flex-1 resize-none overflow-y-auto rounded-xl bg-slate-50 px-3 py-2.5 text-base md:text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
               tall ? "min-h-[7.5rem]" : "min-h-[3.25rem]"
             }`}
           />

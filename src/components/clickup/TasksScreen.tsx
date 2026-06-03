@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { MousePointerClick, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { PRIORITY_OPTIONS } from "@/components/clickup/clickup-format";
 import { QuickAddTask } from "@/components/clickup/QuickAddTask";
 import { RunningTimerChip } from "@/components/clickup/RunningTimerChip";
 import { TaskBoard } from "@/components/clickup/TaskBoard";
-import { TaskDetailPanel } from "@/components/clickup/TaskDetailPanel";
+import { TaskDetailModal } from "@/components/clickup/TaskDetailModal";
 import { TaskGroupList } from "@/components/clickup/TaskGroupList";
 import { TaskSidebar } from "@/components/clickup/TaskSidebar";
 import { useClickUpTimer } from "@/components/clickup/useClickUpTimer";
@@ -44,18 +44,6 @@ function writeStoredTeam(teamId: string) {
   }
 }
 
-/** Tracks a min-width media query (client-only; false until mounted). */
-function useMinWidth(px: number): boolean {
-  const [match, setMatch] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia(`(min-width: ${px}px)`);
-    const update = () => setMatch(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, [px]);
-  return match;
-}
 
 export default function TasksScreen() {
   const [conn, setConn] = useState<ConnState>("loading");
@@ -76,7 +64,6 @@ export default function TasksScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const timer = useClickUpTimer();
-  const isXl = useMinWidth(1280); // tailwind `xl` — persistent detail column
 
   const loadTasks = useCallback(
     async (refresh = false) => {
@@ -242,7 +229,7 @@ export default function TasksScreen() {
   }
 
   const selectedTask = useMemo(
-    () => data?.flat.find((t) => t.id === selectedTaskId) ?? null,
+    () => (selectedTaskId ? (data?.flat.find((t) => t.id === selectedTaskId) ?? null) : null),
     [data, selectedTaskId],
   );
 
@@ -402,22 +389,6 @@ export default function TasksScreen() {
   );
 
   const hasTasks = visibleFlat.length > 0;
-  // At xl+ in list view the detail lives in a persistent inline column;
-  // otherwise it slides in as an overlay. Gate the panel mount so it renders
-  // in exactly one place (no duplicate comment/status fetches).
-  const inlineDetail = isXl && view === "list";
-
-  const detail = selectedTask && (
-    <TaskDetailPanel
-      task={selectedTask}
-      trackingThis={timer.entry?.taskId === selectedTask.id}
-      timerBusy={timer.busy}
-      onStartTimer={timer.start}
-      onStopTimer={timer.stop}
-      onClose={() => setSelectedTaskId(null)}
-      onChanged={() => loadTasks(true)}
-    />
-  );
 
   return (
     <div className="app-screen app-screen-home flex min-h-0 flex-1 flex-col">
@@ -481,37 +452,20 @@ export default function TasksScreen() {
           </div>
         </div>
 
-        {/* Persistent detail slot (xl+, list view): panel or empty state. */}
-        {view === "list" && (
-          <div className="hidden w-80 shrink-0 flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm xl:flex 2xl:w-96">
-            {inlineDetail && detail ? (
-              detail
-            ) : (
-              <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center">
-                <MousePointerClick className="h-6 w-6 text-slate-300" strokeWidth={1.8} />
-                <p className="text-sm font-medium text-slate-400">
-                  Select a task to see details
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Overlay detail: mobile/tablet always; board view at all sizes. */}
-        {selectedTask && !inlineDetail && (
-          <>
-            <button
-              type="button"
-              aria-label="Close details"
-              onClick={() => setSelectedTaskId(null)}
-              className="fixed inset-0 z-30 hidden bg-slate-900/20 sm:block"
-            />
-            <aside className="fixed inset-0 z-40 flex flex-col bg-white sm:inset-y-0 sm:left-auto sm:right-0 sm:w-full sm:max-w-md sm:border-l sm:border-slate-100 sm:shadow-2xl">
-              {detail}
-            </aside>
-          </>
-        )}
       </div>
+
+      {/* Task detail modal — all screen sizes and view modes. */}
+      {selectedTask && (
+        <TaskDetailModal
+          task={selectedTask}
+          trackingThis={timer.entry?.taskId === selectedTask.id}
+          timerBusy={timer.busy}
+          onStartTimer={timer.start}
+          onStopTimer={timer.stop}
+          onClose={() => setSelectedTaskId(null)}
+          onChanged={() => loadTasks(true)}
+        />
+      )}
     </div>
   );
 }

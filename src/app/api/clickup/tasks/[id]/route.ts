@@ -3,9 +3,29 @@ import { clearClickUpCache } from "@/lib/integrations/clickup/cache";
 import {
   ClickUpNotConnectedError,
   completeTask,
+  getTaskDetail,
   updateTask,
 } from "@/lib/integrations/clickup/client";
 import { isClickUpReady } from "@/lib/integrations/clickup/config";
+
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!isClickUpReady()) {
+    return Response.json({ error: "ClickUp not configured" }, { status: 503 });
+  }
+  const { id } = await params;
+  try {
+    const detail = await getTaskDetail(decodeURIComponent(id));
+    return Response.json(detail);
+  } catch (err) {
+    if (err instanceof ClickUpNotConnectedError) {
+      return Response.json({ error: "not_connected" }, { status: 401 });
+    }
+    return Response.json({ markdownContent: null, textContent: null });
+  }
+}
 
 export async function PATCH(
   request: NextRequest,

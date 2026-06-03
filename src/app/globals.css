@@ -17,10 +17,36 @@
   --radius-btn: 1rem;
 }
 
+/* ── Touch interaction baseline ─────────────────────────────────────────────
+   Removes the 300ms tap delay and the grey flash box on all interactive
+   controls. Uses touch-action: manipulation (not user-scalable=no) so
+   pinch-zoom still works — accessibility-safe. */
+@layer base {
+  button,
+  a,
+  [role="button"],
+  input,
+  select,
+  textarea,
+  summary,
+  label {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
 body {
   background: var(--color-background);
   color: var(--color-foreground);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Inner scroll containers must not chain-scroll the parent page.
+   Covers every overflow-y-auto list globally; override with
+   overscroll-auto on any container where chaining is intentional. */
+.overflow-y-auto {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch; /* momentum scroll on older iOS */
 }
 
 /* Primary scroll on mobile lives on `main.app-main-scroll` (see AppShell). */
@@ -96,15 +122,17 @@ body {
 }
 
 .app-chip {
-  @apply inline-flex min-h-11 shrink-0 items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700;
+  @apply inline-flex min-h-11 shrink-0 items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 active:scale-[0.98];
 }
 
 .app-chip-active {
   @apply border-blue-600 bg-blue-50 font-semibold text-blue-700;
 }
 
+/* text-base (16px) on mobile prevents iOS Safari from zooming the viewport
+   on focus. md:text-sm restores the compact size on desktop. */
 .app-input {
-  @apply w-full rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-800 transition-colors placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500;
+  @apply w-full rounded-2xl bg-slate-50 px-4 py-3 text-base md:text-sm text-slate-800 transition-colors placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
 .app-status-pill {

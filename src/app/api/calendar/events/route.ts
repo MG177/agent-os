@@ -28,7 +28,12 @@ export async function GET(request: NextRequest) {
       tz,
       skipCache: refresh,
     });
-    return Response.json({ events });
+    // Calendar events change infrequently — short private cache lets SWR serve
+    // a snapshot instantly on revisit before revalidating in the background.
+    return Response.json(
+      { events },
+      { headers: { "Cache-Control": "private, max-age=15, stale-while-revalidate=60" } },
+    );
   } catch (err) {
     if (err instanceof CalendarNotConnectedError) {
       return Response.json(

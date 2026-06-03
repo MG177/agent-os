@@ -138,6 +138,8 @@ interface RawTask {
   space?: { id?: string };
   tags?: { name?: string; tag_fg?: string; tag_bg?: string }[];
   assignees?: { id?: number; username?: string; initials?: string; color?: string }[];
+  markdown_content?: string;
+  text_content?: string;
 }
 
 function num(value: number | string | undefined, fallback = 0): number {
@@ -386,6 +388,18 @@ export async function addComment(
     { method: "POST", json: { comment_text: text, notify_all: false } },
   );
   return { id: data.id ?? "" };
+}
+
+/** Fetch the description fields for a single task (lazy load in modal). */
+export async function getTaskDetail(
+  taskId: string,
+): Promise<{ markdownContent: string | null; textContent: string | null }> {
+  const { token } = await getAuthContext();
+  const raw = await clickupRequest<RawTask>(token, `/task/${taskId}`);
+  return {
+    markdownContent: raw.markdown_content?.trim() || null,
+    textContent: raw.text_content?.trim() || null,
+  };
 }
 
 export async function startTimer(taskId: string): Promise<ClickUpTimeEntry | null> {

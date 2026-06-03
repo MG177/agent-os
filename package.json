@@ -14,9 +14,9 @@
     "@cursor/sdk": "^1.0.17",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@tailwindcss/postcss": "^4.3.0",
-    "cron-parser": "^5.5.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "cron-parser": "^5.5.0",
     "googleapis": "^172.0.0",
     "gray-matter": "^4.0.3",
     "lucide-react": "^1.17.0",
@@ -27,6 +27,7 @@
     "react-dom": "19.2.4",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
+    "swr": "^2.4.1",
     "tailwindcss": "^4.3.0",
     "zod": "^4.4.3"
   },

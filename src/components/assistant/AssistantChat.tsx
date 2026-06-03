@@ -508,7 +508,7 @@ export default function AssistantChat() {
                 : "Message or type / for commands…"
             }
             disabled={streaming || loading || !activeSessionId}
-            className="flex-1 resize-none bg-transparent py-1.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none disabled:opacity-50"
+            className="flex-1 resize-none bg-transparent py-1.5 text-base md:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none disabled:opacity-50"
           />
           <button
             type="button"

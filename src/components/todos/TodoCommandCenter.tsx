@@ -179,26 +179,53 @@ function EmptyHint({ children }: { children: React.ReactNode }) {
   return <p className="py-6 text-center text-xs text-slate-400">{children}</p>;
 }
 
-// ── Stat strip ─────────────────────────────────────────────────────────
+// ── Compact stats (sidebar column, matches Manage schedules width) ─────
 
-function StatTile({
-  label,
-  value,
-  tone = "slate",
+function CompactStatStrip({
+  active,
+  overdue,
+  recurring,
 }: {
-  label: string;
-  value: number;
-  tone?: "slate" | "red" | "violet";
+  active: number;
+  overdue: number;
+  recurring: number;
 }) {
-  const styles = {
-    slate: { card: "border-slate-100 bg-white", label: "text-slate-400", value: "text-slate-900" },
-    red: { card: "border-red-100 bg-red-50/50", label: "text-red-400", value: "text-red-600" },
-    violet: { card: "border-slate-100 bg-white", label: "text-slate-400", value: "text-violet-600" },
-  }[tone];
+  const tiles: {
+    label: string;
+    value: number;
+    valueClass: string;
+    cardClass?: string;
+  }[] = [
+      { label: "Active", value: active, valueClass: "text-slate-900" },
+      {
+        label: "Overdue",
+        value: overdue,
+        valueClass: overdue > 0 ? "text-red-600" : "text-slate-900",
+        cardClass: overdue > 0 ? "border-red-100 bg-red-50/40" : "border-slate-100 bg-white",
+      },
+      {
+        label: "Recurring",
+        value: recurring,
+        valueClass: "text-violet-600",
+        cardClass: "border-slate-100 bg-white",
+      },
+    ];
+
   return (
-    <div className={`rounded-2xl border p-4 shadow-sm ${styles.card}`}>
-      <p className={`text-[10px] font-bold uppercase tracking-widest ${styles.label}`}>{label}</p>
-      <p className={`mt-1 text-3xl font-bold md:text-4xl ${styles.value}`}>{value}</p>
+    <div className="grid grid-cols-3 place-items-center gap-1">
+      {tiles.map(({ label, value, valueClass, cardClass }) => (
+        <div
+          key={label}
+          className={`flex size-11 flex-col items-center justify-center rounded-lg border text-center ${cardClass ?? "border-slate-100 bg-white"}`}
+        >
+          <p className="text-[8px] font-bold uppercase leading-none tracking-wide text-slate-400">
+            {label}
+          </p>
+          <p className={`mt-px text-sm font-bold tabular-nums leading-none ${valueClass}`}>
+            {value}
+          </p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -221,9 +248,8 @@ function TodoRow({
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-2xl px-3 py-2 transition-colors ${
-        justDone ? "bg-emerald-50/70" : overdue ? "bg-red-50/60" : "hover:bg-slate-50"
-      }`}
+      className={`flex items-center gap-3 rounded-2xl px-3 py-2 transition-colors ${justDone ? "bg-emerald-50/70" : overdue ? "bg-red-50/60" : "hover:bg-slate-50"
+        }`}
     >
       <DoneCircle checked={justDone} onClick={() => onDone(todo._id)} />
       <button
@@ -329,93 +355,87 @@ export function TodoCommandCenter({
     .sort((a, b) => nextRun(a) - nextRun(b));
 
   return (
-    <div className="space-y-4">
-      {/* Stat strip */}
-      <div className="grid grid-cols-3 gap-3">
-        <StatTile label="Active" value={todos.length} />
-        <StatTile label="Overdue" value={overdueCount} tone="red" />
-        <StatTile label="Recurring" value={recurring.length} tone="violet" />
+    <div className="grid items-start gap-4 lg:grid-cols-3">
+      <div className="min-w-0 lg:col-span-2">
+        <Panel
+          icon={<ListTodo strokeWidth={1.8} className="h-4 w-4 text-blue-500" />}
+          title="Todo"
+          subtitle={
+            overdueCount > 0
+              ? `${overdueCount} overdue · then upcoming`
+              : "Due now & upcoming, soonest first"
+          }
+          count={todoItems.length}
+          accent={overdueCount > 0 ? "border-red-200" : undefined}
+        >
+          {todoItems.length === 0 ? (
+            <EmptyHint>Nothing to do — you&apos;re all caught up</EmptyHint>
+          ) : (
+            <div className="space-y-1.5">
+              {todoItems.map((todo) => (
+                <TodoRow
+                  key={todo._id}
+                  todo={todo}
+                  justDone={justDone.has(todo._id)}
+                  onDone={handleDone}
+                  onToggle={onToggle}
+                  onDelete={onDelete}
+                  onEdit={onEdit}
+                />
+              ))}
+            </div>
+          )}
+        </Panel>
       </div>
 
-      {/* Todo (2/3) + Manage schedules (1/3) */}
-      <div className="grid items-start gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Panel
-            icon={<ListTodo strokeWidth={1.8} className="h-4 w-4 text-blue-500" />}
-            title="Todo"
-            subtitle={
-              overdueCount > 0
-                ? `${overdueCount} overdue · then upcoming`
-                : "Due now & upcoming, soonest first"
-            }
-            count={todoItems.length}
-            accent={overdueCount > 0 ? "border-red-200" : undefined}
-          >
-            {todoItems.length === 0 ? (
-              <EmptyHint>Nothing to do — you&apos;re all caught up</EmptyHint>
-            ) : (
-              <div className="space-y-1.5">
-                {todoItems.map((todo) => (
-                  <TodoRow
+      <div className="flex min-w-0 flex-col gap-4 lg:col-span-1">
+        <CompactStatStrip
+          active={todos.length}
+          overdue={overdueCount}
+          recurring={recurring.length}
+        />
+        <Panel
+          icon={<Repeat strokeWidth={1.8} className="h-4 w-4 text-violet-500" />}
+          title="Manage schedules"
+          subtitle="Pause, edit, or remove repeating reminders"
+          count={recurring.length}
+        >
+          {recurring.length === 0 ? (
+            <EmptyHint>No repeating reminders yet</EmptyHint>
+          ) : (
+            <div className="space-y-1.5">
+              {recurring.map((todo) => {
+                const summary = recurringSummary(todo);
+                return (
+                  <div
                     key={todo._id}
-                    todo={todo}
-                    justDone={justDone.has(todo._id)}
-                    onDone={handleDone}
-                    onToggle={onToggle}
-                    onDelete={onDelete}
-                    onEdit={onEdit}
-                  />
-                ))}
-              </div>
-            )}
-          </Panel>
-        </div>
-
-        <div className="lg:col-span-1">
-          <Panel
-            icon={<Repeat strokeWidth={1.8} className="h-4 w-4 text-violet-500" />}
-            title="Manage schedules"
-            subtitle="Pause, edit, or remove repeating reminders"
-            count={recurring.length}
-          >
-            {recurring.length === 0 ? (
-              <EmptyHint>No repeating reminders yet</EmptyHint>
-            ) : (
-              <div className="space-y-1.5">
-                {recurring.map((todo) => {
-                  const summary = recurringSummary(todo);
-                  return (
-                    <div
-                      key={todo._id}
-                      className={`flex items-center gap-3 rounded-2xl px-3 py-2 hover:bg-slate-50 ${
-                        todo.enabled ? "" : "opacity-60"
+                    className={`flex items-center gap-3 rounded-2xl px-3 py-2 hover:bg-slate-50 ${todo.enabled ? "" : "opacity-60"
                       }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onEdit(todo)}
+                      className="min-w-0 flex-1 text-left"
+                      title="Edit"
                     >
-                      <button
-                        type="button"
-                        onClick={() => onEdit(todo)}
-                        className="min-w-0 flex-1 text-left"
-                        title="Edit"
-                      >
-                        <p className="truncate text-sm font-medium text-slate-900">{todo.title}</p>
-                        <p className="truncate text-[11px] text-slate-400">
-                          {todo.enabled ? summary || "Recurring" : "Paused"}
-                        </p>
-                      </button>
-                      <RowActions
-                        todo={todo}
-                        showToggle
-                        onToggle={onToggle}
-                        onDelete={onDelete}
-                        onEdit={onEdit}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </Panel>
-        </div>
+                      <p className="truncate text-sm font-medium text-slate-900">{todo.title}</p>
+                      <p className="truncate text-[11px] text-slate-400">
+                        {todo.enabled ? summary || "Recurring" : "Paused"}
+                      </p>
+                    </button>
+                    <RowActions
+                      todo={todo}
+                      showToggle
+                      onToggle={onToggle}
+                      onDelete={onDelete}
+                      onEdit={onEdit}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Panel>
       </div>
     </div>
   );

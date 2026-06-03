@@ -26,7 +26,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const tasks = await getMyTasksCached({ includeClosed, skipCache });
-    return Response.json(groupTasks(tasks, { due, priority }));
+    // Short private cache — SWR client cache dedupes re-fetches; this lets the
+    // browser also reuse the response for a short window between SWR dedup intervals.
+    return Response.json(groupTasks(tasks, { due, priority }), {
+      headers: { "Cache-Control": "private, max-age=15, stale-while-revalidate=60" },
+    });
   } catch (err) {
     return errorResponse(err);
   }
