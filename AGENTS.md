@@ -42,7 +42,9 @@ Every screen must earn its space: favor information density and **use the full v
 - **Fill vertical room.** Scrollable lists (schedule, activity, agenda) raise `max-h` on `lg`+ and reveal more rows instead of truncating to "+N more".
 - **Radius.** Keep `rounded-3xl` for hero / primary cards (per design system); inner/secondary tiles use `rounded-2xl`.
 
-Reuse the `globals.css` primitives (`.app-screen`, `.app-screen-home`, `.app-card`, `.app-hero`) — don't hand-roll widths or padding.
+**Layout kit (required for new pages).** Use `src/components/ui/layout/` — `<Page variant="dashboard|list|read|form">`, `<PageHeader>`, `<PageBody>`, `<Grid cols={2|3|4|"auto"}>`, `<Stack>`, `<Widget>`. See `docs/layout-system.md`. Don't hand-roll `app-screen-inset`, `max-w-6xl`, or grid breakpoints.
+
+Reuse the `globals.css` primitives (`.app-screen`, `.app-card`, `.app-hero`) via the layout kit — don't copy width/padding class chains.
 
 ## Local dev
 

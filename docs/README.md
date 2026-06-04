@@ -157,3 +157,5 @@ Shipped (2026-05-27):
 ## Design
 
 `Design System — Nutrition & PARA.html` at repo root.
+
+**Layout system:** [`layout-system.md`](./layout-system.md) — page scaffold, grid, tokens.

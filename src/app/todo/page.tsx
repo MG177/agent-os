@@ -8,6 +8,7 @@ import { AddTodoSheet } from "@/components/todos/AddTodoSheet";
 import { CompletedRemindersButton } from "@/components/todos/CompletedRemindersButton";
 import type { TodoDoc } from "@/lib/todos";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Page, PageBody } from "@/components/ui/layout";
 
 export default function TodoPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -26,9 +27,9 @@ export default function TodoPage() {
   }
 
   return (
-    <div className="app-screen app-screen-home flex min-h-0 flex-1 flex-col">
+    <Page variant="dashboard">
       <PageHeader>
-        <div className="app-screen-inset flex items-center justify-between gap-4 pb-4 pt-5 md:pb-5 md:pt-6">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-50">
               <BellRing strokeWidth={1.8} className="h-5 w-5 text-blue-600" />
@@ -52,7 +53,7 @@ export default function TodoPage() {
         </div>
       </PageHeader>
 
-      <div className="app-screen-inset flex flex-col pb-4 md:pb-8">
+      <PageBody gap={false}>
         <div className="mt-4">
           {loading ? (
             <div className="flex flex-col gap-2">
@@ -88,7 +89,7 @@ export default function TodoPage() {
             />
           )}
         </div>
-      </div>
+      </PageBody>
 
       <AddTodoSheet
         open={sheetOpen}
@@ -96,6 +97,6 @@ export default function TodoPage() {
         onSaved={refresh}
         editing={editing}
       />
-    </div>
+    </Page>
   );
 }

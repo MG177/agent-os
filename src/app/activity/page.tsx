@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { Page, Stack } from "@/components/ui/layout";
 import { ActivityStats } from "@/components/activity/ActivityStats";
 import { ActivityTimeline } from "@/components/activity/ActivityTimeline";
 import { computeStats, groupByDay } from "@/components/activity/activity-display";
@@ -60,10 +61,10 @@ export default function ActivityPage() {
   );
 
   return (
-    <div className="app-screen app-screen-wide">
+    <Page variant="list">
       <ScreenHeader title="Activity" />
 
-      <section className="space-y-2">
+      <Stack gap="tight">
         <p className="app-section-label">Filters</p>
         <div className="flex gap-2 overflow-x-auto pb-1">
           {FILTERS.map(({ id, label }) => (
@@ -77,7 +78,7 @@ export default function ActivityPage() {
             </button>
           ))}
         </div>
-      </section>
+      </Stack>
 
       <div className="flex-1 lg:grid lg:grid-cols-[minmax(220px,260px)_1fr] lg:gap-6 lg:items-start">
         <ActivityStats title={title} stats={stats} />
@@ -100,6 +101,6 @@ export default function ActivityPage() {
       <p className="rounded-2xl bg-slate-50 px-4 py-3 text-center text-xs text-slate-500">
         Undo available for 24 hours after write
       </p>
-    </div>
+    </Page>
   );
 }

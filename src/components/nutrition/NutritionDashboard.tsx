@@ -17,6 +17,8 @@ import {
   type MacroGoals,
   type NutritionView,
 } from "./types";
+import { Page, PageBody } from "@/components/ui/layout";
+import { PageHeader } from "@/components/ui/PageHeader";
 
 const EMPTY_TOTALS: DailyTotals = {
   calories: 0,
@@ -147,8 +149,11 @@ function NutritionDashboardInner() {
   }
 
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col md:overflow-hidden">
-      <header className="app-page-header flex shrink-0 flex-wrap items-center justify-between gap-3 bg-white/80 px-4 py-3 md:px-8 lg:px-10">
+    <Page variant="dashboard" scroll="inner">
+      <PageHeader
+        inset={false}
+        className="flex shrink-0 flex-wrap items-center justify-between gap-3 bg-white/80 px-4 py-3 md:px-8 lg:px-10"
+      >
         <div className="flex items-center gap-3 md:gap-4">
           <h1 className="text-xl font-bold text-slate-900 md:text-2xl md:tracking-tight">
             Nutrition
@@ -205,14 +210,14 @@ function NutritionDashboardInner() {
             Goals
           </button>
         </div>
-      </header>
+      </PageHeader>
 
       {loading ? (
         <div className="flex flex-1 items-center justify-center px-4 text-sm text-slate-400">
           Loading…
         </div>
       ) : (
-        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 py-4 md:overflow-hidden md:px-0 md:py-0 lg:max-w-7xl 2xl:max-w-[1600px]">
+        <PageBody fill gap={false} className="py-4 md:overflow-hidden md:py-5">
           {/* Mobile: summary at top, then tabs + panels */}
           <div className="flex flex-col gap-4 md:hidden">
             <NutritionSummary
@@ -238,7 +243,7 @@ function NutritionDashboardInner() {
           </div>
 
           {/* Desktop: food workspace (left) · summary + meals today (right) */}
-          <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-12 md:gap-5 md:overflow-hidden md:px-8 md:py-5 lg:gap-6 lg:px-10">
+          <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-12 md:gap-5 md:overflow-hidden lg:gap-6">
             <section className="flex min-h-0 flex-col md:col-span-7 xl:col-span-8">
               <FoodWorkspace
                 logDate={selectedDate}
@@ -261,7 +266,7 @@ function NutritionDashboardInner() {
               />
             </aside>
           </div>
-        </div>
+        </PageBody>
       )}
 
       <NutritionGoalsSheet
@@ -273,7 +278,7 @@ function NutritionDashboardInner() {
           refresh();
         }}
       />
-    </div>
+    </Page>
   );
 }
 

@@ -22,9 +22,9 @@ import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/ty
 type CalendarStatus = { configured: boolean; connected: boolean };
 type EventsResponse = { events: CalendarEventSummary[] };
 
-/** Desktop: tall Gantt card. Mobile agenda is content-height. */
+/** md+: fill grid cell; Gantt scroll area grows inside. Mobile stays content-height. */
 const HOME_SCHEDULE_CARD_CLASS =
-  "min-h-0 md:min-h-[19rem] lg:min-h-[23rem]";
+  "flex min-h-0 flex-col md:h-full md:min-h-[19rem] md:flex-1 lg:min-h-[23rem]";
 
 /** Fetches the home 24h window using the current time for the URL, but uses a
  *  stable synthetic key so SWR/localStorage treats it as the same resource. */
@@ -98,26 +98,30 @@ export function TodayScheduleCard() {
         </Link>
       </div>
 
-      <div className={`app-card flex flex-col p-0 ${HOME_SCHEDULE_CARD_CLASS}`}>
+      <div className={`app-card p-0 ${HOME_SCHEDULE_CARD_CLASS}`}>
         {isLoading && !eventsData && (
-          <div className="p-3">
+          <div className="flex flex-1 flex-col p-3 md:min-h-0">
             <CalendarLoadingSkeleton rows={3} />
           </div>
         )}
 
         {!isLoading && statusData?.connected === false && (
-          <CalendarConnectionEmpty variant="compact" />
+          <div className="flex flex-1 items-center md:min-h-0">
+            <CalendarConnectionEmpty variant="compact" />
+          </div>
         )}
 
         {eventsError?.status === 401 && (
-          <CalendarConnectionEmpty variant="compact" />
+          <div className="flex flex-1 items-center md:min-h-0">
+            <CalendarConnectionEmpty variant="compact" />
+          </div>
         )}
 
         {!isLoading &&
           !eventsError &&
           statusData?.connected &&
           (!hasVisibleEvents) && (
-            <p className="px-4 py-8 text-center text-xs text-slate-400">
+            <p className="flex flex-1 items-center justify-center px-4 py-8 text-center text-xs text-slate-400 md:min-h-0">
               No events in the next 24 hours
             </p>
           )}

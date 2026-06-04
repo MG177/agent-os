@@ -3,13 +3,13 @@
 import { useEffect } from "react";
 import ProgressRing from "@/components/ProgressRing";
 import { RecentActivityButton } from "@/components/activity/RecentActivityButton";
-import { StatCard } from "@/components/ui/StatCard";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import type { ActivityEvent } from "@/lib/activity";
 import { TodayScheduleCard } from "@/components/calendar/TodayScheduleCard";
 import { TodayTasksCard } from "@/components/clickup/TodayTasksCard";
 import { DueTodosCard } from "@/components/todos/DueTodosCard";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Grid, Page, PageBody } from "@/components/ui/layout";
 import { useResource } from "@/lib/data/useResource";
 import { KEYS } from "@/lib/data/keys";
 
@@ -26,7 +26,7 @@ interface HealthData {
   vps: string;
 }
 
-/** A single inline hero stat tile (lg+), with a pulse placeholder while loading. */
+/** Frosted stat tile inside the home hero (all breakpoints). */
 function HeroStat({
   loading,
   value,
@@ -74,9 +74,9 @@ export default function HomePage() {
   });
 
   return (
-    <div className="app-screen app-screen-home flex min-h-0 flex-1 flex-col">
+    <Page variant="dashboard">
       <PageHeader>
-        <div className="app-screen-inset flex items-center justify-between gap-4 pb-4 pt-5 md:pb-5 md:pt-6">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <p className="app-section-label md:hidden">Luna Apps</p>
             <h1 className="text-xl font-bold text-slate-900 md:text-2xl md:tracking-tight">
@@ -90,11 +90,10 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             {vpsOnline !== null && (
               <span
-                className={`rounded-full px-3 py-1.5 text-[10px] font-bold text-white shadow-sm md:hidden ${
-                  vpsOnline
-                    ? "bg-emerald-500 shadow-emerald-200"
-                    : "bg-red-500 shadow-red-200"
-                }`}
+                className={`rounded-full px-3 py-1.5 text-[10px] font-bold text-white shadow-sm md:hidden ${vpsOnline
+                  ? "bg-emerald-500 shadow-emerald-200"
+                  : "bg-red-500 shadow-red-200"
+                  }`}
               >
                 {vpsOnline ? "VPS online" : "VPS offline"}
               </span>
@@ -104,8 +103,8 @@ export default function HomePage() {
         </div>
       </PageHeader>
 
-      <div className="app-screen-inset flex flex-col gap-4 pb-4 md:gap-6 md:pb-8">
-        {/* Hero — full width; stats beside ring on desktop */}
+      <PageBody>
+        {/* Hero — ring + remaining; frosted stat tiles (stacked below on mobile, rail on lg+) */}
         <section className="app-hero md:p-6">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
             <div className="min-w-0 flex-1">
@@ -171,9 +170,7 @@ export default function HomePage() {
                       </p>
                       <p className="mt-1 text-sm text-white/75">kcal remaining</p>
                       <p className="mt-2 text-xs text-white/55">
-                        {Math.round(calPct * 100)}% of {goal} kcal goal ·{" "}
-                        {data?.mealsToday ?? 0} meals · {data?.capturesToday ?? 0}{" "}
-                        captures
+                        {Math.round(calPct * 100)}% of {goal} kcal goal
                       </p>
                     </>
                   )}
@@ -181,8 +178,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Inline stats inside hero on large screens */}
-            <div className="hidden shrink-0 lg:grid lg:grid-cols-2 lg:gap-2.5 xl:grid-cols-4">
+            <div className="grid w-full shrink-0 grid-cols-2 gap-2.5 md:grid-cols-4 lg:w-auto lg:grid-cols-2 xl:grid-cols-4">
               <HeroStat
                 loading={loading}
                 value={data?.capturesToday ?? "—"}
@@ -199,51 +195,24 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Stats row — mobile + tablet (hidden on lg where stats live in hero) */}
-        <section className="space-y-3 lg:hidden">
-          <p className="app-section-label">Today at a glance</p>
-          {!data ? (
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-2.5">
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="app-card h-16 animate-pulse bg-slate-100" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-2.5">
-              <StatCard
-                label="Captures"
-                value={data.capturesToday}
-                variant="blue"
-              />
-              <StatCard
-                label="Meals logged"
-                value={data.mealsToday}
-                variant="emerald"
-              />
-              <StatCard label="Calories" value={calories || "—"} variant="violet" />
-              <StatCard label="Goal" value={goal} variant="amber" />
-            </div>
-          )}
-        </section>
-
         {/* Schedule + tasks (left) · reminders rail (right, full height) */}
-        <div className="grid items-stretch gap-4 md:gap-5 lg:grid-cols-2 lg:gap-6 xl:grid-cols-3">
-          <div className="flex min-h-0 flex-col lg:col-span-1 xl:col-span-2">
+        <Grid cols={3} className="lg:grid-cols-2 lg:gap-6 2xl:grid-cols-3">
+          <div className="flex min-h-0 flex-col md:col-span-2 xl:col-span-2">
             <ErrorBoundary>
               <TodayScheduleCard />
             </ErrorBoundary>
           </div>
-          <div className="flex min-h-0 flex-col lg:col-start-2 lg:row-span-2 lg:row-start-1 xl:col-start-3">
+          <div className="flex min-h-0 flex-col md:col-start-2 md:row-start-2 xl:col-start-3 xl:row-span-2 xl:row-start-1">
             <ErrorBoundary>
               <DueTodosCard />
             </ErrorBoundary>
           </div>
-          <div className="flex min-h-0 flex-col lg:col-span-1 lg:row-start-2 xl:col-span-2">
+          <div className="flex min-h-0 flex-col md:col-start-1 md:row-start-2 md:col-span-1 xl:col-span-2 xl:row-start-2">
             <ErrorBoundary>
               <TodayTasksCard />
             </ErrorBoundary>
           </div>
-        </div>
+        </Grid>
 
         {/* Coming soon — full width */}
         <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-4 shadow-lg shadow-indigo-200/60 md:p-5">
@@ -253,7 +222,7 @@ export default function HomePage() {
             same PWA, more domains.
           </p>
         </div>
-      </div>
-    </div>
+      </PageBody>
+    </Page>
   );
 }

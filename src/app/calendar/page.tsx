@@ -28,6 +28,7 @@ import { useHiddenCalendars } from "@/components/calendar/useHiddenCalendars";
 import { useScheduleClock } from "@/components/calendar/useScheduleClock";
 import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Page, PageBody } from "@/components/ui/layout";
 
 type DetailSpan = "day" | "week";
 type MobileView = "month" | "detail";
@@ -237,90 +238,88 @@ export default function CalendarPage() {
   );
 
   return (
-    <div className="app-screen app-screen-home flex min-h-0 flex-1 flex-col">
-      <PageHeader>
-        <div className="app-screen-inset flex flex-col gap-3 pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between md:pb-5 md:pt-6">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900 md:text-2xl">
-              Calendar
-            </h1>
-            <p className="mt-0.5 text-xs text-slate-400 md:text-sm">
-              {headerSubtitle}
-            </p>
-          </div>
+    <Page variant="dashboard">
+      <PageHeader insetClassName="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 md:text-2xl">
+            Calendar
+          </h1>
+          <p className="mt-0.5 text-xs text-slate-400 md:text-sm">
+            {headerSubtitle}
+          </p>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {showScheduleChrome && (
-              <>
-                <Segmented
-                  ariaLabel="Calendar view (mobile)"
-                  className="md:hidden"
-                  value={mobileTab}
-                  onChange={onMobileTab}
-                  options={[
-                    { id: "month", label: "Month" },
-                    { id: "week", label: "Week" },
-                    { id: "day", label: "Day" },
-                  ]}
-                />
-                <Segmented
-                  ariaLabel="Detail span"
-                  className="hidden md:inline-flex"
-                  value={detailSpan}
-                  onChange={setDetailSpan}
-                  options={[
-                    { id: "day", label: "Day" },
-                    { id: "week", label: "Week" },
-                  ]}
-                />
+        <div className="flex flex-wrap items-center gap-2">
+          {showScheduleChrome && (
+            <>
+              <Segmented
+                ariaLabel="Calendar view (mobile)"
+                className="md:hidden"
+                value={mobileTab}
+                onChange={onMobileTab}
+                options={[
+                  { id: "month", label: "Month" },
+                  { id: "week", label: "Week" },
+                  { id: "day", label: "Day" },
+                ]}
+              />
+              <Segmented
+                ariaLabel="Detail span"
+                className="hidden md:inline-flex"
+                value={detailSpan}
+                onChange={setDetailSpan}
+                options={[
+                  { id: "day", label: "Day" },
+                  { id: "week", label: "Week" },
+                ]}
+              />
+              <button
+                type="button"
+                onClick={() => setListMode((v) => !v)}
+                aria-pressed={listMode}
+                className="hidden rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 md:inline-flex"
+              >
+                {listMode ? "Grid" : "List"}
+              </button>
+              <div className="inline-flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => setListMode((v) => !v)}
-                  aria-pressed={listMode}
-                  className="hidden rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 md:inline-flex"
+                  onClick={stepPrev}
+                  aria-label="Previous"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
                 >
-                  {listMode ? "Grid" : "List"}
+                  ‹
                 </button>
-                <div className="inline-flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={stepPrev}
-                    aria-label="Previous"
-                    className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedDay(today)}
-                    className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-                  >
-                    Today
-                  </button>
-                  <button
-                    type="button"
-                    onClick={stepNext}
-                    aria-label="Next"
-                    className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
-                  >
-                    ›
-                  </button>
-                </div>
-              </>
-            )}
-            <button
-              type="button"
-              onClick={() => load(fetchFrom, fetchTo, { refresh: true })}
-              disabled={refreshing || loading}
-              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-            >
-              {refreshing ? "Refreshing…" : "Refresh"}
-            </button>
-          </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDay(today)}
+                  className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                  Today
+                </button>
+                <button
+                  type="button"
+                  onClick={stepNext}
+                  aria-label="Next"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                  ›
+                </button>
+              </div>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => load(fetchFrom, fetchTo, { refresh: true })}
+            disabled={refreshing || loading}
+            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+          >
+            {refreshing ? "Refreshing…" : "Refresh"}
+          </button>
         </div>
       </PageHeader>
 
-      <div className="app-screen-inset flex flex-col gap-4 pb-4 md:gap-6 md:pb-8">
+      <PageBody>
         {!showScheduleChrome && (
           <div>
             {loading && <CalendarLoadingSkeleton rows={6} />}
@@ -383,7 +382,7 @@ export default function CalendarPage() {
             Integration settings
           </Link>
         </p>
-      </div>
-    </div>
+      </PageBody>
+    </Page>
   );
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { Page } from "@/components/ui/layout";
 import type { GoogleCalendarStatus } from "@/lib/integrations/google-calendar/types";
 import type { ClickUpStatus } from "@/lib/integrations/clickup/types";
 
@@ -97,7 +98,7 @@ export default function IntegrationsSettingsPage() {
   }
 
   return (
-    <div className="app-screen max-w-lg">
+    <Page variant="form">
       <header className="space-y-1">
         <Link
           href="/"
@@ -114,8 +115,8 @@ export default function IntegrationsSettingsPage() {
       {banner && (
         <div
           className={`rounded-2xl px-4 py-3 text-sm font-medium ${banner.type === "ok"
-              ? "bg-emerald-50 text-emerald-800"
-              : "bg-amber-50 text-amber-900"
+            ? "bg-emerald-50 text-emerald-800"
+            : "bg-amber-50 text-amber-900"
             }`}
         >
           {banner.text}
@@ -276,7 +277,7 @@ export default function IntegrationsSettingsPage() {
           Open tasks →
         </Link>
       </div>
-    </div>
+    </Page>
   );
 }
 
@@ -284,8 +285,8 @@ function StatusBadge({ connected }: { connected: boolean }) {
   return (
     <span
       className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${connected
-          ? "bg-emerald-50 text-emerald-700"
-          : "bg-slate-100 text-slate-500"
+        ? "bg-emerald-50 text-emerald-700"
+        : "bg-slate-100 text-slate-500"
         }`}
     >
       {connected ? "Connected" : "Off"}

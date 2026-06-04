@@ -13,6 +13,7 @@ import { TaskSidebar } from "@/components/clickup/TaskSidebar";
 import { useClickUpTimer } from "@/components/clickup/useClickUpTimer";
 import type { ClickUpGroupedTasks } from "@/components/clickup/types";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Page, PageBody } from "@/components/ui/layout";
 import { readSnapshot, writeSnapshot } from "@/lib/data/useResource";
 
 /** Snapshot of the last-rendered grouped tasks — hydrated on mount for an
@@ -286,42 +287,44 @@ export default function TasksScreen() {
   // a snapshot, fall through and paint it optimistically while conn resolves.
   if (conn === "loading" && !data) {
     return (
-      <div className="app-screen app-screen-home flex min-h-0 flex-1 flex-col">
+      <Page variant="dashboard">
         <PageHeader>
-          <div className="app-screen-inset pb-4 pt-5 md:pb-5 md:pt-6">
-            <Header teamName={undefined} counts={null} controls={null} />
-          </div>
+          <Header teamName={undefined} counts={null} controls={null} />
         </PageHeader>
-        <div className="app-screen-inset flex min-h-0 flex-1 flex-col pb-4 md:pb-8">
+        <PageBody fill>
           <TaskListSkeleton />
-        </div>
-      </div>
+        </PageBody>
+      </Page>
     );
   }
 
   if (conn === "not_configured" || conn === "not_connected") {
     return (
-      <div className="app-screen app-screen-home">
-        <Header teamName={undefined} counts={null} controls={null} />
-        <div className="app-card mx-auto mt-6 max-w-md text-center">
-          <p className="text-sm font-semibold text-slate-800">
-            {conn === "not_configured"
-              ? "ClickUp is not configured"
-              : "Connect ClickUp"}
-          </p>
-          <p className="mt-1 text-xs text-slate-500">
-            {conn === "not_configured"
-              ? "Set TOKEN_ENCRYPTION_KEY in .env.local to enable the tasks surface."
-              : "Paste your ClickUp Personal API token in Integrations to see and act on your tasks here."}
-          </p>
-          <Link
-            href="/settings/integrations"
-            className="mt-4 inline-block rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
-          >
-            Open integrations
-          </Link>
-        </div>
-      </div>
+      <Page variant="dashboard" fill={false}>
+        <PageHeader>
+          <Header teamName={undefined} counts={null} controls={null} />
+        </PageHeader>
+        <PageBody gap={false}>
+          <div className="app-card mx-auto mt-6 max-w-md text-center">
+            <p className="text-sm font-semibold text-slate-800">
+              {conn === "not_configured"
+                ? "ClickUp is not configured"
+                : "Connect ClickUp"}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              {conn === "not_configured"
+                ? "Set TOKEN_ENCRYPTION_KEY in .env.local to enable the tasks surface."
+                : "Paste your ClickUp Personal API token in Integrations to see and act on your tasks here."}
+            </p>
+            <Link
+              href="/settings/integrations"
+              className="mt-4 inline-block rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+            >
+              Open integrations
+            </Link>
+          </div>
+        </PageBody>
+      </Page>
     );
   }
 
@@ -413,14 +416,12 @@ export default function TasksScreen() {
   const hasTasks = visibleFlat.length > 0;
 
   return (
-    <div className="app-screen app-screen-home flex min-h-0 flex-1 flex-col">
+    <Page variant="dashboard">
       <PageHeader>
-        <div className="app-screen-inset pb-4 pt-5 md:pb-5 md:pt-6">
-          <Header teamName={teamName} counts={data?.counts ?? null} controls={controls} />
-        </div>
+        <Header teamName={teamName} counts={data?.counts ?? null} controls={controls} />
       </PageHeader>
 
-      <div className="app-screen-inset flex min-h-0 flex-1 gap-4 pb-4 md:gap-5 md:pb-8">
+      <PageBody fill direction="row">
         <TaskSidebar
           due={due}
           onDueChange={setDue}
@@ -476,7 +477,7 @@ export default function TasksScreen() {
           </div>
         </div>
 
-      </div>
+      </PageBody>
 
       {/* Task detail modal — all screen sizes and view modes. */}
       {selectedTask && (
@@ -490,7 +491,7 @@ export default function TasksScreen() {
           onChanged={() => loadTasks(true)}
         />
       )}
-    </div>
+    </Page>
   );
 }
 
