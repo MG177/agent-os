@@ -72,8 +72,8 @@ export function TaskBoard({
                 task={task}
                 selected={task.id === selectedTaskId}
                 completing={task.id === completingId}
-                onSelect={() => onSelect(task.id)}
-                onComplete={() => onComplete(task.id, task.listId)}
+                onSelect={onSelect}
+                onComplete={onComplete}
               />
             ))}
           </div>

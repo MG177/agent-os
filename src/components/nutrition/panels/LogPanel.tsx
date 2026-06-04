@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SearchField from "@/components/ui/SearchField";
+import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import type { FoodEntry } from "../types";
 
 const FREQUENT_PREVIEW = 5;
@@ -45,12 +46,14 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
     inputRef.current?.focus();
   }, []);
 
+  // Debounced so the result filter runs once the user pauses, not per keystroke.
+  const debouncedQuery = useDebouncedValue(query, 200);
   useEffect(() => {
-    if (!query.trim() || selected) {
+    if (!debouncedQuery.trim() || selected) {
       setResults([]);
       return;
     }
-    const q = query.toLowerCase();
+    const q = debouncedQuery.toLowerCase();
     setResults(
       allFoods
         .filter(
@@ -59,7 +62,7 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
         )
         .slice(0, 6),
     );
-  }, [query, allFoods, selected]);
+  }, [debouncedQuery, allFoods, selected]);
 
   /** Foods ranked by all-time log frequency, mapped to library items. */
   const frequent = useMemo(() => {

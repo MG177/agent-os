@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { ActivityEvent } from "@/lib/activity";
 import {
   KIND_STYLE,
@@ -8,7 +9,7 @@ import {
   type DayGroup,
 } from "./activity-display";
 
-function TimelineRow({
+const TimelineRow = memo(function TimelineRow({
   event,
   isLast,
   onUndo,
@@ -16,7 +17,8 @@ function TimelineRow({
 }: {
   event: ActivityEvent;
   isLast: boolean;
-  onUndo?: () => void;
+  /** Stable parent callback — the row passes its own event so memo holds. */
+  onUndo: (event: ActivityEvent) => void;
   undoing: boolean;
 }) {
   const style = KIND_STYLE[event.kind];
@@ -50,10 +52,10 @@ function TimelineRow({
           {event.reverted && (
             <span className="font-medium text-amber-600">Reverted</span>
           )}
-          {event.undoable && onUndo && (
+          {event.undoable && (
             <button
               type="button"
-              onClick={onUndo}
+              onClick={() => onUndo(event)}
               disabled={undoing}
               className="font-semibold text-blue-600 underline decoration-blue-200 underline-offset-2 hover:text-blue-700 disabled:opacity-50"
             >
@@ -64,7 +66,7 @@ function TimelineRow({
       </div>
     </li>
   );
-}
+});
 
 export function ActivityTimeline({
   groups,
@@ -92,7 +94,7 @@ export function ActivityTimeline({
                 key={event.id}
                 event={event}
                 isLast={i === group.events.length - 1}
-                onUndo={event.undoable ? () => onUndo(event) : undefined}
+                onUndo={onUndo}
                 undoing={undoing === event.id}
               />
             ))}

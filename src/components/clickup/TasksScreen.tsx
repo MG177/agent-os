@@ -13,6 +13,11 @@ import { TaskSidebar } from "@/components/clickup/TaskSidebar";
 import { useClickUpTimer } from "@/components/clickup/useClickUpTimer";
 import type { ClickUpGroupedTasks } from "@/components/clickup/types";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { readSnapshot, writeSnapshot } from "@/lib/data/useResource";
+
+/** Snapshot of the last-rendered grouped tasks — hydrated on mount for an
+ *  instant paint on revisit, then refreshed by the normal load. */
+const TASKS_SNAPSHOT_KEY = "clickup.tasks.view";
 
 type ConnState = "loading" | "not_configured" | "not_connected" | "ready";
 type View = "list" | "board";
@@ -52,7 +57,9 @@ export default function TasksScreen() {
   const [activeTeamId, setActiveTeamId] = useState<string | null>(null);
   const [switching, setSwitching] = useState(false);
   const [workspaceResolved, setWorkspaceResolved] = useState(false);
-  const [data, setData] = useState<ClickUpGroupedTasks | null>(null);
+  const [data, setData] = useState<ClickUpGroupedTasks | null>(
+    () => readSnapshot<ClickUpGroupedTasks>(TASKS_SNAPSHOT_KEY) ?? null,
+  );
   const [view, setView] = useState<View>("list");
   const [due, setDue] = useState<Due>("all");
   const [priority, setPriority] = useState<string>("");
@@ -82,7 +89,11 @@ export default function TasksScreen() {
         setConn("not_configured");
         return;
       }
-      if (res.ok) setData(await res.json());
+      if (res.ok) {
+        const json = (await res.json()) as ClickUpGroupedTasks;
+        setData(json);
+        writeSnapshot(TASKS_SNAPSHOT_KEY, json);
+      }
     },
     [due, priority, includeClosed],
   );
@@ -201,17 +212,20 @@ export default function TasksScreen() {
     setRefreshing(false);
   }
 
-  async function handleComplete(taskId: string, listId: string) {
-    setCompletingId(taskId);
-    await fetch(`/api/clickup/tasks/${encodeURIComponent(taskId)}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "complete", listId }),
-    });
-    if (selectedTaskId === taskId) setSelectedTaskId(null);
-    await loadTasks(true);
-    setCompletingId(null);
-  }
+  const handleComplete = useCallback(
+    async (taskId: string, listId: string) => {
+      setCompletingId(taskId);
+      await fetch(`/api/clickup/tasks/${encodeURIComponent(taskId)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "complete", listId }),
+      });
+      setSelectedTaskId((cur) => (cur === taskId ? null : cur));
+      await loadTasks(true);
+      setCompletingId(null);
+    },
+    [loadTasks],
+  );
 
   async function handleCreate(input: {
     name: string;
@@ -268,10 +282,19 @@ export default function TasksScreen() {
   }, [data, activeListId]);
 
   // ── connection states ──────────────────────────────────────────────────
-  if (conn === "loading") {
+  // Cold start (no snapshot): show a skeleton, never a blank screen. If we have
+  // a snapshot, fall through and paint it optimistically while conn resolves.
+  if (conn === "loading" && !data) {
     return (
-      <div className="app-screen app-screen-home">
-        <p className="py-20 text-center text-sm text-slate-400">Loading…</p>
+      <div className="app-screen app-screen-home flex min-h-0 flex-1 flex-col">
+        <PageHeader>
+          <div className="app-screen-inset pb-4 pt-5 md:pb-5 md:pt-6">
+            <Header teamName={undefined} counts={null} controls={null} />
+          </div>
+        </PageHeader>
+        <div className="app-screen-inset flex min-h-0 flex-1 flex-col pb-4 md:pb-8">
+          <TaskListSkeleton />
+        </div>
       </div>
     );
   }
@@ -307,7 +330,6 @@ export default function TasksScreen() {
     <div className="flex flex-wrap items-center gap-2">
       <RunningTimerChip
         entry={timer.entry}
-        now={timer.now}
         busy={timer.busy}
         onStop={timer.stop}
       />
@@ -398,7 +420,7 @@ export default function TasksScreen() {
         </div>
       </PageHeader>
 
-      <div className="app-screen-inset flex gap-4 pb-4 md:gap-5 md:pb-8">
+      <div className="app-screen-inset flex min-h-0 flex-1 gap-4 pb-4 md:gap-5 md:pb-8">
         <TaskSidebar
           due={due}
           onDueChange={setDue}
@@ -420,9 +442,11 @@ export default function TasksScreen() {
             creating={creating}
             onCreate={handleCreate}
           />
-          <div className={view === "board" ? "min-h-96 overflow-hidden" : undefined}>
+          <div
+            className={`flex min-h-0 flex-1 flex-col ${view === "board" ? "overflow-hidden" : ""}`}
+          >
             {!data ? (
-              <p className="py-16 text-center text-sm text-slate-400">Loading tasks…</p>
+              <TaskListSkeleton />
             ) : !hasTasks ? (
               <div className="app-card mt-2 text-center">
                 <p className="text-sm font-semibold text-slate-700">No tasks</p>
@@ -490,6 +514,26 @@ function Header({
         <p className="mt-0.5 text-xs text-slate-400 md:text-sm">{subtitle}</p>
       </div>
       {controls}
+    </div>
+  );
+}
+
+/** Skeleton list shown on cold start (no cached snapshot) instead of a blank
+ *  "Loading…" — holds the list footprint so there's no layout shift. */
+function TaskListSkeleton() {
+  return (
+    <div className="app-card min-h-0 flex-1 overflow-hidden p-0">
+      <div className="divide-y divide-slate-100">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-2.5 px-3 py-3">
+            <div className="h-[18px] w-[18px] shrink-0 animate-pulse rounded-full bg-slate-100" />
+            <div className="flex-1 space-y-1.5">
+              <div className="h-3 w-2/3 animate-pulse rounded bg-slate-100" />
+              <div className="h-2 w-1/3 animate-pulse rounded bg-slate-100" />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

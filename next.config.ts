@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -6,4 +7,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@cursor/sdk"],
 };
 
-export default nextConfig;
+// Treemap of route/chunk sizes: `npm run analyze` (sets ANALYZE=true). No-op otherwise.
+const analyze = withBundleAnalyzer({ enabled: process.env.ANALYZE === "true" });
+
+export default analyze(nextConfig);

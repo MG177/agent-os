@@ -33,6 +33,17 @@ function lsWrite(key: string, value: unknown): void {
   }
 }
 
+/** Read a namespaced localStorage snapshot (size/expiry-guarded). Exposed for
+ *  components with a bespoke load flow that still want instant-paint hydration. */
+export function readSnapshot<T>(key: string): T | undefined {
+  return lsRead<T>(key);
+}
+
+/** Write a namespaced localStorage snapshot (size/expiry-guarded). */
+export function writeSnapshot(key: string, value: unknown): void {
+  lsWrite(key, value);
+}
+
 export const defaultFetcher = (url: string) =>
   fetch(url).then((r) => {
     if (!r.ok) {

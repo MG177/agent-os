@@ -1,11 +1,12 @@
 "use client";
 
+import { memo } from "react";
 import { Circle, CircleCheckBig, Loader2 } from "lucide-react";
 import { DUE_TONE_CLASS, formatDue } from "@/components/clickup/clickup-format";
 import { PriorityFlag } from "@/components/clickup/PriorityFlag";
 import type { ClickUpTask } from "@/components/clickup/types";
 
-export function TaskRow({
+function TaskRowImpl({
   task,
   selected,
   completing,
@@ -16,16 +17,17 @@ export function TaskRow({
   task: ClickUpTask;
   selected: boolean;
   completing: boolean;
-  onSelect: () => void;
-  onComplete: () => void;
+  /** Stable parent callbacks — the row supplies its own ids so React.memo holds. */
+  onSelect: (taskId: string) => void;
+  onComplete: (taskId: string, listId: string) => void;
   showList?: boolean;
 }) {
   const due = formatDue(task.dueDate);
 
   return (
-    <li
-      onClick={onSelect}
-      className={`group flex cursor-pointer items-start gap-2.5 px-3 py-2.5 transition-colors ${
+    <div
+      onClick={() => onSelect(task.id)}
+      className={`group flex cursor-pointer items-start gap-2.5 border-t border-slate-50 px-3 py-2.5 transition-colors ${
         selected ? "bg-blue-50/70" : "hover:bg-slate-50"
       }`}
     >
@@ -33,7 +35,7 @@ export function TaskRow({
         type="button"
         onClick={(e) => {
           e.stopPropagation();
-          onComplete();
+          onComplete(task.id, task.listId);
         }}
         disabled={completing}
         aria-label={`Complete ${task.name}`}
@@ -79,6 +81,10 @@ export function TaskRow({
           ))}
         </div>
       </div>
-    </li>
+    </div>
   );
 }
+
+/** Memoized: only re-renders when this row's own props change, not when a
+ *  sibling's selection/completion state flips. */
+export const TaskRow = memo(TaskRowImpl);

@@ -1,11 +1,12 @@
 "use client";
 
+import { memo } from "react";
 import { Circle, CircleCheckBig, Loader2 } from "lucide-react";
 import { DUE_TONE_CLASS, formatDue } from "@/components/clickup/clickup-format";
 import { PriorityFlag } from "@/components/clickup/PriorityFlag";
 import type { ClickUpTask } from "@/components/clickup/types";
 
-export function TaskCard({
+function TaskCardImpl({
   task,
   selected,
   completing,
@@ -15,14 +16,15 @@ export function TaskCard({
   task: ClickUpTask;
   selected: boolean;
   completing: boolean;
-  onSelect: () => void;
-  onComplete: () => void;
+  /** Stable parent callbacks — the card supplies its own ids so React.memo holds. */
+  onSelect: (taskId: string) => void;
+  onComplete: (taskId: string, listId: string) => void;
 }) {
   const due = formatDue(task.dueDate);
 
   return (
     <div
-      onClick={onSelect}
+      onClick={() => onSelect(task.id)}
       className={`group cursor-pointer rounded-2xl border bg-white p-3 shadow-sm transition-colors ${
         selected
           ? "border-blue-300 ring-1 ring-blue-200"
@@ -34,7 +36,7 @@ export function TaskCard({
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            onComplete();
+            onComplete(task.id, task.listId);
           }}
           disabled={completing}
           aria-label={`Complete ${task.name}`}
@@ -72,3 +74,6 @@ export function TaskCard({
     </div>
   );
 }
+
+/** Memoized: board cards don't re-render when an unrelated card's state changes. */
+export const TaskCard = memo(TaskCardImpl);

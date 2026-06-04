@@ -3,11 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Circle, CircleCheckBig, Loader2, Play, Square } from "lucide-react";
-import {
-  DUE_TONE_CLASS,
-  formatDue,
-  formatElapsed,
-} from "@/components/clickup/clickup-format";
+import { DUE_TONE_CLASS, formatDue } from "@/components/clickup/clickup-format";
+import { ElapsedTime } from "@/components/clickup/ElapsedTime";
 import { useClickUpTimer } from "@/components/clickup/useClickUpTimer";
 import { useResource, mutate } from "@/lib/data/useResource";
 import { KEYS } from "@/lib/data/keys";
@@ -151,7 +148,7 @@ export function TodayTasksCard() {
                     {tracking ? (
                       <>
                         <Square className="h-3 w-3 fill-current" />
-                        {formatElapsed(timer.entry!.start, timer.now)}
+                        <ElapsedTime start={timer.entry!.start} />
                       </>
                     ) : (
                       <Play className="h-3.5 w-3.5 fill-current" />

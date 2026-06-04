@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3003",
     "build": "next build",
+    "analyze": "ANALYZE=true next build",
     "start": "next start --port 3003",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
@@ -14,6 +15,7 @@
     "@cursor/sdk": "^1.0.17",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@tailwindcss/postcss": "^4.3.0",
+    "@tanstack/react-virtual": "^3.14.2",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "cron-parser": "^5.5.0",
@@ -32,6 +34,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.2.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

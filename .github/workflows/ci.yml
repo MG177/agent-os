@@ -28,3 +28,39 @@ jobs:
           VAULT_PATH: /tmp/vault
           MONGODB_URI: mongodb://localhost:27017/test
           AGENT_OS_DATA_PATH: /tmp/agent-os-data
+
+  # Lighthouse perf budget — warn-only for now (see docs/perf-budget.md).
+  # Non-blocking: assertions are "warn" and the job is continue-on-error until
+  # the budget is ratified with real numbers, then flip to enforce.
+  lighthouse:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (production)
+        run: npm run build
+        env:
+          # Lock disabled (no DEV_PREVIEW_PASSWORD) so routes are reachable;
+          # integrations unconfigured → cards render their empty/skeleton states.
+          VAULT_PATH: /tmp/vault
+          MONGODB_URI: mongodb://localhost:27017/test
+          AGENT_OS_DATA_PATH: /tmp/agent-os-data
+
+      - name: Lighthouse CI
+        run: |
+          mkdir -p /tmp/vault
+          npx --yes @lhci/cli@0.16.x autorun
+        env:
+          VAULT_PATH: /tmp/vault
+          MONGODB_URI: mongodb://localhost:27017/test
+          AGENT_OS_DATA_PATH: /tmp/agent-os-data

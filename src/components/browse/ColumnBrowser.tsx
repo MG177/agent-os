@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronLeft, ChevronRight, FileText, Folder } from "lucide-react";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
 import type {
@@ -59,7 +60,7 @@ function RowChevron({ className }: { className?: string }) {
   );
 }
 
-function ColumnRow({
+const ColumnRow = memo(function ColumnRow({
   selected,
   isDirectory,
   label,
@@ -71,7 +72,7 @@ function ColumnRow({
   onClick: () => void;
 }) {
   return (
-    <li className="px-1">
+    <div className="px-1">
       <button
         type="button"
         onClick={onClick}
@@ -100,9 +101,9 @@ function ColumnRow({
           <span className="h-3 w-3 shrink-0" aria-hidden />
         )}
       </button>
-    </li>
+    </div>
   );
-}
+});
 
 type ColumnState = BrowseColumn & { loading?: boolean };
 
@@ -176,21 +177,50 @@ function FilePreview({ file }: { file: BrowseFileResult }) {
   );
 }
 
+/** Row height estimate for the virtualizer (button min-h 1.625rem + py-1). */
+const COLUMN_ROW_PX = 34;
+
 function ColumnList({
   column,
   columnIndex,
   selectedSegment,
   onSelect,
+  mounted,
   mobileOnly,
 }: {
   column: ColumnState;
   columnIndex: number;
   selectedSegment: string | undefined;
   onSelect: (columnIndex: number, entry: BrowseEntry) => void;
+  /** Virtualize only after mount so SSR/first-paint markup matches (no mismatch). */
+  mounted: boolean;
   mobileOnly?: boolean;
 }) {
-  const dirs = column.entries.filter((e) => e.type === "directory");
-  const files = column.entries.filter((e) => e.type === "file");
+  // Directories first, then files — same order as before, one flat array.
+  const entries = useMemo(() => {
+    const dirs = column.entries.filter((e) => e.type === "directory");
+    const files = column.entries.filter((e) => e.type === "file");
+    return [...dirs, ...files];
+  }, [column.entries]);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const virtualizer = useVirtualizer({
+    count: entries.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => COLUMN_ROW_PX,
+    overscan: 12,
+    getItemKey: (i) => `${entries[i].type}:${entries[i].name}`,
+  });
+
+  const rowFor = (entry: BrowseEntry) => (
+    <ColumnRow
+      key={`${entry.type}:${entry.name}`}
+      selected={selectedSegment === entry.name}
+      isDirectory={entry.type === "directory"}
+      label={entry.type === "file" ? entry.name.replace(/\.md$/, "") : entry.name}
+      onClick={() => onSelect(columnIndex, entry)}
+    />
+  );
 
   return (
     <div
@@ -213,31 +243,38 @@ function ColumnList({
             />
           ))}
         </div>
-      ) : column.entries.length === 0 ? (
+      ) : entries.length === 0 ? (
         <p className="px-3 py-6 text-center text-xs text-slate-400">
           Empty folder
         </p>
+      ) : !mounted ? (
+        // SSR / first client paint: plain list (matches server markup).
+        <div className="min-h-0 flex-1 overflow-y-auto py-1">
+          {entries.map(rowFor)}
+        </div>
       ) : (
-        <ul className="min-h-0 flex-1 overflow-y-auto py-1">
-          {dirs.map((entry) => (
-            <ColumnRow
-              key={entry.name}
-              selected={selectedSegment === entry.name}
-              isDirectory
-              label={entry.name}
-              onClick={() => onSelect(columnIndex, entry)}
-            />
-          ))}
-          {files.map((entry) => (
-            <ColumnRow
-              key={entry.name}
-              selected={selectedSegment === entry.name}
-              isDirectory={false}
-              label={entry.name.replace(/\.md$/, "")}
-              onClick={() => onSelect(columnIndex, entry)}
-            />
-          ))}
-        </ul>
+        // Post-mount: windowed — only the visible rows stay in the DOM.
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto py-1">
+          <div
+            className="relative w-full"
+            style={{ height: virtualizer.getTotalSize() }}
+          >
+            {virtualizer.getVirtualItems().map((vi) => {
+              const entry = entries[vi.index];
+              return (
+                <div
+                  key={vi.key}
+                  data-index={vi.index}
+                  ref={virtualizer.measureElement}
+                  className="absolute left-0 top-0 w-full"
+                  style={{ transform: `translateY(${vi.start}px)` }}
+                >
+                  {rowFor(entry)}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -259,6 +296,9 @@ export default function ColumnBrowser({
 
   const [columns, setColumns] = useState<ColumnState[]>(initialColumns);
   const [file, setFile] = useState<BrowseFileResult | null>(initialFile);
+  // Gate virtualization until after mount so SSR markup matches first client paint.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const pathFromUrl = parseBrowsePath(pathname);
   const activePath = pathFromUrl.length > 0 ? pathFromUrl : initialPath;
@@ -429,6 +469,7 @@ export default function ColumnBrowser({
                 columnIndex={i}
                 selectedSegment={selectedSegment}
                 onSelect={selectEntry}
+                mounted={mounted}
               />
             );
           })}
@@ -438,6 +479,7 @@ export default function ColumnBrowser({
               columnIndex={mobileColumnIndex}
               selectedSegment={mobileSelected}
               onSelect={selectEntry}
+              mounted={mounted}
               mobileOnly
             />
           )}

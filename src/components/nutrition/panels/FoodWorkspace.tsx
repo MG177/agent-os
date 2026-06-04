@@ -1,8 +1,9 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Broccoli, Pencil, Plus } from "lucide-react";
 import SearchField from "@/components/ui/SearchField";
+import { useDebouncedValue } from "@/lib/useDebouncedValue";
 import type { FoodEntry } from "../types";
 
 const MACRO_FIELDS = [
@@ -16,6 +17,72 @@ const MACRO_FIELDS = [
 
 type FormField = (typeof MACRO_FIELDS)[number]["field"];
 type FormState = { name: string } & Record<FormField, string>;
+
+function foodToForm(food: FoodEntry): FormState {
+  const { per_100g } = food;
+  return {
+    name: food.display_name,
+    calories: String(per_100g.calories),
+    protein_g: String(per_100g.protein_g),
+    carb_g: String(per_100g.carb_g),
+    fat_g: String(per_100g.fat_g),
+    fiber_g: per_100g.fiber_g != null ? String(per_100g.fiber_g) : "",
+    sugar_g: per_100g.sugar_g != null ? String(per_100g.sugar_g) : "",
+  };
+}
+
+/** Memoized library row (the main `<tr>`). The mobile portion-entry expander
+ *  lives in the parent so changing the portion only re-renders that one row,
+ *  not the whole table. */
+const FoodRow = memo(function FoodRow({
+  food,
+  active,
+  onRowClick,
+  onEdit,
+}: {
+  food: FoodEntry;
+  active: boolean;
+  onRowClick: (e: React.MouseEvent<HTMLTableRowElement>, food: FoodEntry) => void;
+  onEdit: (food: FoodEntry) => void;
+}) {
+  return (
+    <tr
+      onClick={(e) => onRowClick(e, food)}
+      className={`cursor-pointer transition-colors ${
+        active ? "bg-blue-50" : "hover:bg-slate-50"
+      }`}
+    >
+      <td className="px-4 py-3 font-medium text-slate-800">
+        {food.display_name}
+      </td>
+      <td className="px-3 py-3 text-right tabular-nums text-blue-600">
+        {food.per_100g.protein_g}g
+      </td>
+      <td className="px-3 py-3 text-right tabular-nums text-emerald-600">
+        {food.per_100g.carb_g}g
+      </td>
+      <td className="px-3 py-3 text-right tabular-nums text-amber-600">
+        {food.per_100g.fat_g}g
+      </td>
+      <td className="px-4 py-3 text-right font-bold tabular-nums text-violet-600">
+        {food.per_100g.calories}
+      </td>
+      <td className="px-2 py-3 text-right">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(food);
+          }}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600"
+          aria-label={`Edit ${food.display_name}`}
+        >
+          <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden />
+        </button>
+      </td>
+    </tr>
+  );
+});
 
 const EMPTY_FORM: FormState = {
   name: "",
@@ -60,6 +127,12 @@ export default function FoodWorkspace({
   const [popoverFood, setPopoverFood] = useState<FoodEntry | null>(null);
   const [popoverPos, setPopoverPos] = useState<{ x: number; y: number } | null>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
+  // Mirror of popoverFood so the row click handler can stay referentially stable
+  // (keeps FoodRow's React.memo effective).
+  const popoverFoodRef = useRef<FoodEntry | null>(null);
+  useEffect(() => {
+    popoverFoodRef.current = popoverFood;
+  }, [popoverFood]);
 
   useEffect(() => {
     if (!popoverFood) return;
@@ -106,7 +179,10 @@ export default function FoodWorkspace({
     return () => window.removeEventListener("nutrition:updated", onUpdate);
   }, [loadFrequency]);
 
-  const q = query.trim().toLowerCase();
+  // Debounce the query that drives filtering — the input stays responsive while
+  // the O(n) filter + table re-render only runs once the user pauses typing.
+  const debouncedQuery = useDebouncedValue(query, 200);
+  const q = debouncedQuery.trim().toLowerCase();
 
   const exactMatch = useMemo(
     () => foods.some((f) => f.display_name.toLowerCase() === q),
@@ -158,10 +234,11 @@ export default function FoodWorkspace({
       ? Math.round(((popoverFood.per_100g.calories * quantity) / 100) * 10) / 10
       : 0;
 
-  function handleRowClick(e: React.MouseEvent<HTMLTableRowElement>, food: FoodEntry) {
+  const handleRowClick = useCallback(
+    (e: React.MouseEvent<HTMLTableRowElement>, food: FoodEntry) => {
     const isDesktop = window.matchMedia("(min-width: 768px)").matches;
     if (isDesktop) {
-      if (popoverFood?.key === food.key) {
+      if (popoverFoodRef.current?.key === food.key) {
         setPopoverFood(null);
         setPopoverPos(null);
         setSelectedKey(null);
@@ -180,7 +257,9 @@ export default function FoodWorkspace({
     } else {
       selectFood(food.key);
     }
-  }
+    },
+    [selectFood],
+  );
 
   async function logMeal(food: FoodEntry) {
     if (!quantity) {
@@ -211,19 +290,6 @@ export default function FoodWorkspace({
     setLogging(false);
   }
 
-  function foodToForm(food: FoodEntry): FormState {
-    const { per_100g } = food;
-    return {
-      name: food.display_name,
-      calories: String(per_100g.calories),
-      protein_g: String(per_100g.protein_g),
-      carb_g: String(per_100g.carb_g),
-      fat_g: String(per_100g.fat_g),
-      fiber_g: per_100g.fiber_g != null ? String(per_100g.fiber_g) : "",
-      sugar_g: per_100g.sugar_g != null ? String(per_100g.sugar_g) : "",
-    };
-  }
-
   function closeForm() {
     setShowForm(false);
     setEditingKey(null);
@@ -241,7 +307,7 @@ export default function FoodWorkspace({
     setShowForm(true);
   }
 
-  function openEditForm(food: FoodEntry) {
+  const openEditForm = useCallback((food: FoodEntry) => {
     setEditingKey(food.key);
     setForm(foodToForm(food));
     setFormError("");
@@ -249,7 +315,7 @@ export default function FoodWorkspace({
     setPopoverFood(null);
     setPopoverPos(null);
     setShowForm(true);
-  }
+  }, []);
 
   async function handleSaveFood() {
     setFormError("");
@@ -442,41 +508,12 @@ export default function FoodWorkspace({
                   const active = selectedKey === food.key;
                   return (
                     <Fragment key={food.key}>
-                      <tr
-                        onClick={(e) => handleRowClick(e, food)}
-                        className={`cursor-pointer transition-colors ${
-                          active ? "bg-blue-50" : "hover:bg-slate-50"
-                        }`}
-                      >
-                        <td className="px-4 py-3 font-medium text-slate-800">
-                          {food.display_name}
-                        </td>
-                        <td className="px-3 py-3 text-right tabular-nums text-blue-600">
-                          {food.per_100g.protein_g}g
-                        </td>
-                        <td className="px-3 py-3 text-right tabular-nums text-emerald-600">
-                          {food.per_100g.carb_g}g
-                        </td>
-                        <td className="px-3 py-3 text-right tabular-nums text-amber-600">
-                          {food.per_100g.fat_g}g
-                        </td>
-                        <td className="px-4 py-3 text-right font-bold tabular-nums text-violet-600">
-                          {food.per_100g.calories}
-                        </td>
-                        <td className="px-2 py-3 text-right">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openEditForm(food);
-                            }}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600"
-                            aria-label={`Edit ${food.display_name}`}
-                          >
-                            <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden />
-                          </button>
-                        </td>
-                      </tr>
+                      <FoodRow
+                        food={food}
+                        active={active}
+                        onRowClick={handleRowClick}
+                        onEdit={openEditForm}
+                      />
 
                       {active && (
                         <tr className="bg-blue-50/60 md:hidden">

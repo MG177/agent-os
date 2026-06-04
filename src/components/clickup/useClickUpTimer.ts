@@ -1,41 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useResource, mutate } from "@/lib/data/useResource";
+import { KEYS } from "@/lib/data/keys";
 import type { ClickUpTimeEntry } from "@/components/clickup/types";
+
+type TimeResponse = { entry: ClickUpTimeEntry | null };
 
 /**
  * Tracks the workspace's single running time entry and exposes start/stop.
- * Shared by the Tasks header chip, the detail panel, and the Home widget.
+ * Shared by the Tasks header chip, the detail modal, and the Home widget.
+ *
+ * The 1s elapsed tick lives in `<ElapsedTime>`, not here — so consumers of
+ * this hook only re-render when the entry itself changes (start/stop), not
+ * every second while a timer runs.
  */
 export function useClickUpTimer() {
-  const [entry, setEntry] = useState<ClickUpTimeEntry | null>(null);
+  const { data } = useResource<TimeResponse>(KEYS.clickupTime, undefined, {
+    // The endpoint may 401/503 when ClickUp isn't connected — treat as "no timer".
+    shouldRetryOnError: false,
+    onError: () => {},
+  });
+  const entry = data?.entry ?? null;
   const [busy, setBusy] = useState(false);
-  const [now, setNow] = useState(() => Date.now());
 
-  const refresh = useCallback(async () => {
-    try {
-      const res = await fetch("/api/clickup/time");
-      if (!res.ok) {
-        setEntry(null);
-        return;
-      }
-      const data = await res.json();
-      setEntry(data.entry ?? null);
-    } catch {
-      setEntry(null);
-    }
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  // Tick once a second only while a timer is running.
-  useEffect(() => {
-    if (!entry) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [entry]);
+  const refresh = useCallback(() => mutate(KEYS.clickupTime), []);
 
   const start = useCallback(async (taskId: string) => {
     setBusy(true);
@@ -46,9 +35,8 @@ export function useClickUpTimer() {
         body: JSON.stringify({ action: "start", taskId }),
       });
       if (res.ok) {
-        const data = await res.json();
-        setEntry(data.entry ?? null);
-        setNow(Date.now());
+        const d = await res.json();
+        await mutate(KEYS.clickupTime, { entry: d.entry ?? null }, false);
       }
     } finally {
       setBusy(false);
@@ -63,11 +51,11 @@ export function useClickUpTimer() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "stop" }),
       });
-      if (res.ok) setEntry(null);
+      if (res.ok) await mutate(KEYS.clickupTime, { entry: null }, false);
     } finally {
       setBusy(false);
     }
   }, []);
 
-  return { entry, now, busy, start, stop, refresh };
+  return { entry, busy, start, stop, refresh };
 }
