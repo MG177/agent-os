@@ -23,6 +23,8 @@ export type CalendarEventRowProps = {
   temporalState?: EventTemporalState | null;
   /** Marks row for auto-scroll anchor in Home card. */
   scheduleAnchor?: boolean;
+  /** Overrides default start clock (e.g. day prefix in 24h window). */
+  startTimeLabel?: string;
 };
 
 export function CalendarEventRow({
@@ -35,6 +37,7 @@ export function CalendarEventRow({
   showNowBadge = true,
   temporalState = null,
   scheduleAnchor = false,
+  startTimeLabel,
 }: CalendarEventRowProps) {
   const visual = deriveCalendarVisual(event.calendarId);
   const happening =
@@ -42,7 +45,7 @@ export function CalendarEventRow({
     (temporalState === null && showNowBadge && isEventHappeningNow(event));
   const isUpNext = temporalState === "next";
   const timeLabel = formatEventTimeRange(event);
-  const startClock = formatEventTimeShort(event);
+  const startClock = startTimeLabel ?? formatEventTimeShort(event);
 
   if (dense) {
     const isPast = temporalState === "past";
@@ -56,14 +59,14 @@ export function CalendarEventRow({
             : "";
 
     const rowClass = `flex items-center gap-2 border-b border-slate-50 px-3 py-1.5 last:border-0 ${stateClass} ${clickable && event.htmlLink
-        ? "cursor-pointer hover:bg-slate-50/80"
-        : ""
+      ? "cursor-pointer hover:bg-slate-50/80"
+      : ""
       }`;
 
     const content = (
       <>
         <span
-          className={`w-9 shrink-0 text-[10px] font-semibold tabular-nums ${isPast ? "text-slate-400" : "text-slate-500"}`}
+          className={`min-w-[3.25rem] shrink-0 text-[10px] font-semibold tabular-nums leading-tight ${isPast ? "text-slate-400" : "text-slate-500"}`}
         >
           {event.allDay ? "All day" : startClock}
         </span>
@@ -210,8 +213,8 @@ export function CalendarEventRow({
   );
 
   const rowClass = `flex gap-3 border-b border-slate-50 py-3 last:border-0 transition-colors ${stateClass} ${clickable && event.htmlLink
-      ? "cursor-pointer hover:bg-slate-50/80"
-      : ""
+    ? "cursor-pointer hover:bg-slate-50/80"
+    : ""
     }`;
 
   if (clickable && event.htmlLink) {

@@ -22,8 +22,9 @@ import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/ty
 type CalendarStatus = { configured: boolean; connected: boolean };
 type EventsResponse = { events: CalendarEventSummary[] };
 
-/** Tall schedule card — no max-height cap; inner chart clips only horizontally. */
-const HOME_SCHEDULE_CARD_CLASS = "min-h-[19rem] lg:min-h-[23rem]";
+/** Desktop: tall Gantt card. Mobile agenda is content-height. */
+const HOME_SCHEDULE_CARD_CLASS =
+  "min-h-0 md:min-h-[19rem] lg:min-h-[23rem]";
 
 /** Fetches the home 24h window using the current time for the URL, but uses a
  *  stable synthetic key so SWR/localStorage treats it as the same resource. */
