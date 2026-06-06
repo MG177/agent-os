@@ -159,7 +159,7 @@ export function AddTodoSheet({ open, onClose, onSaved, editing }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
+    <div className="app-modal-overlay flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl">
         {/* Header */}
@@ -277,7 +277,10 @@ export function AddTodoSheet({ open, onClose, onSaved, editing }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="shrink-0 border-t border-slate-100 px-6 py-4">
+        <div
+          className="shrink-0 border-t border-slate-100 px-6 py-4"
+          style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
+        >
           <div className="flex gap-2">
             <button
               type="button"

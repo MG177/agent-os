@@ -249,7 +249,7 @@ export function TaskDetailModal({
     /* Backdrop */
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 backdrop-blur-[2px] sm:items-center sm:p-4"
+      className="app-modal-overlay flex items-end justify-center bg-slate-900/40 backdrop-blur-[2px] sm:items-center sm:p-4"
       onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
     >
       {/* Modal sheet */}
@@ -504,6 +504,7 @@ export function TaskDetailModal({
         <form
           onSubmit={postComment}
           className="flex items-center gap-2 border-t border-slate-100 px-4 py-3"
+          style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0px))" }}
         >
           <input
             value={commentText}

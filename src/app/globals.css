@@ -3,6 +3,22 @@
 :root {
   /* Mobile bottom bar: h-16 (4rem) + border-t (1px) + home-indicator safe area */
   --app-mobile-nav-offset: calc(4rem + 1px + env(safe-area-inset-bottom, 0px));
+  /* Z stack: bottom nav 50 · full-screen sheets 60 · nested popovers 70 */
+  --app-z-nav: 50;
+  --app-z-modal: 60;
+  --app-z-popover: 70;
+}
+
+/* Full-viewport modal / bottom-sheet overlay — must sit above `.app-bottom-nav`. */
+.app-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--app-z-modal);
+}
+
+.app-bottom-nav,
+.app-assistant-fab {
+  z-index: var(--app-z-nav);
 }
 
 @theme inline {
