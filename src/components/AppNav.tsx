@@ -85,7 +85,7 @@ export default function AppNav() {
         href="/assistant"
         aria-label="Open Assistant"
         aria-current={assistantActive ? "page" : undefined}
-        style={{ bottom: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}
+        style={{ bottom: "calc(var(--app-mobile-nav-offset) + 1rem)" }}
         className={`fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-lg shadow-blue-300/50 transition-transform active:scale-95 md:hidden ${
           panel ? "hidden" : ""
         } ${assistantActive ? "ring-2 ring-blue-300 ring-offset-2" : ""}`}

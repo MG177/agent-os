@@ -15,7 +15,7 @@ export default function ShellLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Center — single render, always visible */}
-      <div className="flex-1 min-w-0 overflow-y-auto pb-16 md:pb-0">
+      <div className="flex-1 min-w-0 overflow-y-auto pb-[var(--app-mobile-nav-offset)] md:pb-0">
         {children}
       </div>
 
