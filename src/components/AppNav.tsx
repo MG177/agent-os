@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQuickPanel } from "@/components/QuickPanelContext";
 import {
-  IconActivity,
   IconAssistant,
   IconCapture,
   IconHome,
   IconNutrition,
+  IconTasks,
 } from "@/components/ui/icons";
 
 type Tab = {
@@ -38,10 +38,10 @@ const TABS: Tab[] = [
     Icon: IconNutrition,
   },
   {
-    href: "/activity",
-    label: "Activity",
-    match: (p: string) => p === "/activity",
-    Icon: IconActivity,
+    href: "/todo",
+    label: "Todo",
+    match: (p: string) => p.startsWith("/todo"),
+    Icon: IconTasks,
   },
 ];
 
