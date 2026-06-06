@@ -66,7 +66,7 @@ export default function BrowseHubPage() {
   }));
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-slate-50">
+    <div className="flex min-h-0 flex-col bg-slate-50 md:h-full">
       {/* Toolbar — matches the column browser header */}
       <div className="flex shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 py-2.5">
         <h1 className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-900">
@@ -77,7 +77,7 @@ export default function BrowseHubPage() {
         </span>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 md:overflow-y-auto">
         <Page variant="dashboard" fill={false}>
           <PageBody>
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6">

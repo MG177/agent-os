@@ -42,7 +42,9 @@ export function Page({
     <div
       className={[
         VARIANT_CLASS[variant],
-        shouldFill && "flex min-h-0 flex-1 flex-col",
+        // Mobile: no flex-1 and no shrink — otherwise the shell compresses below
+        // its content and paints under the fixed bottom nav; main scroll handles clearance.
+        shouldFill && "flex shrink-0 flex-col md:min-h-0 md:shrink md:flex-1",
         scrollClass,
         className,
       ]

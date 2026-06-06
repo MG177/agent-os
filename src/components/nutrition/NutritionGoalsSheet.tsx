@@ -123,7 +123,7 @@ export default function NutritionGoalsSheet({
     (parseFloat(form.fat_g) || 0) * 9;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center md:items-center md:p-4">
+    <div className="app-modal-overlay flex items-end justify-center md:items-center md:p-4">
       <button
         type="button"
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"

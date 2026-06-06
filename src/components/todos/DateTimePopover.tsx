@@ -147,7 +147,7 @@ export function DateTimePopover({
                 typeof window !== "undefined" ? window.innerWidth - 16 : POP_WIDTH,
               ),
             }}
-            className="fixed z-[60] rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl"
+            className="fixed z-[var(--app-z-popover)] rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl"
           >
             <DateTimePicker
               value={value}

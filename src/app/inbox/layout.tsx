@@ -4,6 +4,6 @@ export default function InboxLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>
+    <div className="app-route-layout overflow-hidden">{children}</div>
   );
 }

@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQuickPanel } from "@/components/QuickPanelContext";
 import {
-  IconActivity,
   IconAssistant,
   IconCapture,
   IconHome,
   IconNutrition,
+  IconTasks,
 } from "@/components/ui/icons";
 
 type Tab = {
@@ -38,10 +38,10 @@ const TABS: Tab[] = [
     Icon: IconNutrition,
   },
   {
-    href: "/activity",
-    label: "Activity",
-    match: (p: string) => p === "/activity",
-    Icon: IconActivity,
+    href: "/todo",
+    label: "Todo",
+    match: (p: string) => p.startsWith("/todo"),
+    Icon: IconTasks,
   },
 ];
 
@@ -85,8 +85,8 @@ export default function AppNav() {
         href="/assistant"
         aria-label="Open Assistant"
         aria-current={assistantActive ? "page" : undefined}
-        style={{ bottom: "calc(5rem + env(safe-area-inset-bottom, 0px))" }}
-        className={`fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-lg shadow-blue-300/50 transition-transform active:scale-95 md:hidden ${
+        style={{ bottom: "calc(var(--app-mobile-nav-offset) + 1rem)" }}
+        className={`app-assistant-fab fixed right-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-lg shadow-blue-300/50 transition-transform active:scale-95 md:hidden ${
           panel ? "hidden" : ""
         } ${assistantActive ? "ring-2 ring-blue-300 ring-offset-2" : ""}`}
       >
@@ -94,7 +94,7 @@ export default function AppNav() {
       </Link>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/90 backdrop-blur-md md:hidden"
+        className="app-bottom-nav fixed bottom-0 left-0 right-0 border-t border-slate-200/80 bg-white/90 backdrop-blur-md md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
         aria-label="Main"
       >
