@@ -5,8 +5,16 @@
 //   - bypass cache for /api/* (always network)
 //   - stale-while-revalidate for static /_next/* assets
 
-const VERSION = 'agent-os-v1';
-const SHELL_URLS = ['/', '/manifest.webmanifest', '/icon.svg'];
+const VERSION = 'agent-os-v2';
+const SHELL_URLS = [
+  '/',
+  '/manifest.webmanifest',
+  '/app-icon.png',
+  '/app-icon-192.png',
+  '/app-icon-512.png',
+  '/app-icon-180.png',
+  '/icon.svg',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

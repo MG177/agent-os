@@ -150,6 +150,10 @@ export const PUBLIC_LOCK_BYPASS_PATHS = new Set([
   "/manifest.webmanifest",
   "/sw.js",
   "/icon.svg",
+  "/app-icon.png",
+  "/app-icon-192.png",
+  "/app-icon-512.png",
+  "/app-icon-180.png",
 ]);
 
 export function isPublicLockBypassPath(pathname: string): boolean {

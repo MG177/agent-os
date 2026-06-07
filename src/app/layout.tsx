@@ -13,6 +13,13 @@ export const metadata: Metadata = {
   title: "Agent OS",
   description: "Personal Agent OS — PARA capture and nutrition tracking",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/app-icon.png", type: "image/png" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/app-icon-180.png", sizes: "180x180", type: "image/png" }],
+  },
   appleWebApp: {
     capable: true,
     title: "Agent OS",
