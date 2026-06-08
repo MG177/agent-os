@@ -1,14 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { TriggerRow } from "./TriggerRow";
 import { DateTimePicker } from "./DateTimePicker";
 import type { TriggerDoc } from "@/lib/trigger-format";
 import type { TodoDoc } from "@/lib/todos";
+import {
+  AppModal,
+  AppModalBody,
+  AppModalFooter,
+  AppModalHeader,
+} from "@/components/ui/app-modal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function defaultDueAt(): string {
-  // Tomorrow at 9:00 AM, local — a sensible reminder default.
   const d = new Date();
   d.setDate(d.getDate() + 1);
   d.setHours(9, 0, 0, 0);
@@ -41,13 +51,6 @@ export function AddTodoSheet({ open, onClose, onSaved, editing }: Props) {
   const [triggers, setTriggers] = useState<TriggerDoc[]>([defaultTrigger()]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [open, onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -156,150 +159,127 @@ export function AddTodoSheet({ open, onClose, onSaved, editing }: Props) {
     }
   }
 
-  if (!open) return null;
-
   return (
-    <div className="app-modal-overlay flex items-end justify-center sm:items-center">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl">
-        {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-6 py-4">
-          <h2 className="text-base font-bold text-slate-900">
-            {editing ? "Edit Reminder" : "New Reminder"}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-          >
-            <X strokeWidth={2} className="h-4 w-4" />
-          </button>
-        </div>
+    <AppModal open={open} onOpenChange={(v) => !v && onClose()}>
+      <AppModalHeader
+        title={editing ? "Edit Reminder" : "New Reminder"}
+        onClose={onClose}
+      />
 
-        {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <form id="todo-form" onSubmit={handleSubmit} className="space-y-4">
-            {/* Title + Type */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="col-span-2">
-                <label className="mb-1 block text-xs font-semibold text-slate-700">Title</label>
-                <input
-                  className="app-input w-full"
-                  placeholder="Drink water, Take medicine…"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  autoFocus
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">Type</label>
-                <div className="flex gap-1">
-                  {(["once", "recurring"] as const).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setType(t)}
-                      className={`flex-1 rounded-xl border py-2.5 text-xs font-medium transition-colors ${
-                        type === t
-                          ? "border-blue-600 bg-blue-50 font-semibold text-blue-700"
-                          : "border-slate-200 text-slate-600 hover:bg-slate-50"
-                      }`}
-                    >
-                      {t === "once" ? "Once" : "Recurring"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* One-time: date/time */}
-            {type === "once" && (
-              <div>
-                <label className="mb-2 block text-xs font-semibold text-slate-700">When</label>
-                <DateTimePicker value={dueAt} onChange={setDueAt} minDate={new Date()} />
-              </div>
-            )}
-
-            {/* Recurring: triggers table */}
-            {type === "recurring" && (
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <label className="text-xs font-semibold text-slate-700">
-                    Triggers
-                    <span className="ml-1 font-normal text-slate-400">— fires on whichever comes first</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={addTrigger}
-                    className="flex items-center gap-1 text-xs font-semibold text-blue-600 transition-colors hover:text-blue-700"
-                  >
-                    <Plus strokeWidth={2.5} className="h-3 w-3" />
-                    Add trigger
-                  </button>
-                </div>
-                <div className="overflow-hidden rounded-2xl border border-slate-200">
-                  <div className="grid grid-cols-12 gap-2 bg-slate-50 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                    <div className="col-span-3">Type</div>
-                    <div className="col-span-7">Schedule</div>
-                    <div className="col-span-2 text-right">Next</div>
-                  </div>
-                  {triggers.map((t, idx) => (
-                    <TriggerRow
-                      key={t.id}
-                      trigger={t}
-                      onChange={(updated) => updateTrigger(idx, updated)}
-                      onRemove={() => removeTrigger(idx)}
-                      canRemove={triggers.length > 1}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Notes */}
-            <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-700">
-                Notes <span className="font-normal text-slate-400">(optional)</span>
-              </label>
-              <textarea
-                className="app-input w-full resize-none"
-                rows={2}
-                placeholder="Any extra details…"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+      <AppModalBody>
+        <form id="todo-form" onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="col-span-2">
+              <Label className="mb-1 block text-xs font-semibold text-slate-700">
+                Title
+              </Label>
+              <Input
+                placeholder="Drink water, Take medicine…"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                autoFocus
               />
             </div>
-
-            {error && (
-              <p className="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">{error}</p>
-            )}
-          </form>
-        </div>
-
-        {/* Footer */}
-        <div
-          className="shrink-0 border-t border-slate-100 px-6 py-4"
-          style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
-        >
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              form="todo-form"
-              disabled={saving}
-              className="app-btn-primary flex-1"
-            >
-              {saving ? "Saving…" : editing ? "Save Changes" : "Add Reminder"}
-            </button>
+            <div>
+              <Label className="mb-1 block text-xs font-semibold text-slate-700">
+                Type
+              </Label>
+              <ToggleGroup
+                value={[type]}
+                onValueChange={(v) => {
+                  const next = v[0] as "once" | "recurring" | undefined;
+                  if (next) setType(next);
+                }}
+                spacing={0}
+                className="w-full"
+              >
+                {(["once", "recurring"] as const).map((t) => (
+                  <ToggleGroupItem
+                    key={t}
+                    value={t}
+                    className="flex-1 rounded-xl border py-2.5 text-xs data-[state=on]:border-blue-600 data-[state=on]:bg-blue-50 data-[state=on]:font-semibold data-[state=on]:text-blue-700"
+                  >
+                    {t === "once" ? "Once" : "Recurring"}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
           </div>
+
+          {type === "once" && (
+            <div>
+              <Label className="mb-2 block text-xs font-semibold text-slate-700">
+                When
+              </Label>
+              <DateTimePicker value={dueAt} onChange={setDueAt} minDate={new Date()} />
+            </div>
+          )}
+
+          {type === "recurring" && (
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <Label className="text-xs font-semibold text-slate-700">
+                  Triggers
+                  <span className="ml-1 font-normal text-slate-400">— fires on whichever comes first</span>
+                </Label>
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  onClick={addTrigger}
+                  className="h-auto gap-1 p-0 text-xs font-semibold"
+                >
+                  <Plus strokeWidth={2.5} className="size-3" />
+                  Add trigger
+                </Button>
+              </div>
+              <div className="overflow-hidden rounded-2xl border border-slate-200">
+                <div className="grid grid-cols-12 gap-2 bg-slate-50 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  <div className="col-span-3">Type</div>
+                  <div className="col-span-7">Schedule</div>
+                  <div className="col-span-2 text-right">Next</div>
+                </div>
+                {triggers.map((t, idx) => (
+                  <TriggerRow
+                    key={t.id}
+                    trigger={t}
+                    onChange={(updated) => updateTrigger(idx, updated)}
+                    onRemove={() => removeTrigger(idx)}
+                    canRemove={triggers.length > 1}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <Label className="mb-1 block text-xs font-semibold text-slate-700">
+              Notes <span className="font-normal text-slate-400">(optional)</span>
+            </Label>
+            <Textarea
+              rows={2}
+              placeholder="Any extra details…"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </div>
+
+          {error && (
+            <p className="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">{error}</p>
+          )}
+        </form>
+      </AppModalBody>
+
+      <AppModalFooter>
+        <div className="flex gap-2">
+          <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" form="todo-form" disabled={saving} className="flex-1">
+            {saving ? "Saving…" : editing ? "Save Changes" : "Add Reminder"}
+          </Button>
         </div>
-      </div>
-    </div>
+      </AppModalFooter>
+    </AppModal>
   );
 }

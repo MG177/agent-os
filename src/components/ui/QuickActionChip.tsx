@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const STYLES = {
   blue: "border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100 hover:border-blue-300",
@@ -25,10 +27,14 @@ export function QuickActionChip({
   icon: React.ReactNode;
   variant: keyof typeof STYLES;
 }) {
-  const className = `inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold shadow-sm transition-colors ${STYLES[variant]}`;
+  const className = cn(
+    buttonVariants({ variant: "outline", size: "default" }),
+    "min-h-11 gap-2 rounded-full border px-4 font-semibold shadow-sm",
+    STYLES[variant],
+  );
   const content = (
     <>
-      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/80 text-sm">
+      <span className="flex size-6 items-center justify-center rounded-full bg-white/80 text-sm">
         {icon}
       </span>
       {label}

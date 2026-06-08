@@ -2,6 +2,14 @@
 
 import { useEffect, useState } from "react";
 import type { MacroGoals } from "./types";
+import {
+  AppModal,
+  AppModalBody,
+  AppModalFooter,
+  AppModalHeader,
+} from "@/components/ui/app-modal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const GOAL_FIELDS = [
   {
@@ -74,17 +82,6 @@ export default function NutritionGoalsSheet({
     }
   }, [open, goals]);
 
-  useEffect(() => {
-    if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
-  if (!open) return null;
-
   async function handleSave() {
     setError("");
     const updated: MacroGoals = {
@@ -123,105 +120,73 @@ export default function NutritionGoalsSheet({
     (parseFloat(form.fat_g) || 0) * 9;
 
   return (
-    <div className="app-modal-overlay flex items-end justify-center md:items-center md:p-4">
-      <button
-        type="button"
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-        aria-label="Close goals"
-        onClick={onClose}
+    <AppModal open={open} onOpenChange={(v) => !v && onClose()} maxWidth="lg">
+      <AppModalHeader
+        title="Daily goals"
+        description="Macro targets for tracking"
+        onClose={onClose}
       />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="nutrition-goals-title"
-        className="relative z-10 flex max-h-[90dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-slate-100 bg-white shadow-xl md:rounded-3xl"
-      >
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <div>
-            <h2
-              id="nutrition-goals-title"
-              className="text-lg font-bold text-slate-900"
-            >
-              Daily goals
-            </h2>
-            <p className="text-xs text-slate-400">Macro targets for tracking</p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-slate-700"
-            aria-label="Close"
-          >
-            ×
-          </button>
-        </div>
 
-        <div className="overflow-y-auto px-5 py-4 space-y-3">
-          {GOAL_FIELDS.map(({ key, label, unit, color, bg, hint }) => (
-            <div key={key} className={`${bg} rounded-2xl p-4`}>
-              <div className="mb-2 flex items-center justify-between">
-                <div>
-                  <p className={`text-sm font-semibold ${color}`}>{label}</p>
-                  <p className="mt-0.5 text-[10px] text-slate-400">{hint}</p>
-                </div>
-                <span className="text-xs tabular-nums text-slate-400">
-                  {goals[key]} {unit}
-                </span>
+      <AppModalBody className="space-y-3">
+        {GOAL_FIELDS.map(({ key, label, unit, color, bg, hint }) => (
+          <div key={key} className={`${bg} rounded-2xl p-4`}>
+            <div className="mb-2 flex items-center justify-between">
+              <div>
+                <p className={`text-sm font-semibold ${color}`}>{label}</p>
+                <p className="mt-0.5 text-[10px] text-slate-400">{hint}</p>
               </div>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={form[key]}
-                  onChange={(e) => {
-                    setForm((p) => ({ ...p, [key]: e.target.value }));
-                    setError("");
-                  }}
-                  className="w-full rounded-xl bg-white/70 py-2.5 pl-4 pr-12 text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
-                  {unit}
-                </span>
-              </div>
-            </div>
-          ))}
-
-          {totalCals > 0 && (
-            <p className="text-[10px] text-slate-500">
-              Macro-implied calories:{" "}
-              <span className="font-semibold tabular-nums text-slate-700">
-                {Math.round(totalCals)} kcal
+              <span className="text-xs tabular-nums text-slate-400">
+                {goals[key]} {unit}
               </span>
-            </p>
-          )}
+            </div>
+            <div className="relative">
+              <Input
+                type="number"
+                value={form[key]}
+                onChange={(e) => {
+                  setForm((p) => ({ ...p, [key]: e.target.value }));
+                  setError("");
+                }}
+                className="rounded-xl bg-white/70 pr-12 font-semibold focus:bg-white"
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
+                {unit}
+              </span>
+            </div>
+          </div>
+        ))}
 
-          {error && (
-            <p className="text-xs font-medium text-red-600" role="alert">
-              {error}
-            </p>
-          )}
-        </div>
+        {totalCals > 0 && (
+          <p className="text-[10px] text-slate-500">
+            Macro-implied calories:{" "}
+            <span className="font-semibold tabular-nums text-slate-700">
+              {Math.round(totalCals)} kcal
+            </span>
+          </p>
+        )}
 
-        <div className="flex gap-3 border-t border-slate-100 px-5 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-2xl border border-slate-200 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-          >
+        {error && (
+          <p className="text-xs font-medium text-red-600" role="alert">
+            {error}
+          </p>
+        )}
+      </AppModalBody>
+
+      <AppModalFooter>
+        <div className="flex gap-3">
+          <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className={`flex-1 rounded-2xl py-3 text-sm font-bold text-white transition-all disabled:opacity-60 ${saved
-                ? "bg-emerald-500 shadow-emerald-200"
-                : "bg-blue-600 shadow-sm shadow-blue-200 hover:bg-blue-700"
-              }`}
+            className={`flex-1 font-bold ${saved ? "bg-emerald-500 shadow-emerald-200 hover:bg-emerald-500" : ""}`}
           >
             {saving ? "Saving…" : saved ? "Saved" : "Save goals"}
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </AppModalFooter>
+    </AppModal>
   );
 }

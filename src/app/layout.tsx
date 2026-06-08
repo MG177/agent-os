@@ -5,6 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import AppShell from "@/components/AppShell";
 import ParaShell from "@/components/ParaShell";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const geist = Geist({
@@ -62,6 +63,7 @@ export default function RootLayout({
           <ParaShell>{children}</ParaShell>
         </AppShell>
         <ServiceWorkerRegister />
+        <Toaster position="top-center" richColors />
         <Analytics />
         <SpeedInsights />
       </body>

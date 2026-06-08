@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ExternalLink, Loader2, Monitor, Play, Send, Square, X } from "lucide-react";
@@ -17,6 +17,13 @@ import type {
   ClickUpTask,
   ClickUpTaskStatus,
 } from "@/components/clickup/types";
+import {
+  AppModal,
+  AppModalBody,
+  AppModalFooter,
+} from "@/components/ui/app-modal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 // ── helpers ───────────────────────────────────────────────────────────────
 
@@ -146,23 +153,7 @@ export function TaskDetailModal({
   const [description, setDescription] = useState<string | null | "loading">("loading");
   const [beBranch, setBeBranch] = useState("");
   const [feBranch, setFeBranch] = useState("");
-  const backdropRef = useRef<HTMLDivElement>(null);
   const due = formatDue(task.dueDate);
-
-  // Close on Escape key
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  // Prevent background scroll while modal is open
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, []);
 
   // Load branch fields from localStorage
   useEffect(() => {
@@ -246,17 +237,8 @@ export function TaskDetailModal({
   const currentPriority = priorityLevel(task.priority?.priority);
 
   return (
-    /* Backdrop */
-    <div
-      ref={backdropRef}
-      className="app-modal-overlay flex items-end justify-center bg-slate-900/40 backdrop-blur-[2px] sm:items-center sm:p-4"
-      onClick={(e) => { if (e.target === backdropRef.current) onClose(); }}
-    >
-      {/* Modal sheet */}
-      <div className="flex max-h-[90dvh] w-full max-w-2xl flex-col rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl">
-
-        {/* ── Header ──────────────────────────────────────────────────── */}
-        <div className="flex items-start gap-3 border-b border-slate-100 px-5 py-4">
+    <AppModal open onOpenChange={(v) => !v && onClose()}>
+      <div className="flex items-start gap-3 border-b border-slate-100 px-5 py-4">
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
               {task.folderName ? `${task.folderName} · ` : ""}{task.listName}
@@ -288,19 +270,20 @@ export function TaskDetailModal({
                 <ExternalLink className="h-4 w-4" strokeWidth={1.8} />
               </a>
             )}
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={onClose}
               aria-label="Close"
-              className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              className="rounded-xl text-slate-400 hover:text-slate-700"
             >
-              <X className="h-4 w-4" strokeWidth={1.8} />
-            </button>
+              <X className="size-4" strokeWidth={1.8} />
+            </Button>
           </div>
-        </div>
+      </div>
 
-        {/* ── Scrollable body ──────────────────────────────────────────── */}
-        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-4">
+      <AppModalBody className="min-h-0 space-y-5">
 
           {/* Description */}
           <div>
@@ -326,7 +309,7 @@ export function TaskDetailModal({
               <label className="app-section-label mb-1.5 block" htmlFor={`be-${task.id}`}>
                 BE branch
               </label>
-              <input
+              <Input
                 id={`be-${task.id}`}
                 value={beBranch}
                 onChange={(e) => {
@@ -334,14 +317,14 @@ export function TaskDetailModal({
                   writeBranch("be", task.id, e.target.value);
                 }}
                 placeholder="feature/…"
-                className="w-full rounded-xl bg-slate-50 px-3 py-2 text-base md:text-sm font-mono text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="rounded-xl px-3 py-2 font-mono"
               />
             </div>
             <div>
               <label className="app-section-label mb-1.5 block" htmlFor={`fe-${task.id}`}>
                 FE branch
               </label>
-              <input
+              <Input
                 id={`fe-${task.id}`}
                 value={feBranch}
                 onChange={(e) => {
@@ -349,7 +332,7 @@ export function TaskDetailModal({
                   writeBranch("fe", task.id, e.target.value);
                 }}
                 placeholder="feature/…"
-                className="w-full rounded-xl bg-slate-50 px-3 py-2 text-base md:text-sm font-mono text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="rounded-xl px-3 py-2 font-mono"
               />
             </div>
           </div>
@@ -498,30 +481,27 @@ export function TaskDetailModal({
               </ul>
             )}
           </div>
-        </div>
+      </AppModalBody>
 
-        {/* ── Add comment footer ───────────────────────────────────────── */}
-        <form
-          onSubmit={postComment}
-          className="flex items-center gap-2 border-t border-slate-100 px-4 py-3"
-          style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom, 0px))" }}
-        >
-          <input
+      <AppModalFooter className="py-3">
+        <form onSubmit={postComment} className="flex items-center gap-2">
+          <Input
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             placeholder="Add a comment…"
-            className="min-w-0 flex-1 rounded-xl bg-slate-50 px-3 py-2 text-base md:text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="min-w-0 flex-1 rounded-xl px-3 py-2"
           />
-          <button
+          <Button
             type="submit"
+            size="icon"
             disabled={posting || !commentText.trim()}
             aria-label="Send comment"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+            className="size-9 shrink-0 rounded-xl"
           >
-            {posting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" strokeWidth={1.8} />}
-          </button>
+            {posting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" strokeWidth={1.8} />}
+          </Button>
         </form>
-      </div>
-    </div>
+      </AppModalFooter>
+    </AppModal>
   );
 }
