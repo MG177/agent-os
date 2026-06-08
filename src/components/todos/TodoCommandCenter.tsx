@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import type { TodoDoc } from "@/lib/todos";
 import { dueState, dueChipClass, formatClock } from "@/lib/todo-format";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 function isToday(d: Date): boolean {
   const now = new Date();
@@ -190,43 +192,63 @@ function CompactStatStrip({
   overdue: number;
   recurring: number;
 }) {
-  const tiles: {
+  const items: {
     label: string;
     value: number;
+    dot: string;
     valueClass: string;
-    cardClass?: string;
+    cellClass?: string;
   }[] = [
-      { label: "Active", value: active, valueClass: "text-slate-900" },
-      {
-        label: "Overdue",
-        value: overdue,
-        valueClass: overdue > 0 ? "text-red-600" : "text-slate-900",
-        cardClass: overdue > 0 ? "border-red-100 bg-red-50/40" : "border-slate-100 bg-white",
-      },
-      {
-        label: "Recurring",
-        value: recurring,
-        valueClass: "text-violet-600",
-        cardClass: "border-slate-100 bg-white",
-      },
-    ];
+    {
+      label: "Active",
+      value: active,
+      dot: "bg-slate-400",
+      valueClass: "text-slate-900",
+    },
+    {
+      label: "Overdue",
+      value: overdue,
+      dot: overdue > 0 ? "bg-red-500" : "bg-slate-300",
+      valueClass: overdue > 0 ? "text-red-600" : "text-slate-900",
+      cellClass: overdue > 0 ? "bg-red-50/50" : undefined,
+    },
+    {
+      label: "Recurring",
+      value: recurring,
+      dot: "bg-violet-500",
+      valueClass: "text-violet-600",
+    },
+  ];
 
   return (
-    <div className="grid grid-cols-3 place-items-center gap-1">
-      {tiles.map(({ label, value, valueClass, cardClass }) => (
-        <div
-          key={label}
-          className={`flex size-11 flex-col items-center justify-center rounded-lg border text-center ${cardClass ?? "border-slate-100 bg-white"}`}
-        >
-          <p className="text-[8px] font-bold uppercase leading-none tracking-wide text-slate-400">
-            {label}
-          </p>
-          <p className={`mt-px text-sm font-bold tabular-nums leading-none ${valueClass}`}>
-            {value}
-          </p>
-        </div>
-      ))}
-    </div>
+    <Card size="sm" className="gap-0 py-0 ring-slate-100">
+      <div className="grid grid-cols-3 divide-x divide-slate-100">
+        {items.map(({ label, value, dot, valueClass, cellClass }) => (
+          <div
+            key={label}
+            className={cn(
+              "flex flex-col items-center px-2 py-3 text-center",
+              cellClass,
+            )}
+          >
+            <div className="flex items-center gap-1">
+              <span className={cn("size-1.5 shrink-0 rounded-full", dot)} aria-hidden />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                {label}
+              </span>
+            </div>
+            <p
+              className={cn(
+                "mt-1.5 text-xl font-bold tabular-nums leading-none",
+                valueClass,
+              )}
+            >
+              {value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
 
