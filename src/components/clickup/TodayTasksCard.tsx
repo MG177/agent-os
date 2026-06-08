@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Circle, CircleCheckBig, Loader2, Play, Square } from "lucide-react";
+import { Circle, CircleCheckBig, Loader2, Play, Square, Zap } from "lucide-react";
 import { DUE_TONE_CLASS, formatDue } from "@/components/clickup/clickup-format";
 import { ElapsedTime } from "@/components/clickup/ElapsedTime";
+import { StatusPill } from "@/components/clickup/StatusPill";
 import { useClickUpTimer } from "@/components/clickup/useClickUpTimer";
 import { useResource, mutate } from "@/lib/data/useResource";
 import { KEYS } from "@/lib/data/keys";
+import { selectLatestSprint } from "@/lib/integrations/clickup/group";
 import type { ClickUpGroupedTasks, ClickUpTask } from "@/components/clickup/types";
 
 const MAX_ROWS = 6;
@@ -38,12 +40,9 @@ export function TodayTasksCard() {
   // 503 = ClickUp not configured (Vercel without integration) — stay invisible.
   if (error?.status === 503) return null;
 
-  const tasks = data
-    ? (data.flat ?? []).filter((t: ClickUpTask) => {
-        const tone = formatDue(t.dueDate)?.tone;
-        return tone === "overdue" || tone === "today";
-      })
-    : null;
+  const sprint = data ? selectLatestSprint(data) : null;
+  const sprintList = sprint?.list ?? null;
+  const tasks = sprint?.tasks ?? null;
 
   async function complete(task: ClickUpTask) {
     setCompletingId(task.id);
@@ -58,18 +57,27 @@ export function TodayTasksCard() {
 
   return (
     <section className="flex h-full min-h-0 flex-col space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <p className="app-section-label">Tasks due today</p>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="app-section-label">Latest sprint</p>
+          {sprintList ? (
+            <p className="mt-0.5 flex items-center gap-1 truncate text-xs font-semibold text-violet-600">
+              <Zap className="size-3 shrink-0" strokeWidth={1.8} aria-hidden />
+              {sprintList.listName}
+            </p>
+          ) : data && !isLoading ? (
+            <p className="mt-0.5 text-xs text-slate-400">No sprint lists found</p>
+          ) : null}
+        </div>
         <Link
           href="/tasks"
-          className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+          className="shrink-0 text-xs font-semibold text-blue-600 hover:text-blue-700"
         >
           All tasks →
         </Link>
       </div>
 
       <div className="app-card flex max-h-[min(40vh,18rem)] min-h-[5.5rem] flex-1 flex-col overflow-hidden p-0 lg:max-h-none">
-        {/* Show skeleton only on true cold start (no snapshot, no data) */}
         {isLoading && !data ? (
           <TasksLoadingSkeleton />
         ) : error?.status === 401 ? (
@@ -79,9 +87,13 @@ export function TodayTasksCard() {
           >
             Connect ClickUp to see your tasks →
           </Link>
+        ) : !sprintList ? (
+          <p className="px-4 py-6 text-center text-xs text-slate-400">
+            Add a sprint folder in ClickUp settings to track sprints here
+          </p>
         ) : !tasks || tasks.length === 0 ? (
           <p className="px-4 py-6 text-center text-xs text-slate-400">
-            Nothing due today 🎉
+            No open tasks in {sprintList.listName}
           </p>
         ) : (
           <ul className="min-h-0 flex-1 divide-y divide-slate-50 overflow-y-auto">
@@ -119,13 +131,14 @@ export function TodayTasksCard() {
                     <p className="truncate text-sm font-medium text-slate-800">
                       {task.name}
                     </p>
-                    <p className="mt-0.5 flex items-center gap-2 text-xs">
-                      <span className="truncate text-slate-400">
-                        {task.listName}
-                      </span>
+                    <p className="mt-1 flex flex-wrap items-center gap-2">
+                      <StatusPill
+                        status={task.status.status}
+                        color={task.status.color}
+                      />
                       {due && (
                         <span
-                          className={`font-medium ${DUE_TONE_CLASS[due.tone]}`}
+                          className={`text-xs font-medium ${DUE_TONE_CLASS[due.tone]}`}
                         >
                           {due.label}
                         </span>

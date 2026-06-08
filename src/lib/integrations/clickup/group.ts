@@ -196,3 +196,23 @@ export function selectTodayTasks(tasks: ClickUpTask[]): ClickUpTask[] {
     )
     .sort(compareTasks);
 }
+
+/**
+ * Latest sprint = newest ClickUp list in a sprint folder (highest list id).
+ * Matches the sort order used in TaskSidebar for sprint folders.
+ */
+export function selectLatestSprint(data: ClickUpGroupedTasks): {
+  list: ClickUpListOption | null;
+  tasks: ClickUpTask[];
+} {
+  const sprintLists = data.lists
+    .filter((l) => l.isSprint)
+    .sort((a, b) => Number(b.listId) - Number(a.listId));
+  const list = sprintLists[0] ?? null;
+  if (!list) return { list: null, tasks: [] };
+
+  const tasks = data.flat
+    .filter((t) => t.listId === list.listId)
+    .sort(compareTasks);
+  return { list, tasks };
+}
