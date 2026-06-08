@@ -3,7 +3,9 @@
 :root {
   /* Mobile bottom bar: h-16 (4rem) + border-t (1px) + home-indicator safe area */
   --app-mobile-nav-offset: calc(4rem + 1px + env(safe-area-inset-bottom, 0px));
-  /* Z stack: bottom nav 50 · full-screen sheets 60 · nested popovers 70 */
+  /* Z stack: sticky header 20 · shell sidebars 30 · bottom nav 50 · sheets 60 · popovers 70 */
+  --app-z-header: 20;
+  --app-z-sidebar: 30;
   --app-z-nav: 50;
   --app-z-modal: 60;
   --app-z-popover: 70;
@@ -147,6 +149,14 @@ body {
 /* Sticky title bar — scroll happens on `main`, not inside this block. */
 .app-page-header {
   @apply relative sticky top-0 shrink-0 border-b border-slate-100 bg-slate-50;
+  z-index: var(--app-z-header);
+}
+
+/* Desktop nav rails — above sticky page headers (edge toggles overlap main column). */
+.app-desktop-sidebar,
+.app-quick-rail {
+  position: relative;
+  z-index: var(--app-z-sidebar);
 }
 
 /* Comfortable reading / single-column form width — caps on desktop so a

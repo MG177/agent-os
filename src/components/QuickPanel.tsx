@@ -34,7 +34,7 @@ function Rail({
 }) {
   return (
     <div
-      className={`relative z-40 hidden w-14 shrink-0 flex-col items-center justify-center gap-2 border-l bg-white md:flex ${active ? "border-slate-100" : "border-slate-200"
+      className={`app-quick-rail hidden w-14 shrink-0 flex-col items-center justify-center gap-2 border-l bg-white md:flex ${active ? "border-slate-100" : "border-slate-200"
         }`}
       role="tablist"
       aria-label="Quick actions"

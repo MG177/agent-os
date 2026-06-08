@@ -113,7 +113,7 @@ export default function DesktopSidebar() {
 
   return (
     <aside
-      className={`relative hidden shrink-0 flex-col border-r border-slate-200 bg-white transition-[width] duration-200 ease-out md:flex ${collapsed ? "w-[4.5rem]" : "w-60 lg:w-64"
+      className={`app-desktop-sidebar hidden shrink-0 flex-col border-r border-slate-200 bg-white transition-[width] duration-200 ease-out md:flex ${collapsed ? "w-[4.5rem]" : "w-60 lg:w-64"
         } ${ready ? "" : "md:w-60"}`}
       aria-label="Main navigation"
       aria-expanded={!collapsed}

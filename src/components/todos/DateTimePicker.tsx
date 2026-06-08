@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatHour12 } from "@/lib/trigger-format";
-
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-const HOURS12 = Array.from({ length: 12 }, (_, i) => i + 1);
+const HOURS24 = Array.from({ length: 24 }, (_, i) => i);
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5); // 0,5,…,55
+
+function formatHour24(h: number, m = 0): string {
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
 
 function parseLocal(s: string): Date {
   const [datePart, timePart] = s.split("T");
@@ -32,7 +34,7 @@ function fmtSummary(d: Date): string {
     month: "short",
     day: "numeric",
   });
-  return `${date} · ${formatHour12(d.getHours(), d.getMinutes())}`;
+  return `${date} · ${formatHour24(d.getHours(), d.getMinutes())}`;
 }
 
 type PickerMode = "date" | "datetime";
@@ -130,7 +132,7 @@ export function DateTimePicker({
       },
     },
     {
-      label: "Tonight 6 PM",
+      label: "Tonight 18:00",
       go: () => {
         const d = new Date();
         d.setHours(18, 0, 0, 0);
@@ -139,7 +141,7 @@ export function DateTimePicker({
       },
     },
     {
-      label: "Tomorrow 9 AM",
+      label: "Tomorrow 09:00",
       go: () => {
         const d = new Date();
         d.setDate(d.getDate() + 1);
@@ -148,7 +150,7 @@ export function DateTimePicker({
       },
     },
     {
-      label: "Next Mon 9 AM",
+      label: "Next Mon 09:00",
       go: () => {
         const d = new Date();
         const add = (8 - d.getDay()) % 7 || 7;
@@ -182,40 +184,35 @@ export function DateTimePicker({
     });
   }
 
-  // ── time selector state (derived) ──
-  const mer = baseHour < 12 ? "AM" : "PM";
-  const hour12 = baseHour % 12 === 0 ? 12 : baseHour % 12;
-  const to24 = (h12: number, m: "AM" | "PM") =>
-    m === "AM" ? h12 % 12 : (h12 % 12) + 12;
-
   const cell =
     "rounded-xl bg-slate-50 px-2.5 py-2 text-sm text-slate-700 ring-1 ring-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500";
 
+  const presetButtons = (
+    <div className="flex flex-wrap gap-1.5">
+      {presets.map((p) => (
+        <button
+          key={p.label}
+          type="button"
+          onClick={p.go}
+          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+        >
+          {p.label}
+        </button>
+      ))}
+      {allowClear && (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+        >
+          No date
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-3">
-      {/* Quick presets */}
-      <div className="flex flex-wrap gap-1.5">
-        {presets.map((p) => (
-          <button
-            key={p.label}
-            type="button"
-            onClick={p.go}
-            className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-          >
-            {p.label}
-          </button>
-        ))}
-        {allowClear && (
-          <button
-            type="button"
-            onClick={() => onChange("")}
-            className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600"
-          >
-            No date
-          </button>
-        )}
-      </div>
-
       <div className="grid gap-3 sm:grid-cols-2">
         {/* Calendar */}
         <div className="rounded-2xl border border-slate-200 p-3">
@@ -284,17 +281,22 @@ export function DateTimePicker({
 
         {/* Time + summary */}
         <div className="flex flex-col gap-3">
+          {presetButtons}
+
           {mode === "datetime" && (
           <div>
             <p className="mb-1.5 text-xs font-semibold text-slate-700">Time</p>
             <div className="flex items-center gap-1.5">
               <select
                 className={cell}
-                value={hour12}
-                onChange={(e) => setTime(to24(Number(e.target.value), mer), baseMin)}
+                value={baseHour}
+                onChange={(e) => setTime(Number(e.target.value), baseMin)}
+                aria-label="Hour"
               >
-                {HOURS12.map((h) => (
-                  <option key={h} value={h}>{h}</option>
+                {HOURS24.map((h) => (
+                  <option key={h} value={h}>
+                    {String(h).padStart(2, "0")}
+                  </option>
                 ))}
               </select>
               <span className="font-semibold text-slate-400">:</span>
@@ -302,25 +304,12 @@ export function DateTimePicker({
                 className={cell}
                 value={baseMin - (baseMin % 5)}
                 onChange={(e) => setTime(baseHour, Number(e.target.value))}
+                aria-label="Minute"
               >
                 {MINUTES.map((m) => (
                   <option key={m} value={m}>{String(m).padStart(2, "0")}</option>
                 ))}
               </select>
-              <div className="ml-1 inline-flex rounded-xl bg-slate-100 p-0.5">
-                {(["AM", "PM"] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setTime(to24(hour12, m), baseMin)}
-                    className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
-                      mer === m ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
-                    }`}
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
           )}
