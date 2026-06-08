@@ -44,7 +44,11 @@ export async function getMongoClient(): Promise<MongoClientType> {
     // (and so the package can be installed lazily without breaking dev).
     const { MongoClient } = await import("mongodb");
     const client = new MongoClient(getUri());
-    clientPromise = client.connect();
+    clientPromise = client.connect().catch((err) => {
+      // Allow retry after mongod starts (singleton must not stay rejected forever).
+      clientPromise = null;
+      throw err;
+    });
   }
   return clientPromise;
 }

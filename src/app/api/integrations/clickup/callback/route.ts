@@ -45,7 +45,11 @@ export async function GET(request: NextRequest) {
     res.cookies.delete("clickup_oauth_state");
     return res;
   } catch (err) {
-    const message = err instanceof Error ? err.message : "oauth_failed";
+    const raw = err instanceof Error ? err.message : "oauth_failed";
+    const message =
+      raw.includes("ECONNREFUSED") || raw.includes("MongoServerSelectionError")
+        ? "storage_unavailable"
+        : raw;
     return NextResponse.redirect(
       new URL(
         `/settings/integrations?error=${encodeURIComponent(message)}`,

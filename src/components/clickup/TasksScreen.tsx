@@ -58,9 +58,7 @@ export default function TasksScreen() {
   const [activeTeamId, setActiveTeamId] = useState<string | null>(null);
   const [switching, setSwitching] = useState(false);
   const [workspaceResolved, setWorkspaceResolved] = useState(false);
-  const [data, setData] = useState<ClickUpGroupedTasks | null>(
-    () => readSnapshot<ClickUpGroupedTasks>(TASKS_SNAPSHOT_KEY) ?? null,
-  );
+  const [data, setData] = useState<ClickUpGroupedTasks | null>(null);
   const [view, setView] = useState<View>("list");
   const [due, setDue] = useState<Due>("all");
   const [priority, setPriority] = useState<string>("");
@@ -72,6 +70,11 @@ export default function TasksScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const timer = useClickUpTimer();
+
+  useEffect(() => {
+    const snapshot = readSnapshot<ClickUpGroupedTasks>(TASKS_SNAPSHOT_KEY);
+    if (snapshot) setData(snapshot);
+  }, []);
 
   const loadTasks = useCallback(
     async (refresh = false) => {

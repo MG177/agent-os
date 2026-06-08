@@ -7,15 +7,23 @@ import type { GoogleCalendarStatus } from "@/lib/integrations/google-calendar/ty
 
 export async function getGoogleCalendarStatus(): Promise<GoogleCalendarStatus> {
   const configured = isGoogleOAuthConfigured();
-  const [connected, record] = await Promise.all([
-    configured ? isCalendarConnected() : Promise.resolve(false),
-    loadTokenRecord(),
-  ]);
+  if (!configured) {
+    return { connected: false, configured: false };
+  }
 
-  return {
-    connected,
-    configured,
-    email: record?.email,
-    connectedAt: record?.connectedAt,
-  };
+  try {
+    const [connected, record] = await Promise.all([
+      isCalendarConnected(),
+      loadTokenRecord(),
+    ]);
+    return {
+      connected,
+      configured: true,
+      email: record?.email,
+      connectedAt: record?.connectedAt,
+    };
+  } catch {
+    // Env is set but token storage (MongoDB) is unavailable — still "configured".
+    return { connected: false, configured: true };
+  }
 }

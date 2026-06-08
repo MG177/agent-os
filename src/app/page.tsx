@@ -31,19 +31,25 @@ function HeroStat({
   loading,
   value,
   label,
+  className = "",
 }: {
   loading: boolean;
   value: string | number;
   label: string;
+  className?: string;
 }) {
   return (
-    <div className="rounded-2xl bg-white/15 px-3.5 py-2.5 backdrop-blur-sm xl:min-w-[7rem]">
+    <div
+      className={`rounded-xl bg-white/15 px-2 py-1.5 backdrop-blur-sm md:rounded-2xl md:px-3.5 md:py-2.5 xl:min-w-[7rem] ${className}`.trim()}
+    >
       {loading ? (
-        <span className="block h-6 w-10 animate-pulse rounded bg-white/25" />
+        <span className="block h-5 w-8 animate-pulse rounded bg-white/25 md:h-6 md:w-10" />
       ) : (
-        <p className="text-xl font-bold tabular-nums text-white">{value}</p>
+        <p className="text-base font-bold tabular-nums text-white md:text-xl">{value}</p>
       )}
-      <p className="app-section-label-invert">{label}</p>
+      <p className="text-[9px] font-bold uppercase tracking-widest text-white/70 md:text-[10px]">
+        {label}
+      </p>
     </div>
   );
 }
@@ -105,30 +111,30 @@ export default function HomePage() {
 
       <PageBody>
         {/* Hero — ring + remaining; frosted stat tiles (stacked below on mobile, rail on lg+) */}
-        <section className="app-hero md:p-6">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+        <section className="app-hero p-4 md:p-6">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
             <div className="min-w-0 flex-1">
               <p className="app-section-label-invert">Today&apos;s overview</p>
-              <div className="mt-3 flex items-center gap-5 md:gap-6">
+              <div className="mt-2 flex items-center gap-3 md:mt-3 md:gap-6">
                 <div className="shrink-0">
                   <ProgressRing
                     value={calories}
                     max={goal}
                     color="rgba(255,255,255,0.92)"
                     trackColor="rgba(255,255,255,0.22)"
-                    size={84}
-                    strokeWidth={8}
+                    size={68}
+                    strokeWidth={7}
                     className="md:hidden"
                   >
                     <div className="text-center">
                       {loading ? (
-                        <span className="mx-auto block h-5 w-9 animate-pulse rounded bg-white/30" />
+                        <span className="mx-auto block h-4 w-8 animate-pulse rounded bg-white/30" />
                       ) : (
                         <>
-                          <p className="text-lg font-bold tabular-nums text-white">
+                          <p className="text-base font-bold tabular-nums text-white">
                             {calories}
                           </p>
-                          <p className="text-[10px] text-white/70">kcal</p>
+                          <p className="text-[9px] text-white/70">kcal</p>
                         </>
                       )}
                     </div>
@@ -165,11 +171,13 @@ export default function HomePage() {
                     </>
                   ) : (
                     <>
-                      <p className="text-3xl font-bold tabular-nums leading-none text-white md:text-4xl">
+                      <p className="text-2xl font-bold tabular-nums leading-none text-white md:text-4xl">
                         {remaining}
                       </p>
-                      <p className="mt-1 text-sm text-white/75">kcal remaining</p>
-                      <p className="mt-2 text-xs text-white/55">
+                      <p className="mt-0.5 text-xs text-white/75 md:mt-1 md:text-sm">
+                        kcal remaining
+                      </p>
+                      <p className="mt-1 hidden text-xs text-white/55 sm:block">
                         {Math.round(calPct * 100)}% of {goal} kcal goal
                       </p>
                     </>
@@ -178,7 +186,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid w-full shrink-0 grid-cols-2 gap-2.5 md:grid-cols-4 lg:w-auto lg:grid-cols-2 xl:grid-cols-4">
+            <div className="grid w-full shrink-0 grid-cols-2 gap-2 md:grid-cols-4 md:gap-2.5 lg:w-auto lg:grid-cols-2 xl:grid-cols-4">
               <HeroStat
                 loading={loading}
                 value={data?.capturesToday ?? "—"}
@@ -189,8 +197,18 @@ export default function HomePage() {
                 value={data?.mealsToday ?? "—"}
                 label="Meals"
               />
-              <HeroStat loading={loading} value={calories || "—"} label="Calories" />
-              <HeroStat loading={loading} value={goal} label="Goal" />
+              <HeroStat
+                loading={loading}
+                value={calories || "—"}
+                label="Calories"
+                className="hidden md:block"
+              />
+              <HeroStat
+                loading={loading}
+                value={goal}
+                label="Goal"
+                className="hidden md:block"
+              />
             </div>
           </div>
         </section>

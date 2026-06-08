@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import useSWR, { type SWRConfiguration, mutate } from "swr";
 
 const LS_PREFIX = "aos.cache.";
@@ -34,7 +35,8 @@ function lsWrite(key: string, value: unknown): void {
 }
 
 /** Read a namespaced localStorage snapshot (size/expiry-guarded). Exposed for
- *  components with a bespoke load flow that still want instant-paint hydration. */
+ *  components with a bespoke load flow that still want instant-paint hydration.
+ *  Call only inside `useEffect` (or after mount) — never during SSR/render. */
 export function readSnapshot<T>(key: string): T | undefined {
   return lsRead<T>(key);
 }
@@ -55,9 +57,9 @@ export const defaultFetcher = (url: string) =>
 
 /**
  * SWR-backed resource hook with a localStorage snapshot for instant paint on
- * revisit. First mount hydrates `data` synchronously from the snapshot (no
- * spinner); SWR revalidates in the background and writes a fresh snapshot on
- * success.
+ * revisit. After mount, seeds SWR from the snapshot (no revalidation) so the
+ * server and initial client hydration tree match; SWR then revalidates in the
+ * background and writes a fresh snapshot on success.
  *
  * Returns the standard SWR tuple: { data, error, isLoading, isValidating, mutate }.
  */
@@ -66,10 +68,7 @@ export function useResource<T>(
   fetcher?: ((key: string) => Promise<T>) | null,
   config?: SWRConfiguration<T>,
 ) {
-  const snapshot = key ? lsRead<T>(key) : undefined;
-
-  return useSWR<T>(key, fetcher ?? defaultFetcher, {
-    fallbackData: snapshot,
+  const swr = useSWR<T>(key, fetcher ?? defaultFetcher, {
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
     dedupingInterval: 4_000,
@@ -79,6 +78,20 @@ export function useResource<T>(
       config?.onSuccess?.(data, swrKey, swrConfig);
     },
   });
+
+  // Never read localStorage during render — that diverges SSR from hydration.
+  useEffect(() => {
+    if (!key) return;
+    const snapshot = lsRead<T>(key);
+    if (snapshot === undefined) return;
+    void mutate(
+      key,
+      (current: T | undefined) => current ?? snapshot,
+      { revalidate: false },
+    );
+  }, [key]);
+
+  return swr;
 }
 
 export { mutate };

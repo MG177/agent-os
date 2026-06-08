@@ -10,6 +10,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   access_denied: "Sign-in was cancelled.",
   invalid_state: "Invalid OAuth state. Try connecting again.",
   expired_state: "OAuth session expired. Try connecting again.",
+  storage_unavailable:
+    "Google sign-in succeeded but the token could not be saved. Start MongoDB (MONGODB_URI) and try Connect again.",
 };
 
 const CONNECTED_MESSAGES: Record<string, string> = {
@@ -20,6 +22,7 @@ const CONNECTED_MESSAGES: Record<string, string> = {
 export default function IntegrationsSettingsPage() {
   const [status, setStatus] = useState<GoogleCalendarStatus | null>(null);
   const [clickup, setClickup] = useState<ClickUpStatus | null>(null);
+  const [statusLoadFailed, setStatusLoadFailed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [disconnecting, setDisconnecting] = useState(false);
   const [clickupDisconnecting, setClickupDisconnecting] = useState(false);
@@ -31,12 +34,14 @@ export default function IntegrationsSettingsPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setStatusLoadFailed(false);
     const [gcal, cu] = await Promise.all([
       fetch("/api/integrations/google-calendar/status"),
       fetch("/api/integrations/clickup/status"),
     ]);
     if (gcal.ok) setStatus(await gcal.json());
     if (cu.ok) setClickup(await cu.json());
+    if (!gcal.ok || !cu.ok) setStatusLoadFailed(true);
     setLoading(false);
   }, []);
 
@@ -120,6 +125,15 @@ export default function IntegrationsSettingsPage() {
             }`}
         >
           {banner.text}
+        </div>
+      )}
+
+      {statusLoadFailed && (
+        <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Could not load integration status. If keys are set in{" "}
+          <code className="text-xs">.env.local</code>, check that MongoDB is
+          running (<code className="text-xs">MONGODB_URI</code>) and restart{" "}
+          <code className="text-xs">npm run dev</code>.
         </div>
       )}
 
