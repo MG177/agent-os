@@ -14,7 +14,7 @@ export function RecentActivityButton({ events }: { events: ActivityEvent[] }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
       >
         <ClipboardList
           strokeWidth={1.8}
@@ -49,7 +49,7 @@ export function RecentActivityButton({ events }: { events: ActivityEvent[] }) {
               variant="ghost"
               size="icon-sm"
               onClick={() => setOpen(false)}
-              className="size-7 rounded-xl text-slate-400 hover:text-slate-700"
+              className="size-7 rounded-lg text-slate-400 hover:text-slate-700"
               aria-label="Close"
             >
               <X strokeWidth={2} className="size-4" aria-hidden />

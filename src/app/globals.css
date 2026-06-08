@@ -37,7 +37,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 1rem;
+  --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -73,8 +73,8 @@
   --color-violet: #7c3aed;
   --color-emerald: #10b981;
   --color-amber: #f59e0b;
-  --radius-card: 1.5rem;
-  --radius-btn: 1rem;
+  --radius-card: 0.75rem;
+  --radius-btn: 0.5rem;
   /* Layout tokens — referenced by .app-page-* / .app-stack primitives */
   --spacing-section-gap: 1rem;
   --spacing-section-gap-md: 1.25rem;
@@ -254,19 +254,19 @@ body {
 }
 
 .app-card {
-  @apply rounded-3xl border border-slate-100 bg-white p-4 shadow-sm;
+  @apply rounded-xl border border-slate-100 bg-white p-4 shadow-sm;
 }
 
 .app-hero {
-  @apply rounded-3xl bg-indigo-600 p-5 text-white shadow-lg shadow-indigo-200;
+  @apply rounded-xl bg-indigo-600 p-5 text-white shadow-lg shadow-indigo-200;
 }
 
 .app-btn-primary {
-  @apply flex min-h-11 w-full items-center justify-center rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-blue-200 transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60;
+  @apply flex min-h-11 w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-blue-200 transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60;
 }
 
 .app-btn-secondary {
-  @apply flex min-h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-50 active:scale-[0.98];
+  @apply flex min-h-11 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition-all hover:bg-slate-50 active:scale-[0.98];
 }
 
 .app-chip {
@@ -280,7 +280,7 @@ body {
 /* text-base (16px) on mobile prevents iOS Safari from zooming the viewport
    on focus. md:text-sm restores the compact size on desktop. */
 .app-input {
-  @apply w-full rounded-2xl bg-slate-50 px-4 py-3 text-base md:text-sm text-slate-800 transition-colors placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500;
+  @apply w-full rounded-lg bg-slate-50 px-4 py-3 text-base md:text-sm text-slate-800 transition-colors placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
 .app-status-pill {

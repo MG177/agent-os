@@ -19,7 +19,7 @@ export function CompletedRemindersButton({ onEdit }: Props) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
       >
         <History strokeWidth={1.8} className="size-4 text-slate-500" aria-hidden />
         <span className="hidden sm:inline">History</span>
@@ -41,7 +41,7 @@ export function CompletedRemindersButton({ onEdit }: Props) {
             variant="ghost"
             size="icon-sm"
             onClick={() => setOpen(false)}
-            className="size-7 rounded-xl text-slate-400 hover:text-slate-700"
+            className="size-7 rounded-lg text-slate-400 hover:text-slate-700"
             aria-label="Close"
           >
             <X strokeWidth={2} className="size-4" aria-hidden />
@@ -51,7 +51,7 @@ export function CompletedRemindersButton({ onEdit }: Props) {
         {loading ? (
           <div className="flex flex-col gap-2 px-4 py-4">
             {Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />
+              <div key={i} className="h-16 animate-pulse rounded-lg bg-slate-100" />
             ))}
           </div>
         ) : todos.length === 0 ? (

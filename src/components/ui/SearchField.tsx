@@ -47,7 +47,7 @@ const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(
             variant="ghost"
             size="icon-sm"
             onClick={onClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl text-slate-400 hover:text-slate-700"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg text-slate-400 hover:text-slate-700"
             aria-label="Clear search"
           >
             <X strokeWidth={2} className="size-4" aria-hidden />

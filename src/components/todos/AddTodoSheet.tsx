@@ -197,7 +197,7 @@ export function AddTodoSheet({ open, onClose, onSaved, editing }: Props) {
                   <ToggleGroupItem
                     key={t}
                     value={t}
-                    className="flex-1 rounded-xl border py-2.5 text-xs data-[state=on]:border-blue-600 data-[state=on]:bg-blue-50 data-[state=on]:font-semibold data-[state=on]:text-blue-700"
+                    className="flex-1 rounded-lg border py-2.5 text-xs data-[state=on]:border-blue-600 data-[state=on]:bg-blue-50 data-[state=on]:font-semibold data-[state=on]:text-blue-700"
                   >
                     {t === "once" ? "Once" : "Recurring"}
                   </ToggleGroupItem>
@@ -233,7 +233,7 @@ export function AddTodoSheet({ open, onClose, onSaved, editing }: Props) {
                   Add trigger
                 </Button>
               </div>
-              <div className="overflow-hidden rounded-2xl border border-slate-200">
+              <div className="overflow-hidden rounded-lg border border-slate-200">
                 <div className="grid grid-cols-12 gap-2 bg-slate-50 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                   <div className="col-span-3">Type</div>
                   <div className="col-span-7">Schedule</div>
@@ -265,7 +265,7 @@ export function AddTodoSheet({ open, onClose, onSaved, editing }: Props) {
           </div>
 
           {error && (
-            <p className="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">{error}</p>
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{error}</p>
           )}
         </form>
       </AppModalBody>

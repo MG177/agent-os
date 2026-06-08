@@ -489,14 +489,14 @@ export function TaskDetailModal({
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             placeholder="Add a comment…"
-            className="min-w-0 flex-1 rounded-xl px-3 py-2"
+            className="min-w-0 flex-1 rounded-lg px-3 py-2"
           />
           <Button
             type="submit"
             size="icon"
             disabled={posting || !commentText.trim()}
             aria-label="Send comment"
-            className="size-9 shrink-0 rounded-xl"
+            className="size-9 shrink-0 rounded-lg"
           >
             {posting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" strokeWidth={1.8} />}
           </Button>

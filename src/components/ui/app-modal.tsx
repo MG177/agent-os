@@ -32,8 +32,8 @@ function AppModal({
         showCloseButton={false}
         className={cn(
           "z-[calc(var(--app-z-modal)+1)] flex max-h-[90dvh] w-full flex-col gap-0 overflow-hidden border-0 bg-white p-0 shadow-2xl ring-0",
-          "top-auto bottom-0 left-0 max-w-none translate-x-0 translate-y-0 rounded-t-3xl",
-          "sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl",
+          "top-auto bottom-0 left-0 max-w-none translate-x-0 translate-y-0 rounded-t-2xl",
+          "sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl",
           maxWidth === "lg" ? "sm:max-w-lg" : "sm:max-w-2xl",
           className,
         )}
@@ -84,7 +84,7 @@ function AppModalHeader({
           variant="ghost"
           size="icon-sm"
           onClick={onClose}
-          className="shrink-0 rounded-xl text-slate-400 hover:text-slate-700"
+          className="shrink-0 rounded-lg text-slate-400 hover:text-slate-700"
           aria-label="Close"
         >
           <X strokeWidth={2} className="size-4" />

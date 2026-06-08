@@ -129,7 +129,7 @@ export default function NutritionGoalsSheet({
 
       <AppModalBody className="space-y-3">
         {GOAL_FIELDS.map(({ key, label, unit, color, bg, hint }) => (
-          <div key={key} className={`${bg} rounded-2xl p-4`}>
+          <div key={key} className={`${bg} rounded-lg p-4`}>
             <div className="mb-2 flex items-center justify-between">
               <div>
                 <p className={`text-sm font-semibold ${color}`}>{label}</p>
@@ -147,7 +147,7 @@ export default function NutritionGoalsSheet({
                   setForm((p) => ({ ...p, [key]: e.target.value }));
                   setError("");
                 }}
-                className="rounded-xl bg-white/70 pr-12 font-semibold focus:bg-white"
+                className="rounded-lg bg-white/70 pr-12 font-semibold focus:bg-white"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
                 {unit}
