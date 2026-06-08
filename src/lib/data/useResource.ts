@@ -23,11 +23,24 @@ function lsRead<T>(key: string): T | undefined {
   }
 }
 
+function lsRemove(key: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(LS_PREFIX + key);
+  } catch {
+    // ignore
+  }
+}
+
 function lsWrite(key: string, value: unknown): void {
   if (typeof window === "undefined") return;
   try {
     const s = JSON.stringify({ v: value, t: Date.now() });
-    if (s.length > MAX_ENTRY_BYTES) return;
+    if (s.length > MAX_ENTRY_BYTES) {
+      // Drop undersized stale snapshots so a future visit does not hydrate wrong data.
+      lsRemove(key);
+      return;
+    }
     localStorage.setItem(LS_PREFIX + key, s);
   } catch {
     // quota exceeded — silent drop
@@ -46,6 +59,11 @@ export function writeSnapshot(key: string, value: unknown): void {
   lsWrite(key, value);
 }
 
+/** Drop a cached snapshot (e.g. after switching ClickUp workspace). */
+export function clearResourceSnapshot(key: string): void {
+  lsRemove(key);
+}
+
 export const defaultFetcher = (url: string) =>
   fetch(url).then((r) => {
     if (!r.ok) {
@@ -57,9 +75,8 @@ export const defaultFetcher = (url: string) =>
 
 /**
  * SWR-backed resource hook with a localStorage snapshot for instant paint on
- * revisit. After mount, seeds SWR from the snapshot (no revalidation) so the
- * server and initial client hydration tree match; SWR then revalidates in the
- * background and writes a fresh snapshot on success.
+ * revisit. After mount, seeds SWR from the snapshot for instant paint, then
+ * revalidates in the background and writes a fresh snapshot when it fits.
  *
  * Returns the standard SWR tuple: { data, error, isLoading, isValidating, mutate }.
  */
@@ -87,7 +104,7 @@ export function useResource<T>(
     void mutate(
       key,
       (current: T | undefined) => current ?? snapshot,
-      { revalidate: false },
+      { revalidate: true },
     );
   }, [key]);
 

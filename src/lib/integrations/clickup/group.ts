@@ -5,22 +5,13 @@ import type {
   ClickUpStatusGroup,
   ClickUpTask,
 } from "@/lib/integrations/clickup/types";
+import { getSprintFolderNames } from "@/lib/integrations/clickup/sprint-folders";
 import { getAppTimeZone } from "@/lib/timezone";
 
 export type DueFilter = "all" | "overdue" | "today" | "week";
 
 function getTimeZone(): string {
   return getAppTimeZone();
-}
-
-/** Folder names (lowercased) configured to be treated as sprints. */
-function getSprintFolderNames(): Set<string> {
-  return new Set(
-    (process.env.CLICKUP_SPRINT_FOLDERS ?? "")
-      .split(",")
-      .map((s) => s.trim().toLowerCase())
-      .filter(Boolean),
-  );
 }
 
 function tzOffsetMinutes(timeZone: string, probe: Date): number {

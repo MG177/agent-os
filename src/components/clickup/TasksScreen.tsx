@@ -14,7 +14,12 @@ import { useClickUpTimer } from "@/components/clickup/useClickUpTimer";
 import type { ClickUpGroupedTasks } from "@/components/clickup/types";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Page, PageBody } from "@/components/ui/layout";
-import { readSnapshot, writeSnapshot } from "@/lib/data/useResource";
+import { KEYS } from "@/lib/data/keys";
+import {
+  clearResourceSnapshot,
+  readSnapshot,
+  writeSnapshot,
+} from "@/lib/data/useResource";
 
 /** Snapshot of the last-rendered grouped tasks — hydrated on mount for an
  *  instant paint on revisit, then refreshed by the normal load. */
@@ -204,6 +209,9 @@ export default function TasksScreen() {
       setSelectedTaskId(null);
       setActiveListId(null);
       setData(null);
+      clearResourceSnapshot(KEYS.tasksDueAll);
+      clearResourceSnapshot(KEYS.sprintLatest);
+      clearResourceSnapshot(TASKS_SNAPSHOT_KEY);
       await loadTasks(true);
     }
     setSwitching(false);

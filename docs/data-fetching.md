@@ -21,7 +21,7 @@ const { data, error, isLoading, isValidating, mutate } = useResource<T>(key, fet
 
 | Feature | How |
 |---|---|
-| Instant paint on revisit | `localStorage` snapshot hydrates `fallbackData` synchronously; SWR revalidates in background |
+| Instant paint on revisit | `localStorage` snapshot seeds SWR after mount; SWR always revalidates in background |
 | Request dedup | SWR dedupes concurrent mounts with the same key within `dedupingInterval` (4 s) |
 | Revalidate on focus / reconnect | SWR defaults (`revalidateOnFocus`, `revalidateOnReconnect`) |
 | Optimistic update | `mutate(KEYS.x, optimisticData)` or `mutate(KEYS.x)` to revalidate |
@@ -29,7 +29,7 @@ const { data, error, isLoading, isValidating, mutate } = useResource<T>(key, fet
 
 ### Snapshot limits
 
-- Max entry size: 50 KB. Larger payloads are never written to `localStorage`.
+- Max entry size: 50 KB. Larger payloads are never written; any existing snapshot for that key is cleared so stale undersized data is not reused.
 - Expiry: 1 hour. Expired entries are dropped on read.
 - Namespace: `aos.cache.<key>` — never stores auth tokens or vault file bodies.
 
@@ -40,6 +40,7 @@ const { data, error, isLoading, isValidating, mutate } = useResource<T>(key, fet
 | `KEYS.home` | `GET /api/home` | `private, max-age=20, stale-while-revalidate=60` |
 | `KEYS.health` | `GET /api/health` | browser default |
 | `KEYS.tasksDueAll` | `GET /api/clickup/tasks?due=all` | `private, max-age=15, stale-while-revalidate=60` |
+| `KEYS.sprintLatest` | `GET /api/clickup/sprint/latest` | `private, max-age=15, stale-while-revalidate=60` |
 | `KEYS.calendarStatus` | `GET /api/integrations/google-calendar/status` | browser default |
 | `KEYS.calendarHomeEvents` | synthetic key → `GET /api/calendar/events?...` | `private, max-age=15, stale-while-revalidate=60` |
 | `KEYS.todosDue` | `GET /api/todos?due=true` | browser default |

@@ -9,10 +9,7 @@ import { StatusPill } from "@/components/clickup/StatusPill";
 import { useClickUpTimer } from "@/components/clickup/useClickUpTimer";
 import { useResource, mutate } from "@/lib/data/useResource";
 import { KEYS } from "@/lib/data/keys";
-import { selectLatestSprint } from "@/lib/integrations/clickup/group";
-import type { ClickUpGroupedTasks, ClickUpTask } from "@/components/clickup/types";
-
-const MAX_ROWS = 6;
+import type { ClickUpTask, SprintLatestResponse } from "@/components/clickup/types";
 
 function TasksLoadingSkeleton() {
   return (
@@ -31,8 +28,8 @@ function TasksLoadingSkeleton() {
 }
 
 export function TodayTasksCard() {
-  const { data, error, isLoading } = useResource<ClickUpGroupedTasks>(
-    KEYS.tasksDueAll,
+  const { data, error, isLoading } = useResource<SprintLatestResponse>(
+    KEYS.sprintLatest,
   );
   const [completingId, setCompletingId] = useState<string | null>(null);
   const timer = useClickUpTimer();
@@ -40,9 +37,8 @@ export function TodayTasksCard() {
   // 503 = ClickUp not configured (Vercel without integration) — stay invisible.
   if (error?.status === 503) return null;
 
-  const sprint = data ? selectLatestSprint(data) : null;
-  const sprintList = sprint?.list ?? null;
-  const tasks = sprint?.tasks ?? null;
+  const sprintList = data?.list ?? null;
+  const tasks = data?.tasks ?? null;
 
   async function complete(task: ClickUpTask) {
     setCompletingId(task.id);
@@ -51,7 +47,10 @@ export function TodayTasksCard() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "complete", listId: task.listId }),
     });
-    await mutate(KEYS.tasksDueAll);
+    await Promise.all([
+      mutate(KEYS.sprintLatest),
+      mutate(KEYS.tasksDueAll),
+    ]);
     setCompletingId(null);
   }
 
@@ -64,6 +63,11 @@ export function TodayTasksCard() {
             <p className="mt-0.5 flex items-center gap-1 truncate text-xs font-semibold text-violet-600">
               <Zap className="size-3 shrink-0" strokeWidth={1.8} aria-hidden />
               {sprintList.listName}
+              {tasks && tasks.length > 0 ? (
+                <span className="font-normal text-slate-400">
+                  · {tasks.length} assigned
+                </span>
+              ) : null}
             </p>
           ) : data && !isLoading ? (
             <p className="mt-0.5 text-xs text-slate-400">No sprint lists found</p>
@@ -89,15 +93,19 @@ export function TodayTasksCard() {
           </Link>
         ) : !sprintList ? (
           <p className="px-4 py-6 text-center text-xs text-slate-400">
-            Add a sprint folder in ClickUp settings to track sprints here
+            No sprint folder — set{" "}
+            <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px]">
+              CLICKUP_SPRINT_FOLDERS
+            </code>{" "}
+            to your ClickUp folder name (e.g. Sprint)
           </p>
         ) : !tasks || tasks.length === 0 ? (
           <p className="px-4 py-6 text-center text-xs text-slate-400">
-            No open tasks in {sprintList.listName}
+            Nothing assigned to you in {sprintList.listName}
           </p>
         ) : (
           <ul className="min-h-0 flex-1 divide-y divide-slate-50 overflow-y-auto">
-            {tasks.slice(0, MAX_ROWS).map((task: ClickUpTask) => {
+            {tasks.map((task: ClickUpTask) => {
               const due = formatDue(task.dueDate);
               const tracking = timer.entry?.taskId === task.id;
               return (
@@ -152,11 +160,10 @@ export function TodayTasksCard() {
                     }
                     disabled={timer.busy}
                     aria-label={tracking ? "Stop timer" : "Start timer"}
-                    className={`mt-0.5 flex shrink-0 items-center gap-1 rounded-lg px-1.5 py-1 text-[10px] font-semibold tabular-nums transition-colors disabled:opacity-50 ${
-                      tracking
+                    className={`mt-0.5 flex shrink-0 items-center gap-1 rounded-lg px-1.5 py-1 text-[10px] font-semibold tabular-nums transition-colors disabled:opacity-50 ${tracking
                         ? "bg-emerald-50 text-emerald-700"
                         : "text-slate-300 opacity-0 hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100"
-                    }`}
+                      }`}
                   >
                     {tracking ? (
                       <>

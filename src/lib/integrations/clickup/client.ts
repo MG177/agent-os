@@ -2,6 +2,7 @@ import {
   getCachedListStatuses,
   setCachedListStatuses,
 } from "@/lib/integrations/clickup/cache";
+import { getSprintFolderNames } from "@/lib/integrations/clickup/sprint-folders";
 import {
   getAccessToken,
   loadTokenRecord,
@@ -134,7 +135,7 @@ interface RawTask {
   due_date?: string | null;
   url?: string;
   list?: { id?: string; name?: string };
-  folder?: { name?: string; hidden?: boolean };
+  folder?: { id?: string; name?: string; hidden?: boolean };
   space?: { id?: string };
   tags?: { name?: string; tag_fg?: string; tag_bg?: string }[];
   assignees?: { id?: number; username?: string; initials?: string; color?: string }[];
@@ -416,4 +417,108 @@ export async function stopTimer(): Promise<void> {
   await clickupRequest(token, `/team/${teamId}/time_entries/stop`, {
     method: "POST",
   });
+}
+
+// ── sprint (Home card) ───────────────────────────────────────────────────────
+
+export interface SprintListRef {
+  listId: string;
+  listName: string;
+  folderName: string;
+}
+
+/** Find a configured sprint folder id from tasks the user is on (assignee or watcher). */
+async function resolveSprintFolderRef(
+  token: string,
+  teamId: string,
+  userId: number,
+): Promise<{ folderId: string; folderName: string } | null> {
+  const sprintFolders = getSprintFolderNames();
+  const uid = String(userId);
+
+  const [assigned, watching] = await Promise.all([
+    fetchTeamTasks(token, teamId, { key: "assignees[]", value: uid }, false),
+    fetchTeamTasks(token, teamId, { key: "watchers[]", value: uid }, false),
+  ]);
+
+  for (const raw of [...assigned, ...watching]) {
+    const folder = raw.folder;
+    if (
+      folder?.id &&
+      folder.name &&
+      !folder.hidden &&
+      sprintFolders.has(folder.name.toLowerCase())
+    ) {
+      return { folderId: folder.id, folderName: folder.name };
+    }
+  }
+  return null;
+}
+
+async function getLatestSprintListInFolder(
+  token: string,
+  folderId: string,
+  folderName: string,
+): Promise<SprintListRef | null> {
+  const data = await clickupRequest<{ lists?: { id: string; name: string }[] }>(
+    token,
+    `/folder/${folderId}/list?archived=false`,
+  );
+
+  let best: SprintListRef | null = null;
+  for (const list of data.lists ?? []) {
+    if (!best || Number(list.id) > Number(best.listId)) {
+      best = { listId: list.id, listName: list.name, folderName };
+    }
+  }
+  return best;
+}
+
+/**
+ * Newest list in a configured sprint folder (highest list id). Resolves the
+ * folder via task metadata, then lists under that folder — works for shared
+ * spaces that do not appear on the team space tree.
+ */
+export async function getLatestSprintList(): Promise<SprintListRef | null> {
+  const sprintFolders = getSprintFolderNames();
+  if (sprintFolders.size === 0) return null;
+
+  const { token, teamId, userId } = await getAuthContext();
+  const folder = await resolveSprintFolderRef(token, teamId, userId);
+  if (!folder) return null;
+
+  return getLatestSprintListInFolder(token, folder.folderId, folder.folderName);
+}
+
+/**
+ * Open tasks assigned to the connected user in a sprint/list. Uses the list
+ * endpoint with `include_timl` so tasks added to the sprint from other home
+ * lists are included (ClickUp sprint boards work this way).
+ */
+export async function getMyAssignedTasksInList(
+  listId: string,
+  opts?: { includeClosed?: boolean },
+): Promise<ClickUpTask[]> {
+  const { token, userId } = await getAuthContext();
+  const includeClosed = Boolean(opts?.includeClosed);
+  const raw: RawTask[] = [];
+
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const params = new URLSearchParams();
+    params.append("assignees[]", String(userId));
+    params.set("subtasks", "true");
+    params.set("include_closed", String(includeClosed));
+    params.set("include_timl", "true");
+    params.set("page", String(page));
+
+    const data = await clickupRequest<{ tasks?: RawTask[]; last_page?: boolean }>(
+      token,
+      `/list/${listId}/task?${params.toString()}`,
+    );
+    const batch = data.tasks ?? [];
+    raw.push(...batch);
+    if (data.last_page || batch.length === 0) break;
+  }
+
+  return raw.map(normalizeTask);
 }

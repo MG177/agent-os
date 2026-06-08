@@ -1,3 +1,4 @@
+import { clearSprintCache } from "@/lib/integrations/clickup/sprint-service";
 import type {
   ClickUpTask,
   ClickUpTaskStatus,
@@ -59,4 +60,5 @@ export function setCachedListStatuses(
 export function clearClickUpCache() {
   tasksCache.clear();
   listStatusCache.clear();
+  clearSprintCache();
 }

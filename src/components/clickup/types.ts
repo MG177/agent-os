@@ -5,6 +5,7 @@ export type {
   ClickUpListGroup,
   ClickUpListOption,
   ClickUpGroupedTasks,
+  SprintLatestResponse,
   ClickUpComment,
   ClickUpTimeEntry,
   ClickUpTag,

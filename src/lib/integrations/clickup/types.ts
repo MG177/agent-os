@@ -87,6 +87,13 @@ export interface ClickUpListOption {
   isSprint: boolean;
 }
 
+/** Home sprint card — latest sprint list + tasks assigned to the connected user. */
+export interface SprintLatestResponse {
+  list: ClickUpListOption | null;
+  tasks: ClickUpTask[];
+  count: number;
+}
+
 export interface ClickUpGroupedTasks {
   /** Primary view: grouped by list, then status. */
   groups: ClickUpListGroup[];
