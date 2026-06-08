@@ -10,7 +10,7 @@ import {
 import { CalendarDayAgendaPanel } from "@/components/calendar/CalendarDayAgendaPanel";
 import { CalendarMonthGrid } from "@/components/calendar/CalendarMonthGrid";
 import { CalendarRightRail } from "@/components/calendar/CalendarRightRail";
-import { CalendarTimeGrid } from "@/components/calendar/CalendarTimeGrid";
+import { LazyCalendarTimeGrid } from "@/components/lazy";
 import {
   addDaysToKey,
   addMonthsToKey,
@@ -348,7 +348,7 @@ export default function CalendarPage() {
                   </div>
                 )
               ) : (
-                <CalendarTimeGrid
+                <LazyCalendarTimeGrid
                   events={filteredEvents}
                   days={detailDays}
                   today={today}

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import MarkdownRenderer from "@/components/MarkdownRenderer";
+import { LazyMarkdownRenderer } from "@/components/lazy";
 import ArchiveButton from "@/components/ArchiveButton";
 import { Page, PageBody } from "@/components/ui/layout";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -45,7 +45,7 @@ export default async function InboxItemPage({
       <PageBody fill inset={false} gap={false} className="min-h-0 space-y-4 overflow-y-auto">
         <div className="min-h-[120px] rounded-3xl border border-slate-100 bg-white px-5 py-5 shadow-sm">
           {item.content.trim() ? (
-            <MarkdownRenderer content={item.content} />
+            <LazyMarkdownRenderer content={item.content} />
           ) : (
             <p className="text-sm italic text-slate-400">No content</p>
           )}

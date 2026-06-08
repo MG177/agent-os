@@ -8,7 +8,7 @@ import { DateTimePopover } from "@/components/todos/DateTimePopover";
 import NutritionGoalsSheet from "./NutritionGoalsSheet";
 import NutritionSegments from "./NutritionSegments";
 import NutritionSummary from "./NutritionSummary";
-import FoodWorkspace from "./panels/FoodWorkspace";
+import { LazyFoodWorkspace } from "@/components/lazy";
 import TodayPanel from "./panels/TodayPanel";
 import {
   parseNutritionView,
@@ -235,7 +235,7 @@ function NutritionDashboardInner() {
                 onLogMeal={() => setView("foods")}
               />
             ) : (
-              <FoodWorkspace
+              <LazyFoodWorkspace
                 logDate={selectedDate}
                 onLogged={handleMealLoggedMobile}
               />
@@ -245,7 +245,7 @@ function NutritionDashboardInner() {
           {/* Desktop: food workspace (left) · summary + meals today (right) */}
           <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-12 md:gap-5 md:overflow-hidden lg:gap-6">
             <section className="flex min-h-0 flex-col md:col-span-7 xl:col-span-8">
-              <FoodWorkspace
+              <LazyFoodWorkspace
                 logDate={selectedDate}
                 onLogged={refresh}
               />

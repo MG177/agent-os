@@ -31,7 +31,7 @@ Lighthouse runs in the lab and cannot measure INP directly; it uses **Total Bloc
 npm run analyze          # = ANALYZE=true next build
 ```
 
-Opens client/server/edge treemaps in the browser. Use it to spot heavy chunks (calendar grid, assistant chat, food workspace, markdown/mermaid) that Lane G should code-split.
+Opens client/server/edge treemaps in the browser. Heavy widgets are code-split via `src/components/lazy.tsx` (`LazyCalendarTimeGrid`, `LazyAssistantChat`, `LazyFoodWorkspace`, `LazyMarkdownRenderer`).
 
 ### Local Lighthouse
 

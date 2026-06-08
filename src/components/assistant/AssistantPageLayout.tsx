@@ -1,6 +1,6 @@
 "use client";
 
-import AssistantChat from "@/components/assistant/AssistantChat";
+import { LazyAssistantChat } from "@/components/lazy";
 import AssistantSessionList from "@/components/assistant/AssistantSessionList";
 import AssistantSessionToolbar from "@/components/assistant/AssistantSessionToolbar";
 import { useAssistantSession } from "@/components/assistant/AssistantSessionContext";
@@ -54,7 +54,7 @@ export default function AssistantPageLayout() {
           )}
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col py-4 md:py-5">
-            <AssistantChat />
+            <LazyAssistantChat />
           </div>
         </div>
       </PageBody>

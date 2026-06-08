@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ChevronLeft, ChevronRight, FileText, Folder } from "lucide-react";
-import MarkdownRenderer from "@/components/MarkdownRenderer";
+import { LazyMarkdownRenderer } from "@/components/lazy";
 import type {
   BrowseColumn,
   BrowseEntry,
@@ -76,11 +76,10 @@ const ColumnRow = memo(function ColumnRow({
       <button
         type="button"
         onClick={onClick}
-        className={`flex w-full min-h-[1.625rem] items-center gap-1.5 rounded-md px-2 py-1 text-left text-sm leading-tight transition-colors ${
-          selected
+        className={`flex w-full min-h-[1.625rem] items-center gap-1.5 rounded-md px-2 py-1 text-left text-sm leading-tight transition-colors ${selected
             ? "bg-blue-600 text-white shadow-sm"
             : "text-slate-800 hover:bg-slate-100/90"
-        }`}
+          }`}
         role="option"
         aria-selected={selected}
       >
@@ -167,7 +166,7 @@ function FilePreview({ file }: { file: BrowseFileResult }) {
       <div className="min-h-0 flex-1 overflow-y-auto p-5">
         <div className="mx-auto max-w-3xl rounded-2xl border border-slate-100 bg-white px-6 py-5 shadow-sm">
           {file.content.trim() ? (
-            <MarkdownRenderer content={file.content} />
+            <LazyMarkdownRenderer content={file.content} />
           ) : (
             <p className="text-sm italic text-slate-400">No content</p>
           )}
@@ -224,9 +223,8 @@ function ColumnList({
 
   return (
     <div
-      className={`flex h-full min-h-0 w-44 shrink-0 flex-col border-r border-slate-200/80 bg-[#f5f5f7] md:w-48 lg:w-52 ${
-        mobileOnly ? "flex w-full md:hidden" : "hidden md:flex"
-      }`}
+      className={`flex h-full min-h-0 w-44 shrink-0 flex-col border-r border-slate-200/80 bg-[#f5f5f7] md:w-48 lg:w-52 ${mobileOnly ? "flex w-full md:hidden" : "hidden md:flex"
+        }`}
       role="listbox"
       aria-label={
         column.path.length > 0
@@ -451,11 +449,10 @@ export default function ColumnBrowser({
       <div className="flex min-h-0 flex-1 overflow-hidden bg-[#ececef]">
         <div
           ref={scrollRef}
-          className={`flex min-h-0 overflow-x-auto overflow-y-hidden scroll-smooth ${
-            file
+          className={`flex min-h-0 overflow-x-auto overflow-y-hidden scroll-smooth ${file
               ? "hidden shrink-0 md:flex md:max-w-[min(70%,42rem)]"
               : "min-w-0 flex-1"
-          }`}
+            }`}
         >
           {columns.map((column, i) => {
             const selectedSegment =

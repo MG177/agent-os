@@ -7,7 +7,11 @@ import ParaShell from "@/components/ParaShell";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
-const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geist = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Agent OS",
@@ -24,6 +28,18 @@ export const metadata: Metadata = {
     capable: true,
     title: "Agent OS",
     statusBarStyle: "default",
+    startupImage: [
+      {
+        url: "/app-icon-512.png",
+        media:
+          "(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)",
+      },
+      {
+        url: "/app-icon-512.png",
+        media:
+          "(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)",
+      },
+    ],
   },
 };
 

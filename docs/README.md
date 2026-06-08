@@ -28,20 +28,23 @@ Set `AGENT_OS_DEPLOYMENT=full` on Vercel only if you add persistent storage and 
 
 ## Routes (wireframe IA)
 
-Main mobile tabs: **Home · Capture · Nutrition · Activity** (see `Personal Agent OS Wireframes.html` + `Design System — Nutrition & PARA.html`).
+Main mobile tabs: **Home · Capture · Nutrition · Todo** (see `Personal Agent OS Wireframes.html` + `Design System — Nutrition & PARA.html`). Assistant is a floating FAB on mobile; **ClickUp** (`/tasks`) and **Activity** (`/activity`) are on the desktop sidebar.
 
-| Route | Wireframe screen |
-|-------|------------------|
+| Route | Screen |
+|-------|--------|
 | `/` | Home — command center |
-| `/capture` | Quick note |
+| `/capture` | Quick note (mobile: Quick Panel sheet) |
 | `/capture/success` | Saved confirmation |
 | `/nutrition` | Nutrition today |
 | `/nutrition/log` | Log meal (Manual / Photo) |
 | `/assistant` | Multi-module AI assistant (nutrition, vault, calendar) |
-| `/activity` | Audit + undo |
+| `/assistant/[sessionId]` | Assistant thread deep link |
+| `/todo` | Personal todos & reminders (mobile tab) |
+| `/tasks` | ClickUp tasks board / list |
+| `/activity` | Audit + undo (desktop sidebar) |
 | `/calendar` | Google Calendar week view |
-| `/settings/integrations` | Connect / disconnect Google Calendar |
-| `/inbox`, `/browse/...` | Secondary (desktop nav) |
+| `/settings/integrations` | Connect Google Calendar + ClickUp |
+| `/inbox`, `/browse/...` | Vault inbox + read-only browse (desktop / full deploy) |
 
 ### Assistant stack
 
@@ -75,11 +78,23 @@ Assistant chats persist in MongoDB (`assistant_sessions`, `assistant_messages`).
 
 | Route | Purpose |
 |-------|---------|
+| `GET /api/health` | VPS / deployment health probe (Home status pill) |
 | `POST /api/inbox` | Capture → `Inbox/` (Capture UI) |
 | `POST /api/webhooks/whatsapp` | WAHA webhook → `Inbox/` (HMAC + allowlist) |
 | `/api/home` | Home stats + recent activity |
 | `/api/activity` | Full activity feed |
 | `/api/nutrition/*` | Nutrition REST |
+| `GET/POST /api/todos` | List / create personal todos (`?status=active\|done`, `?due=true`) |
+| `PATCH/DELETE /api/todos/[id]` | Update / complete / delete todo |
+| `GET/POST /api/clickup/tasks` | List / create ClickUp tasks |
+| `GET/PATCH /api/clickup/tasks/[id]` | Task detail / update |
+| `GET/POST /api/clickup/tasks/[id]/comments` | Task comments |
+| `GET /api/clickup/lists`, `GET /api/clickup/lists/[listId]` | ClickUp lists |
+| `GET/POST /api/clickup/time` | Running timer + time entries |
+| `GET /api/integrations/clickup/status` | ClickUp connection status |
+| `GET /api/integrations/clickup/auth` | Start ClickUp OAuth |
+| `GET /api/integrations/clickup/callback` | OAuth callback |
+| `DELETE /api/integrations/clickup` | Disconnect ClickUp |
 | `GET/POST /api/assistant/sessions` | List / create assistant chat sessions |
 | `GET/PATCH/DELETE /api/assistant/sessions/[id]` | Load messages, rename, delete session |
 | `POST /api/chat` | Assistant turn: `{ sessionId, content, image?, command? }` (server loads history) |
@@ -128,6 +143,8 @@ Original production target; not in use while VPS is down. Compose file and embed
 | Vault (read + `Inbox/` write only) | Local filesystem | `VAULT_PATH` |
 | Audit log | `~/.local/share/agent-os/audit.jsonl` | `AGENT_OS_DATA_PATH` |
 | Nutrition | MongoDB (`foods`, `meals`, `goals`) | `MONGODB_URI` |
+| Personal todos | MongoDB `todos` collection | `MONGODB_URI` |
+| Assistant sessions | MongoDB `assistant_sessions`, `assistant_messages` | `MONGODB_URI` |
 | Integration tokens (Google Calendar, ClickUp) | MongoDB `integrations` collection (encrypted at rest) | `TOKEN_ENCRYPTION_KEY`, `OAUTH_STATE_SECRET` |
 
 Vault git push/pull is **out of scope** — an external sync system keeps `VAULT_PATH` in sync with the remote.
@@ -135,27 +152,33 @@ Vault git push/pull is **out of scope** — an external sync system keeps `VAULT
 ## Legacy repos
 
 - `para-dashboard` — superseded; browse + inbox patterns merged here
-- `nutrition-tracker` — UI + API merged; keep repo until MongoDB cutover
+- `nutrition-tracker` — UI + API merged into `agent-os`; Mongo cutover shipped 2026-05-27
 
 ## Status
 
-Shipped:
-- Capture UI PWA, `POST /api/inbox`, `Inbox/`-only write guard
-- Audit log + 24h undo + `/activity` feed
-- Read-only browse for vault sections
-- Nutrition UI + Mongo-backed API + Cursor SDK assistant (`/assistant`)
-- Dockerfile + docker-compose for VPS
+**Shipped (core MVP):**
+- Capture UI PWA, WhatsApp webhook, `POST /api/inbox`, `Inbox/`-only write guard, audit + 24h undo
+- Nutrition UI + Mongo-backed API; ClickUp tasks board + OAuth; personal todos (`/todo`)
+- Cursor SDK assistant (`/assistant`) with Mongo session history
+- Google Calendar read-only; layout kit; client cache (`useResource`); perf measurement (Lighthouse CI + budgets)
+- Luna PNG PWA icons (192/512 + maskable + apple-touch); perf epic (cache, virtualization, `lazy.tsx` code-split); Dockerfile + docker-compose for VPS
 
-Not yet implemented:
-- VPS hardening / full production smoke on `personal.lumen-dev.com`
+**Not yet:**
+- VPS deploy + production smoke on `personal.lumen-dev.com`
+- Assistant multi-domain tool registry (`p2-assistant-general-agent`)
+- Record per-route JS baselines in `docs/perf-budget.md` (`npm run analyze`)
 
-Shipped (2026-05-27):
-- MongoDB nutrition store — `nutrition-mongo.ts`, `npm run migrate:nutrition`, embedded `mongod` in production image
-- WhatsApp / WAHA → `POST /api/webhooks/whatsapp` — see vault runbook `runbook-whatsapp-inbox-capture`
-- Google Calendar read-only — OAuth connect, `/calendar`, Home schedule card; vault runbook `runbook-google-calendar-connect`
+Vault runbooks: `runbook-whatsapp-inbox-capture`, `runbook-google-calendar-connect`.
 
 ## Design
 
 `Design System — Nutrition & PARA.html` at repo root.
 
-**Layout system:** [`layout-system.md`](./layout-system.md) — page scaffold, grid, tokens.
+## Technical reference
+
+| Doc | Topic |
+|-----|-------|
+| [`layout-system.md`](./layout-system.md) | Page scaffold, grid, tokens |
+| [`data-fetching.md`](./data-fetching.md) | `useResource`, `KEYS`, cache policy |
+| [`perf-budget.md`](./perf-budget.md) | Web Vitals targets + Lighthouse CI |
+| `src/components/lazy.tsx` | Code-split boundaries for calendar, assistant, nutrition, markdown |
