@@ -87,7 +87,7 @@ export function TodayScheduleCard() {
   );
 
   return (
-    <section className="flex h-full min-h-0 flex-col space-y-2">
+    <section className="flex min-h-0 flex-col space-y-2 md:h-full">
       <div className="flex shrink-0 items-center justify-between gap-2">
         <p className="app-section-label">Next 24 hours</p>
         <Link

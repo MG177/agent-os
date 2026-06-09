@@ -269,7 +269,7 @@ export function HomeScheduleNowWindow({
   );
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-0 flex-col md:flex-1">
       <div className="shrink-0 border-b border-slate-100 px-3 pb-2.5 pt-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs">
           <span className="font-medium text-slate-600">
