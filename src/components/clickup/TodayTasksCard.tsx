@@ -81,7 +81,7 @@ export function TodayTasksCard() {
         </Link>
       </div>
 
-      <div className="app-card flex max-h-[min(40vh,18rem)] min-h-[5.5rem] flex-1 flex-col overflow-hidden p-0 lg:max-h-none">
+      <div className="app-card flex max-h-[min(40vh,18rem)] min-h-[5.5rem] flex-1 flex-col overflow-hidden p-0">
         {isLoading && !data ? (
           <TasksLoadingSkeleton />
         ) : error?.status === 401 ? (
