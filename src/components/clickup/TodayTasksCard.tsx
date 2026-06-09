@@ -143,6 +143,7 @@ export function TodayTasksCard() {
                       <StatusPill
                         status={task.status.status}
                         color={task.status.color}
+                        compact
                       />
                       {due && (
                         <span
@@ -161,8 +162,8 @@ export function TodayTasksCard() {
                     disabled={timer.busy}
                     aria-label={tracking ? "Stop timer" : "Start timer"}
                     className={`mt-0.5 flex shrink-0 items-center gap-1 rounded-lg px-1.5 py-1 text-[10px] font-semibold tabular-nums transition-colors disabled:opacity-50 ${tracking
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "text-slate-300 opacity-0 hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "text-slate-300 opacity-0 hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100"
                       }`}
                   >
                     {tracking ? (

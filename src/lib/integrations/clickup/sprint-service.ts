@@ -1,21 +1,46 @@
 import {
   getLatestSprintList,
+  getListStatuses,
   getMyAssignedTasksInList,
 } from "@/lib/integrations/clickup/client";
 import { loadTokenRecord } from "@/lib/integrations/clickup/store";
-import type { SprintLatestResponse } from "@/lib/integrations/clickup/types";
+import type {
+  ClickUpTask,
+  ClickUpTaskStatus,
+  SprintLatestResponse,
+} from "@/lib/integrations/clickup/types";
 
 const TTL_MS = 60 * 1000;
 
 const cache = new Map<string, { expiresAt: number; data: SprintLatestResponse }>();
 
-function sortSprintTasks(
-  tasks: SprintLatestResponse["tasks"],
-): SprintLatestResponse["tasks"] {
-  return [...tasks].sort(
-    (a, z) =>
-      a.status.orderindex - z.status.orderindex || a.name.localeCompare(z.name),
-  );
+function normStatus(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+function isInProgressDevelopment(status: string): boolean {
+  return normStatus(status) === "in progress development";
+}
+
+/** Home sprint card: only tasks still before the TESTING workflow step. */
+function filterBeforeTesting(
+  tasks: ClickUpTask[],
+  listStatuses: ClickUpTaskStatus[],
+): ClickUpTask[] {
+  const testing = listStatuses.find((s) => normStatus(s.status) === "testing");
+  if (!testing) return tasks;
+  return tasks.filter((t) => t.status.orderindex < testing.orderindex);
+}
+
+function sortSprintTasks(tasks: ClickUpTask[]): ClickUpTask[] {
+  return [...tasks].sort((a, z) => {
+    const aDev = isInProgressDevelopment(a.status.status);
+    const zDev = isInProgressDevelopment(z.status.status);
+    if (aDev !== zDev) return aDev ? -1 : 1;
+    return (
+      z.status.orderindex - a.status.orderindex || a.name.localeCompare(z.name)
+    );
+  });
 }
 
 export function clearSprintCache(): void {
@@ -44,9 +69,11 @@ export async function getLatestSprintTasksCached(opts?: {
     return empty;
   }
 
-  const tasks = sortSprintTasks(
-    await getMyAssignedTasksInList(sprintList.listId),
-  );
+  const [rawTasks, listStatuses] = await Promise.all([
+    getMyAssignedTasksInList(sprintList.listId),
+    getListStatuses(sprintList.listId),
+  ]);
+  const tasks = sortSprintTasks(filterBeforeTesting(rawTasks, listStatuses));
 
   const data: SprintLatestResponse = {
     list: {
