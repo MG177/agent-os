@@ -215,7 +215,7 @@ export default function HomePage() {
 
         {/* Schedule + tasks (left) · reminders rail (right, full height) */}
         <Grid cols={3} className="lg:grid-cols-2 lg:gap-6 2xl:grid-cols-3">
-          <div className="flex min-h-0 flex-col md:col-span-2 xl:col-span-2">
+          <div className="flex min-h-0 w-full flex-col self-start md:col-span-2 xl:col-span-2">
             <ErrorBoundary>
               <TodayScheduleCard />
             </ErrorBoundary>

@@ -25,7 +25,7 @@ export function Grid({
   return (
     <div
       className={[
-        "grid auto-rows-auto items-start gap-4 md:auto-rows-fr md:items-stretch md:gap-5",
+        "grid auto-rows-auto items-start gap-4 md:items-stretch md:gap-5",
         COLS_CLASS[cols],
         className,
       ]

@@ -269,7 +269,7 @@ export function HomeScheduleNowWindow({
   );
 
   return (
-    <div className="flex min-h-0 flex-col md:flex-1">
+    <div className="flex min-h-0 flex-col">
       <div className="shrink-0 border-b border-slate-100 px-3 pb-2.5 pt-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs">
           <span className="font-medium text-slate-600">
@@ -373,10 +373,10 @@ export function HomeScheduleNowWindow({
       </div>
 
       {/* md+: horizontal 24h Gantt */}
-      <div className="hidden min-h-[10.5rem] flex-1 flex-col px-3 py-3 md:flex">
+      <div className="hidden shrink-0 flex-col px-3 py-3 md:flex">
         <div
           ref={scrollRef}
-          className="min-h-0 flex-1 overflow-x-auto overflow-y-visible overscroll-x-contain scroll-smooth"
+          className="overflow-x-auto overflow-y-visible overscroll-x-contain scroll-smooth"
           onScroll={handleGanttScroll}
         >
           <div

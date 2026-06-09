@@ -22,9 +22,9 @@ import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/ty
 type CalendarStatus = { configured: boolean; connected: boolean };
 type EventsResponse = { events: CalendarEventSummary[] };
 
-/** md+: fill grid cell; Gantt scroll area grows inside. Mobile stays content-height. */
+/** Content-height; md+ keeps a readable Gantt minimum without stretching to sibling rows. */
 const HOME_SCHEDULE_CARD_CLASS =
-  "flex min-h-0 flex-col md:h-full md:min-h-[19rem] md:flex-1 lg:min-h-[23rem]";
+  "flex min-h-0 flex-col md:min-h-[19rem] lg:min-h-[23rem]";
 
 /** Fetches the home 24h window using the current time for the URL, but uses a
  *  stable synthetic key so SWR/localStorage treats it as the same resource. */
@@ -87,7 +87,7 @@ export function TodayScheduleCard() {
   );
 
   return (
-    <section className="flex min-h-0 flex-col space-y-2 md:h-full">
+    <section className="flex min-h-0 flex-col space-y-2">
       <div className="flex shrink-0 items-center justify-between gap-2">
         <p className="app-section-label">Next 24 hours</p>
         <Link
