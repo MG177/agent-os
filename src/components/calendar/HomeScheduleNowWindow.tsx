@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarEventRow } from "@/components/calendar/CalendarEventRow";
 import {
   buildHome24HourWindow,
@@ -146,6 +146,7 @@ export function HomeScheduleNowWindow({
   const agendaScrollRef = useRef<HTMLDivElement>(null);
   const userScrolledRef = useRef(false);
   const userScrolledAgendaRef = useRef(false);
+  const [chartViewportHeight, setChartViewportHeight] = useState(0);
 
   const range = useMemo(() => buildHome24HourWindow(now), [now]);
   const { winStartMs, winEndMs, spanMs } = range;
@@ -199,7 +200,11 @@ export function HomeScheduleNowWindow({
     MIN_TRACK_BODY_PX,
     (maxLane + 1) * LANE_HEIGHT_PX,
   );
-  const chartHeight = TICK_ROW_PX + trackBodyHeight;
+  const contentChartHeight = TICK_ROW_PX + trackBodyHeight;
+  const chartHeight =
+    chartViewportHeight > 0
+      ? Math.max(contentChartHeight, chartViewportHeight)
+      : contentChartHeight;
 
   const moreCount = useMemo(
     () =>
@@ -234,6 +239,17 @@ export function HomeScheduleNowWindow({
   );
 
   useEffect(() => {
+    const root = scrollRef.current;
+    if (!root) return;
+
+    const update = () => setChartViewportHeight(root.clientHeight);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(root);
+    return () => ro.disconnect();
+  }, [events]);
+
+  useEffect(() => {
     if (userScrolledRef.current) return;
     const root = scrollRef.current;
     if (!root) return;
@@ -242,7 +258,7 @@ export function HomeScheduleNowWindow({
       scrollTimelineToNow(root, trackWidthPx, false);
     });
     return () => cancelAnimationFrame(raf);
-  }, [trackWidthPx, events, now]);
+  }, [trackWidthPx, events, now, chartViewportHeight]);
 
   useEffect(() => {
     if (userScrolledAgendaRef.current) return;
@@ -269,7 +285,7 @@ export function HomeScheduleNowWindow({
   );
 
   return (
-    <div className="flex min-h-0 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <div className="shrink-0 border-b border-slate-100 px-3 pb-2.5 pt-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-xs">
           <span className="font-medium text-slate-600">
@@ -372,11 +388,11 @@ export function HomeScheduleNowWindow({
         </p>
       </div>
 
-      {/* md+: horizontal 24h Gantt */}
-      <div className="hidden shrink-0 flex-col px-3 py-3 md:flex">
+      {/* md+: horizontal 24h Gantt — flex-1 fills card min-height */}
+      <div className="hidden min-h-0 flex-1 flex-col px-3 py-3 md:flex">
         <div
           ref={scrollRef}
-          className="overflow-x-auto overflow-y-visible overscroll-x-contain scroll-smooth"
+          className="min-h-0 flex-1 overflow-x-auto overflow-y-visible overscroll-x-contain scroll-smooth"
           onScroll={handleGanttScroll}
         >
           <div

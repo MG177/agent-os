@@ -22,7 +22,7 @@ import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/ty
 type CalendarStatus = { configured: boolean; connected: boolean };
 type EventsResponse = { events: CalendarEventSummary[] };
 
-/** Content-height; md+ keeps a readable Gantt minimum without stretching to sibling rows. */
+/** md+ min-height gives the Gantt room to grow; child uses flex-1 to fill it. */
 const HOME_SCHEDULE_CARD_CLASS =
   "flex min-h-0 flex-col md:min-h-[19rem] lg:min-h-[23rem]";
 
