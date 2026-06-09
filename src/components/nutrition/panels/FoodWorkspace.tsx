@@ -355,7 +355,7 @@ export default function FoodWorkspace({
   }
 
   return (
-    <div className="flex min-h-0 flex-col gap-4">
+    <div className="flex flex-col gap-4 md:min-h-0 md:flex-1">
       <SearchField
         value={query}
         onChange={(e) => {
@@ -469,7 +469,7 @@ export default function FoodWorkspace({
       )}
 
       {/* Food list — tap to log; doubles as the library */}
-      <div className="min-h-0 flex-1 overflow-y-auto px-1 py-1">
+      <div className="px-1 py-1 md:min-h-0 md:flex-1 md:overflow-y-auto">
         {filtered.length === 0 ? (
           <div className="app-card flex flex-col items-center py-12 text-center">
             <Broccoli strokeWidth={1.6} className="mb-3 h-10 w-10 text-slate-300" aria-hidden />
