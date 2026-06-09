@@ -40,14 +40,14 @@ function HeroStat({
 }) {
   return (
     <div
-      className={`rounded-xl bg-white/15 px-2 py-1.5 backdrop-blur-sm md:rounded-2xl md:px-3.5 md:py-2.5 xl:min-w-[7rem] ${className}`.trim()}
+      className={`rounded-lg bg-white/15 px-1.5 py-1 backdrop-blur-sm md:rounded-xl md:px-2.5 md:py-1.5 xl:min-w-[6rem] ${className}`.trim()}
     >
       {loading ? (
-        <span className="block h-5 w-8 animate-pulse rounded bg-white/25 md:h-6 md:w-10" />
+        <span className="block h-4 w-6 animate-pulse rounded bg-white/25 md:h-5 md:w-8" />
       ) : (
-        <p className="text-base font-bold tabular-nums text-white md:text-xl">{value}</p>
+        <p className="text-sm font-bold tabular-nums text-white md:text-lg">{value}</p>
       )}
-      <p className="text-[9px] font-bold uppercase tracking-widest text-white/70 md:text-[10px]">
+      <p className="text-[8px] font-bold uppercase tracking-widest text-white/70 md:text-[9px]">
         {label}
       </p>
     </div>
@@ -110,83 +110,82 @@ export default function HomePage() {
       </PageHeader>
 
       <PageBody>
-        {/* Hero — ring + remaining; frosted stat tiles (stacked below on mobile, rail on lg+) */}
-        <section className="app-hero p-4 md:p-6">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
-            <div className="min-w-0 flex-1">
-              <p className="app-section-label-invert">Today&apos;s overview</p>
-              <div className="mt-2 flex items-center gap-3 md:mt-3 md:gap-6">
-                <div className="shrink-0">
-                  <ProgressRing
-                    value={calories}
-                    max={goal}
-                    color="rgba(255,255,255,0.92)"
-                    trackColor="rgba(255,255,255,0.22)"
-                    size={68}
-                    strokeWidth={7}
-                    className="md:hidden"
-                  >
-                    <div className="text-center">
-                      {loading ? (
-                        <span className="mx-auto block h-4 w-8 animate-pulse rounded bg-white/30" />
-                      ) : (
-                        <>
-                          <p className="text-base font-bold tabular-nums text-white">
-                            {calories}
-                          </p>
-                          <p className="text-[9px] text-white/70">kcal</p>
-                        </>
-                      )}
-                    </div>
-                  </ProgressRing>
-                  <ProgressRing
-                    value={calories}
-                    max={goal}
-                    color="rgba(255,255,255,0.92)"
-                    trackColor="rgba(255,255,255,0.22)"
-                    size={104}
-                    strokeWidth={9}
-                    className="hidden md:flex"
-                  >
-                    <div className="text-center">
-                      {loading ? (
-                        <span className="mx-auto block h-7 w-12 animate-pulse rounded bg-white/30" />
-                      ) : (
-                        <>
-                          <p className="text-2xl font-bold tabular-nums text-white">
-                            {calories}
-                          </p>
-                          <p className="text-[10px] text-white/70">kcal eaten</p>
-                        </>
-                      )}
-                    </div>
-                  </ProgressRing>
-                </div>
-                <div className="min-w-0 flex-1">
-                  {loading ? (
-                    <>
-                      <span className="block h-8 w-28 animate-pulse rounded-lg bg-white/25 md:h-10" />
-                      <p className="mt-1 text-sm text-white/75">kcal remaining</p>
-                      <span className="mt-2 block h-3 w-44 max-w-full animate-pulse rounded bg-white/15" />
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-2xl font-bold tabular-nums leading-none text-white md:text-4xl">
-                        {remaining}
-                      </p>
-                      <p className="mt-0.5 text-xs text-white/75 md:mt-1 md:text-sm">
-                        kcal remaining
-                      </p>
-                      <p className="mt-1 hidden text-xs text-white/55 sm:block">
-                        {Math.round(calPct * 100)}% of {goal} kcal goal
-                      </p>
-                    </>
-                  )}
-                </div>
+        {/* Hero — ring + remaining + stat tiles in one compact row */}
+        <section className="app-hero !p-3 md:!p-4">
+          <p className="app-section-label-invert">Today&apos;s overview</p>
+          <div className="mt-1 flex items-center gap-2 md:mt-1.5 md:gap-3 lg:gap-5">
+            <div className="flex min-w-0 flex-1 items-center gap-2.5 md:gap-4">
+              <div className="shrink-0">
+                <ProgressRing
+                  value={calories}
+                  max={goal}
+                  color="rgba(255,255,255,0.92)"
+                  trackColor="rgba(255,255,255,0.22)"
+                  size={52}
+                  strokeWidth={6}
+                  className="md:hidden"
+                >
+                  <div className="text-center">
+                    {loading ? (
+                      <span className="mx-auto block h-3.5 w-7 animate-pulse rounded bg-white/30" />
+                    ) : (
+                      <>
+                        <p className="text-sm font-bold tabular-nums text-white">
+                          {calories}
+                        </p>
+                        <p className="text-[8px] text-white/70">kcal</p>
+                      </>
+                    )}
+                  </div>
+                </ProgressRing>
+                <ProgressRing
+                  value={calories}
+                  max={goal}
+                  color="rgba(255,255,255,0.92)"
+                  trackColor="rgba(255,255,255,0.22)"
+                  size={80}
+                  strokeWidth={7}
+                  className="hidden md:flex"
+                >
+                  <div className="text-center">
+                    {loading ? (
+                      <span className="mx-auto block h-6 w-10 animate-pulse rounded bg-white/30" />
+                    ) : (
+                      <>
+                        <p className="text-xl font-bold tabular-nums text-white">
+                          {calories}
+                        </p>
+                        <p className="text-[9px] text-white/70">kcal eaten</p>
+                      </>
+                    )}
+                  </div>
+                </ProgressRing>
+              </div>
+              <div className="min-w-0 flex-1">
+                {loading ? (
+                  <>
+                    <span className="block h-7 w-24 animate-pulse rounded-lg bg-white/25 md:h-8" />
+                    <p className="mt-0.5 text-[11px] text-white/75 md:text-xs">
+                      kcal remaining
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xl font-bold tabular-nums leading-none text-white md:text-3xl">
+                      {remaining}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-white/75 md:text-xs">
+                      kcal remaining
+                    </p>
+                    <p className="mt-0.5 hidden text-[11px] text-white/55 sm:block">
+                      {Math.round(calPct * 100)}% of {goal} kcal goal
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
-            <div className="grid w-full shrink-0 grid-cols-2 gap-2 md:grid-cols-4 md:gap-2.5 lg:w-auto lg:grid-cols-2 xl:grid-cols-4">
+            <div className="grid shrink-0 grid-cols-2 gap-1 md:grid-cols-4 md:gap-1.5 lg:gap-2">
               <HeroStat
                 loading={loading}
                 value={data?.capturesToday ?? "—"}
