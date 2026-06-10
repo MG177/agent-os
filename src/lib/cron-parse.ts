@@ -1,6 +1,7 @@
 import { CronExpressionParser } from "cron-parser";
 import { triggerToCronExpr, nextIntervalOccurrence } from "./trigger-format";
 import type { TriggerDoc } from "./trigger-format";
+import { getAppTimeZone } from "./timezone";
 
 // Re-export the pure, client-safe helpers so existing imports of these from
 // "@/lib/cron-parse" keep working. Client components should import the pure
@@ -15,7 +16,10 @@ export {
 
 /** Authoritative next occurrence (server-side), via cron-parser. */
 export function nextCronOccurrence(cronExpr: string, from = new Date()): Date {
-  const interval = CronExpressionParser.parse(cronExpr, { currentDate: from });
+  const interval = CronExpressionParser.parse(cronExpr, {
+    currentDate: from,
+    tz: getAppTimeZone(),
+  });
   return interval.next().toDate();
 }
 

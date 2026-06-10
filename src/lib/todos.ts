@@ -49,8 +49,58 @@ export async function ensureTodosIndex(): Promise<void> {
 
 export type ListFilter = "active" | "completed" | "all";
 
+/**
+ * Current accountable slot for a trigger: the next fire after `anchor`, or — if
+ * that time has passed — the latest missed occurrence still before `now`.
+ */
+function effectiveDueSlot(t: TriggerDoc, anchor: Date, now: Date): Date | undefined {
+  let slot = triggerNextRun(t, anchor);
+  if (!slot) return undefined;
+  if (slot > now) return slot;
+  let due = slot;
+  while (true) {
+    const next = triggerNextRun(t, due);
+    if (!next || next.getTime() <= due.getTime() || next > now) return due;
+    due = next;
+  }
+}
+
+/** Recompute a recurring todo's due time from triggers + last completion anchor. */
+export function resolveRecurringNextRun(doc: TodoDoc, now = new Date()): Date | undefined {
+  if (!doc.triggers?.length) return undefined;
+  const anchor = doc.lastDoneAt ?? doc.createdAt;
+  let earliest: Date | undefined;
+  for (const t of doc.triggers) {
+    const slot = effectiveDueSlot(t, anchor, now);
+    if (slot && (!earliest || slot < earliest)) earliest = slot;
+  }
+  return earliest;
+}
+
+function withResolvedSchedule(doc: TodoDoc, now = new Date()): TodoDoc {
+  if (doc.type !== "recurring" || doc.completedAt) return doc;
+  const nextRunAt = resolveRecurringNextRun(doc, now);
+  return nextRunAt ? { ...doc, nextRunAt } : doc;
+}
+
+async function persistScheduleIfDrifted(
+  col: Collection<TodoDoc>,
+  doc: TodoDoc,
+  resolved: Date | undefined,
+  now: Date,
+): Promise<void> {
+  if (!resolved || !doc.nextRunAt) return;
+  const driftMs = Math.abs(new Date(doc.nextRunAt).getTime() - resolved.getTime());
+  if (driftMs < 60_000) return;
+  await col.updateOne(
+    { _id: doc._id },
+    { $set: { nextRunAt: resolved, updatedAt: now } },
+  );
+}
+
 export async function listTodos(filter: ListFilter = "active"): Promise<TodoDoc[]> {
   const col = await todosCollection();
+  const now = new Date();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: Record<string, any> =
     filter === "active"
@@ -58,19 +108,38 @@ export async function listTodos(filter: ListFilter = "active"): Promise<TodoDoc[
       : filter === "completed"
         ? { completedAt: { $exists: true, $ne: null } }
         : {};
-  return col.find(query).sort({ nextRunAt: 1 }).toArray();
+  const docs = await col.find(query).sort({ nextRunAt: 1 }).toArray();
+  const resolved = docs.map((d) => withResolvedSchedule(d, now));
+  await Promise.all(
+    resolved.map((d, i) =>
+      persistScheduleIfDrifted(col, docs[i], d.nextRunAt, now),
+    ),
+  );
+  return resolved.sort(
+    (a, b) => (a.nextRunAt?.getTime() ?? Infinity) - (b.nextRunAt?.getTime() ?? Infinity),
+  );
 }
 
 export async function getDueTodos(): Promise<TodoDoc[]> {
   const col = await todosCollection();
-  const horizon = new Date(Date.now() + 2 * 60 * 60 * 1000);
+  const now = new Date();
+  const horizon = now.getTime() + 2 * 60 * 60 * 1000;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: Record<string, any> = {
     enabled: true,
     $or: [{ completedAt: { $exists: false } }, { completedAt: null }],
-    nextRunAt: { $lte: horizon },
   };
-  return col.find(query).sort({ nextRunAt: 1 }).limit(10).toArray();
+  const docs = await col.find(query).toArray();
+  const resolved = docs.map((d) => withResolvedSchedule(d, now));
+  await Promise.all(
+    resolved.map((d, i) =>
+      persistScheduleIfDrifted(col, docs[i], d.nextRunAt, now),
+    ),
+  );
+  return resolved
+    .filter((d) => d.nextRunAt && d.nextRunAt.getTime() <= horizon)
+    .sort((a, b) => (a.nextRunAt?.getTime() ?? 0) - (b.nextRunAt?.getTime() ?? 0))
+    .slice(0, 10);
 }
 
 export interface CreateTodoInput {
