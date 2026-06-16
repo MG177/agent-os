@@ -7,7 +7,7 @@ import {
   AssistantSessionError,
   loadChatHistoryForTurn,
 } from "@/lib/assistant/sessions";
-import { textStreamResponse, errorJsonResponse } from "@/lib/cursor-sdk/stream";
+import { textStreamResponse, errorJsonResponse } from "@/lib/assistant/stream";
 
 const ImageSchema = z.object({
   base64: z.string(),
