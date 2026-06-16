@@ -7,9 +7,13 @@ import type { TodoDoc } from "@/lib/todos";
 
 type TodosResponse = { todos: TodoDoc[] };
 
+const TODO_POLL_MS = 60_000;
+
 export function useDueTodos() {
   const { data, isLoading, mutate: revalidate } = useResource<TodosResponse>(
     KEYS.todosDue,
+    defaultFetcher,
+    { refreshInterval: TODO_POLL_MS },
   );
 
   const markDone = useCallback(async (id: string) => {
@@ -41,8 +45,7 @@ export function useTodos(status: "active" | "completed" | "all" = "active") {
   const { data, isLoading, mutate: revalidate } = useResource<TodosResponse>(
     key,
     defaultFetcher,
-    // Poll completed/all tabs less aggressively; active tab is managed by mutate calls.
-    status === "active" ? undefined : { refreshInterval: 60_000 },
+    { refreshInterval: TODO_POLL_MS },
   );
 
   const refresh = useCallback(() => revalidate(), [revalidate]);
