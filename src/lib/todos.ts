@@ -21,6 +21,8 @@ export interface TodoDoc {
   enabled: boolean;
   completedAt?: Date;
   lastDoneAt?: Date;
+  /** nextRunAt value the WhatsApp notifier already sent — dedupes repeat sends for the same occurrence. */
+  notifiedRunAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

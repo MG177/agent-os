@@ -29,11 +29,13 @@ services:
       - ASSISTANT_OAUTH_HOST=${ASSISTANT_OAUTH_HOST:-personal.lumen-dev.com}
       # WAHA webhook → /api/webhooks/whatsapp
       - WAHA_WEBHOOK_SECRET=${WAHA_WEBHOOK_SECRET}
-      - WAHA_BASE_URL=${WAHA_BASE_URL:-http://waha:3000}
+      - WAHA_BASE_URL=${WAHA_BASE_URL:-https://waha.lumen-dev.com}
       - WAHA_API_KEY=${WAHA_API_KEY}
       - WAHA_SESSION=${WAHA_SESSION:-default}
       - WHATSAPP_ALLOWED_JIDS=${WHATSAPP_ALLOWED_JIDS}
       - WHATSAPP_ACK_MESSAGE=${WHATSAPP_ACK_MESSAGE:-Saved to Inbox}
+      # Chat to receive todo-due WhatsApp notifications; defaults to the first WHATSAPP_ALLOWED_JIDS entry
+      - WHATSAPP_NOTIFY_JID=${WHATSAPP_NOTIFY_JID:-}
       # Google Calendar (read-only OAuth)
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
       - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
