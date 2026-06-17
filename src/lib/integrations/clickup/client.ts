@@ -97,6 +97,8 @@ export async function fetchClickUpIdentity(
   };
 }
 
+const MAX_RETRIES = 3;
+
 async function clickupRequest<T>(
   token: string,
   path: string,
@@ -108,21 +110,65 @@ async function clickupRequest<T>(
     headers["Content-Type"] = "application/json";
     body = JSON.stringify(init.json);
   }
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: init?.method ?? "GET",
-    headers: { ...headers, ...(init?.headers as Record<string, string>) },
-    body,
-    signal: AbortSignal.timeout(15_000),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new ClickUpApiError(
-      res.status,
-      `ClickUp API ${res.status}: ${text.slice(0, 200)}`,
-    );
+
+  // Retry on 429 (rate limit) — parallel pagination raises the chance of hitting
+  // it. Honor Retry-After when present, otherwise exponential backoff 0.5s→1s→2s.
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(`${API_BASE}${path}`, {
+      method: init?.method ?? "GET",
+      headers: { ...headers, ...(init?.headers as Record<string, string>) },
+      body,
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (res.status === 429 && attempt < MAX_RETRIES) {
+      const retryAfter = Number(res.headers.get("retry-after"));
+      const delayMs =
+        Number.isFinite(retryAfter) && retryAfter > 0
+          ? retryAfter * 1000
+          : 500 * 2 ** attempt;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      continue;
+    }
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ClickUpApiError(
+        res.status,
+        `ClickUp API ${res.status}: ${text.slice(0, 200)}`,
+      );
+    }
+    if (res.status === 204) return undefined as T;
+    return (await res.json()) as T;
   }
-  if (res.status === 204) return undefined as T;
-  return (await res.json()) as T;
+}
+
+/**
+ * Fetch up to MAX_PAGES of a paginated task endpoint. Page 0 is fetched first;
+ * if more pages remain, the rest are fetched concurrently (ClickUp gives no
+ * total-page count, so we speculatively fan out and stop appending at the first
+ * last_page/empty batch). Turns the worst case from 6 serial round-trips into 2.
+ */
+async function fetchPagedTasks(
+  token: string,
+  buildPath: (page: number) => string,
+): Promise<RawTask[]> {
+  type Page = { tasks?: RawTask[]; last_page?: boolean };
+  const first = await clickupRequest<Page>(token, buildPath(0));
+  const firstBatch = first.tasks ?? [];
+  if (first.last_page || firstBatch.length === 0) return firstBatch;
+
+  const rest = await Promise.all(
+    Array.from({ length: MAX_PAGES - 1 }, (_, i) =>
+      clickupRequest<Page>(token, buildPath(i + 1)),
+    ),
+  );
+
+  const raw: RawTask[] = [...firstBatch];
+  for (const page of rest) {
+    const batch = page.tasks ?? [];
+    raw.push(...batch);
+    if (page.last_page || batch.length === 0) break;
+  }
+  return raw;
 }
 
 // ── normalization ──────────────────────────────────────────────────────────
@@ -207,37 +253,34 @@ async function fetchTeamTasks(
   filter: { key: "assignees[]" | "watchers[]"; value: string },
   includeClosed: boolean,
 ): Promise<RawTask[]> {
-  const raw: RawTask[] = [];
-
-  for (let page = 0; page < MAX_PAGES; page++) {
+  return fetchPagedTasks(token, (page) => {
     const params = new URLSearchParams();
     params.append(filter.key, filter.value);
     params.set("subtasks", "true");
     params.set("include_closed", String(includeClosed));
     params.set("order_by", "due_date");
     params.set("page", String(page));
+    return `/team/${teamId}/task?${params.toString()}`;
+  });
+}
 
-    const data = await clickupRequest<{ tasks?: RawTask[]; last_page?: boolean }>(
-      token,
-      `/team/${teamId}/task?${params.toString()}`,
-    );
-    const batch = data.tasks ?? [];
-    raw.push(...batch);
-    if (data.last_page || batch.length === 0) break;
-  }
-
-  return raw;
+/** A task plus how the connected user is attached to it (drives the Mongo cache flags). */
+export interface ClickUpTaskWithParticipation {
+  task: ClickUpTask;
+  isAssignee: boolean;
+  isWatcher: boolean;
 }
 
 /**
  * All tasks the connected user participates in across the workspace — tasks
  * assigned to me *and* tasks I watch (ClickUp auto-watches on assign, @mention,
  * or comment, so this covers tasks I'm involved in alongside others). The two
- * filters can't be OR'd in one request, so we query each and union by id.
+ * filters can't be OR'd in one request, so we query each and union by id, while
+ * tracking which filter(s) matched so the cache can store participation flags.
  */
-export async function getMyTasks(opts?: {
+export async function getMyTasksWithParticipation(opts?: {
   includeClosed?: boolean;
-}): Promise<ClickUpTask[]> {
+}): Promise<ClickUpTaskWithParticipation[]> {
   const { token, teamId, userId } = await getAuthContext();
   const includeClosed = Boolean(opts?.includeClosed);
   const uid = String(userId);
@@ -247,11 +290,25 @@ export async function getMyTasks(opts?: {
     fetchTeamTasks(token, teamId, { key: "watchers[]", value: uid }, includeClosed),
   ]);
 
+  const assignedIds = new Set(assigned.map((r) => r.id).filter(Boolean));
+  const watchingIds = new Set(watching.map((r) => r.id).filter(Boolean));
+
   const byId = new Map<string, RawTask>();
   for (const raw of assigned) if (raw.id) byId.set(raw.id, raw);
   for (const raw of watching) if (raw.id) byId.set(raw.id, raw);
 
-  return [...byId.values()].map(normalizeTask);
+  return [...byId.values()].map((raw) => ({
+    task: normalizeTask(raw),
+    isAssignee: assignedIds.has(raw.id),
+    isWatcher: watchingIds.has(raw.id),
+  }));
+}
+
+/** Flat union of assignee + watcher tasks (thin wrapper over participation). */
+export async function getMyTasks(opts?: {
+  includeClosed?: boolean;
+}): Promise<ClickUpTask[]> {
+  return (await getMyTasksWithParticipation(opts)).map((t) => t.task);
 }
 
 /** Status definitions for a list (cached). Used for the status picker + complete. */
@@ -424,6 +481,7 @@ export async function stopTimer(): Promise<void> {
 export interface SprintListRef {
   listId: string;
   listName: string;
+  folderId: string;
   folderName: string;
 }
 
@@ -468,7 +526,7 @@ async function getLatestSprintListInFolder(
   let best: SprintListRef | null = null;
   for (const list of data.lists ?? []) {
     if (!best || Number(list.id) > Number(best.listId)) {
-      best = { listId: list.id, listName: list.name, folderName };
+      best = { listId: list.id, listName: list.name, folderId, folderName };
     }
   }
   return best;
@@ -478,12 +536,28 @@ async function getLatestSprintListInFolder(
  * Newest list in a configured sprint folder (highest list id). Resolves the
  * folder via task metadata, then lists under that folder — works for shared
  * spaces that do not appear on the team space tree.
+ *
+ * Pass `cached` (the folder id+name persisted by the sync layer) to skip the
+ * expensive task re-scan; we only fall back to a fresh scan when the cached
+ * folder yields nothing (e.g. the sprint folder rolled over).
  */
-export async function getLatestSprintList(): Promise<SprintListRef | null> {
+export async function getLatestSprintList(
+  cached?: { folderId: string; folderName: string } | null,
+): Promise<SprintListRef | null> {
   const sprintFolders = getSprintFolderNames();
   if (sprintFolders.size === 0) return null;
 
   const { token, teamId, userId } = await getAuthContext();
+
+  if (cached?.folderId) {
+    const ref = await getLatestSprintListInFolder(
+      token,
+      cached.folderId,
+      cached.folderName,
+    ).catch(() => null);
+    if (ref) return ref;
+  }
+
   const folder = await resolveSprintFolderRef(token, teamId, userId);
   if (!folder) return null;
 
@@ -501,24 +575,16 @@ export async function getMyAssignedTasksInList(
 ): Promise<ClickUpTask[]> {
   const { token, userId } = await getAuthContext();
   const includeClosed = Boolean(opts?.includeClosed);
-  const raw: RawTask[] = [];
 
-  for (let page = 0; page < MAX_PAGES; page++) {
+  const raw = await fetchPagedTasks(token, (page) => {
     const params = new URLSearchParams();
     params.append("assignees[]", String(userId));
     params.set("subtasks", "true");
     params.set("include_closed", String(includeClosed));
     params.set("include_timl", "true");
     params.set("page", String(page));
-
-    const data = await clickupRequest<{ tasks?: RawTask[]; last_page?: boolean }>(
-      token,
-      `/list/${listId}/task?${params.toString()}`,
-    );
-    const batch = data.tasks ?? [];
-    raw.push(...batch);
-    if (data.last_page || batch.length === 0) break;
-  }
+    return `/list/${listId}/task?${params.toString()}`;
+  });
 
   return raw.map(normalizeTask);
 }

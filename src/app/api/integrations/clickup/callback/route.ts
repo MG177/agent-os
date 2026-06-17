@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { clearClickUpCache } from "@/lib/integrations/clickup/cache";
 import { exchangeAuthorizationCode } from "@/lib/integrations/clickup/oauth";
 import { saveTokenRecord } from "@/lib/integrations/clickup/store";
+import { syncClickUpTasks } from "@/lib/integrations/clickup/sync";
 import { verifyOAuthState } from "@/lib/integrations/oauth-state";
 
 export async function GET(request: NextRequest) {
@@ -38,6 +39,8 @@ export async function GET(request: NextRequest) {
     const result = await exchangeAuthorizationCode(code);
     await saveTokenRecord(result);
     clearClickUpCache();
+    // Warm the cache so the first dashboard load after connecting is instant.
+    void syncClickUpTasks({ reason: "connect-oauth" }).catch(() => {});
 
     const res = NextResponse.redirect(
       new URL("/settings/integrations?connected=clickup", request.url),

@@ -3,6 +3,7 @@ import { clearClickUpCache } from "@/lib/integrations/clickup/cache";
 import { fetchClickUpIdentity } from "@/lib/integrations/clickup/client";
 import { isClickUpReady } from "@/lib/integrations/clickup/config";
 import { saveTokenRecord } from "@/lib/integrations/clickup/store";
+import { syncClickUpTasks } from "@/lib/integrations/clickup/sync";
 
 /**
  * Connect ClickUp with a Personal API Token (pk_...). No admin / app
@@ -36,6 +37,8 @@ export async function POST(request: NextRequest) {
     const identity = await fetchClickUpIdentity(token);
     await saveTokenRecord({ accessToken: token, ...identity });
     clearClickUpCache();
+    // Warm the cache so the first dashboard load is instant.
+    void syncClickUpTasks({ reason: "connect-token" }).catch(() => {});
     return Response.json({ ok: true, connected: true, teamName: identity.teamName });
   } catch {
     return Response.json(

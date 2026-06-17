@@ -9,6 +9,7 @@
  */
 
 import type { Db, MongoClient as MongoClientType, Collection } from "mongodb";
+import type { ClickUpTask } from "@/lib/integrations/clickup/types";
 
 const DEFAULT_DB_NAME = "nutrition-tracker";
 
@@ -120,6 +121,50 @@ export async function goalsCollection(): Promise<Collection<GoalsDoc>> {
   return db.collection<GoalsDoc>("goals");
 }
 
+// ── ClickUp cache ────────────────────────────────────────────────────
+// Persistent read-through cache for ClickUp tasks. One doc per task so
+// write-through is a single replaceOne and pruning is a deleteMany; every
+// existing view (groupTasks, sprint filters) reconstructs from a flat find().
+
+/** One cached ClickUp task. `_id` is the ClickUp task id. */
+export interface ClickUpTaskDoc {
+  _id: string;
+  teamId: string; // active workspace — reads always filter by this
+  task: ClickUpTask; // normalized shape from client.ts normalizeTask()
+  listId: string; // == task.listId, denormalized for the sprint-list index
+  isAssignee: boolean; // returned by the assignees[] filter
+  isWatcher: boolean; // returned by the watchers[] filter
+  inSprintList: boolean; // present in the resolved sprint list fetch
+  syncedAt: string; // ISO; set on every sync / write-through
+}
+
+/** Singleton sync state per workspace. `_id` is the teamId. */
+export interface ClickUpSyncMetaDoc {
+  _id: string;
+  syncedAt: string | null;
+  sprintFolderId: string | null;
+  sprintFolderName: string | null;
+  sprintListId: string | null;
+  sprintListName: string | null;
+  syncStatus: "idle" | "syncing" | "ok" | "error";
+  lastError?: string | null;
+  taskCount?: number;
+}
+
+export async function clickupTasksCollection(): Promise<
+  Collection<ClickUpTaskDoc>
+> {
+  const db = await getDb();
+  return db.collection<ClickUpTaskDoc>("clickup_tasks");
+}
+
+export async function clickupSyncMetaCollection(): Promise<
+  Collection<ClickUpSyncMetaDoc>
+> {
+  const db = await getDb();
+  return db.collection<ClickUpSyncMetaDoc>("clickup_sync_meta");
+}
+
 /**
  * Idempotent index creation. Call once on first DB touch (or from a startup
  * route / migration script) — safe to re-run.
@@ -131,4 +176,9 @@ export async function ensureIndexes(): Promise<void> {
 
   const foods = await foodsCollection();
   await foods.createIndex({ display_name: 1 });
+
+  const clickupTasks = await clickupTasksCollection();
+  await clickupTasks.createIndex({ teamId: 1, syncedAt: -1 });
+  await clickupTasks.createIndex({ teamId: 1, listId: 1 });
+  await clickupTasks.createIndex({ teamId: 1, isAssignee: 1 });
 }

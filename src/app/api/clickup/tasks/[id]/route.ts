@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import { clearClickUpCache } from "@/lib/integrations/clickup/cache";
 import {
   ClickUpNotConnectedError,
   completeTask,
@@ -7,6 +6,10 @@ import {
   updateTask,
 } from "@/lib/integrations/clickup/client";
 import { isClickUpReady } from "@/lib/integrations/clickup/config";
+import {
+  removeClickUpTask,
+  upsertClickUpTask,
+} from "@/lib/integrations/clickup/sync";
 
 export async function GET(
   _request: NextRequest,
@@ -79,7 +82,13 @@ export async function PATCH(
       task = await updateTask(taskId, patch);
     }
 
-    clearClickUpCache();
+    // Write-through: completing moves the task to a closed status (cache holds
+    // open tasks only), so drop it; any other edit upserts the new state.
+    if (body.action === "complete") {
+      await removeClickUpTask(taskId);
+    } else {
+      await upsertClickUpTask(task);
+    }
     return Response.json({ task });
   } catch (err) {
     if (err instanceof ClickUpNotConnectedError) {

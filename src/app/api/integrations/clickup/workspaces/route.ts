@@ -9,6 +9,7 @@ import {
   loadTokenRecord,
   setActiveTeam,
 } from "@/lib/integrations/clickup/store";
+import { syncClickUpTasks } from "@/lib/integrations/clickup/sync";
 
 /** List the workspaces the token can access + which one is active. */
 export async function GET() {
@@ -56,7 +57,10 @@ export async function POST(request: NextRequest) {
       );
     }
     await setActiveTeam(team.id, team.name);
+    // List-status defs differ per workspace; warm the new team's cache in the
+    // background (reads filter by teamId, so the old team's docs never leak).
     clearClickUpCache();
+    void syncClickUpTasks({ reason: "workspace-switch" }).catch(() => {});
     return Response.json({ ok: true, teamId: team.id, teamName: team.name });
   } catch (err) {
     return errorResponse(err);

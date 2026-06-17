@@ -1,18 +1,21 @@
 import {
-  getLatestSprintList,
+  ClickUpNotConnectedError,
   getListStatuses,
-  getMyAssignedTasksInList,
 } from "@/lib/integrations/clickup/client";
 import { loadTokenRecord } from "@/lib/integrations/clickup/store";
+import {
+  CLICKUP_CACHE_TTL_MS,
+  getSyncMeta,
+  readSprintTaskDocs,
+  syncClickUpTasks,
+} from "@/lib/integrations/clickup/sync";
 import type {
   ClickUpTask,
   ClickUpTaskStatus,
   SprintLatestResponse,
 } from "@/lib/integrations/clickup/types";
 
-const TTL_MS = 60 * 1000;
-
-const cache = new Map<string, { expiresAt: number; data: SprintLatestResponse }>();
+const EMPTY: SprintLatestResponse = { list: null, tasks: [], count: 0 };
 
 function normStatus(name: string): string {
   return name.trim().toLowerCase();
@@ -43,49 +46,53 @@ function sortSprintTasks(tasks: ClickUpTask[]): ClickUpTask[] {
   });
 }
 
-export function clearSprintCache(): void {
-  cache.clear();
-}
+/** Retained for API compatibility; sprint freshness now flows through syncClickUpTasks. */
+export function clearSprintCache(): void {}
 
 /**
- * Latest sprint list (from folder hierarchy) + open tasks assigned to me in
- * that list. No due-date filter; watchers are excluded.
+ * Latest sprint list (resolved + persisted by the sync layer) + open tasks
+ * assigned to me in that list, served from the Mongo cache. No due-date filter;
+ * watchers are excluded. Cold/explicit-refresh blocks on one sync; a stale
+ * snapshot is served immediately and refreshed in the background (SWR).
  */
 export async function getLatestSprintTasksCached(opts?: {
   skipCache?: boolean;
 }): Promise<SprintLatestResponse> {
   const record = await loadTokenRecord();
-  const key = `sprint:latest|${record?.teamId ?? "unknown"}`;
+  if (!record) throw new ClickUpNotConnectedError();
+  const teamId = record.teamId;
 
-  if (!opts?.skipCache) {
-    const hit = cache.get(key);
-    if (hit && Date.now() < hit.expiresAt) return hit.data;
+  let meta = await getSyncMeta(teamId);
+  const fresh = meta?.syncedAt
+    ? Date.now() - new Date(meta.syncedAt).getTime() < CLICKUP_CACHE_TTL_MS
+    : false;
+
+  if (opts?.skipCache || !meta?.syncedAt) {
+    await syncClickUpTasks({ reason: opts?.skipCache ? "sprint-refresh" : "sprint-cold" });
+    meta = await getSyncMeta(teamId);
+  } else if (!fresh) {
+    void syncClickUpTasks({ reason: "sprint-swr" }).catch(() => {});
   }
 
-  const sprintList = await getLatestSprintList();
-  if (!sprintList) {
-    const empty: SprintLatestResponse = { list: null, tasks: [], count: 0 };
-    cache.set(key, { expiresAt: Date.now() + TTL_MS, data: empty });
-    return empty;
-  }
+  if (!meta?.sprintListId) return EMPTY;
 
-  const [rawTasks, listStatuses] = await Promise.all([
-    getMyAssignedTasksInList(sprintList.listId),
-    getListStatuses(sprintList.listId),
-  ]);
-  const tasks = sortSprintTasks(filterBeforeTesting(rawTasks, listStatuses));
+  const docs = await readSprintTaskDocs(teamId, meta.sprintListId);
+  const listStatuses = await getListStatuses(meta.sprintListId);
+  const tasks = sortSprintTasks(
+    filterBeforeTesting(
+      docs.map((d) => d.task),
+      listStatuses,
+    ),
+  );
 
-  const data: SprintLatestResponse = {
+  return {
     list: {
-      listId: sprintList.listId,
-      listName: sprintList.listName,
-      folderName: sprintList.folderName,
+      listId: meta.sprintListId,
+      listName: meta.sprintListName ?? "",
+      folderName: meta.sprintFolderName ?? "",
       isSprint: true,
     },
     tasks,
     count: tasks.length,
   };
-
-  cache.set(key, { expiresAt: Date.now() + TTL_MS, data });
-  return data;
 }
