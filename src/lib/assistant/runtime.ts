@@ -1,9 +1,4 @@
-import type { SDKUserMessage } from "@cursor/sdk";
-import {
-  createCursorAgent,
-  closeCursorAgent,
-  sendAndCollectText,
-} from "@/lib/cursor-sdk";
+import { getAssistantProvider } from "@/lib/assistant/provider-factory";
 import {
   buildAssistantSystemInstruction,
   buildUserPromptPayload,
@@ -92,64 +87,35 @@ export async function runAssistantChat(
   const { policy, messages } = resolveRequestCommand(request);
   const mcpPolicyEnv = commandPolicyToMcpEnv(policy);
 
-  let agent;
-  try {
-    agent = await createCursorAgent({
-      name: "agent-os-chat",
-      mcpPolicyEnv,
-    });
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Failed to initialize Cursor agent";
-    const status = message.includes("CURSOR_API_KEY") ? 503 : 500;
-    return { ok: false, message, status };
-  }
+  const systemInstruction = await buildAssistantSystemInstruction(policy);
+  const userText = buildUserPromptPayload(
+    messages,
+    request.image
+      ? "An image is attached — use it for nutrition labels or food identification."
+      : undefined,
+  );
 
-  try {
-    const systemInstruction = await buildAssistantSystemInstruction(policy);
-    const userText = buildUserPromptPayload(
-      messages,
-      request.image
-        ? "An image is attached — use it for nutrition labels or food identification."
-        : undefined,
-    );
+  const provider = getAssistantProvider();
+  const outcome = await provider.send({
+    systemInstruction,
+    userPrompt: userText,
+    image: request.image,
+    mcpPolicyEnv,
+  });
 
-    const fullPrompt = `${systemInstruction}\n\n---\n\n${userText}`;
-
-    const message: SDKUserMessage = {
-      text: fullPrompt,
-      ...(request.image
-        ? {
-            images: [
-              {
-                data: request.image.base64,
-                mimeType: request.image.mediaType,
-              },
-            ],
-          }
-        : {}),
+  if (!outcome.ok) {
+    console.error("[assistant]", outcome.error);
+    return {
+      ok: false,
+      message:
+        outcome.error.kind === "startup"
+          ? outcome.error.message
+          : "Assistant run failed. Check server logs.",
+      status: outcome.error.status ?? (outcome.error.kind === "startup" ? 503 : 500),
     };
-
-    const outcome = await sendAndCollectText({ agent, message });
-
-    if (!outcome.ok) {
-      console.error("[assistant]", outcome.error);
-      return {
-        ok: false,
-        message:
-          outcome.error.kind === "startup"
-            ? outcome.error.message
-            : "Assistant run failed. Check server logs.",
-        status: outcome.error.kind === "startup" ? 503 : 500,
-      };
-    }
-
-    const text =
-      outcome.text ||
-      "Done — let me know if you need anything else.";
-
-    return { ok: true, text };
-  } finally {
-    await closeCursorAgent(agent);
   }
+
+  const text = outcome.text || "Done — let me know if you need anything else.";
+
+  return { ok: true, text };
 }
