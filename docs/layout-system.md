@@ -94,7 +94,11 @@ Defined in `@theme inline` and `.app-page-*` classes in `globals.css`:
 
 - **Browse column browser** — full-bleed Finder-style chrome; hub page uses `<Page>` + `<PageBody>` only.
 - **Custom bento grids** (home schedule/tasks) — use `<Grid>` with `className` overrides for `col-span` / `row-span`.
-- **QuickPanel / modals** — not page-level; stay self-contained.
+- **QuickPanel / modals** — not page-level; stay self-contained. Overlays use shadcn `Dialog` / `Sheet` / `Popover` (see `src/components/ui/`) wrapped by `AppModal` where appropriate.
+
+## shadcn/ui primitives
+
+Interactive building blocks live in `src/components/ui/` (shadcn v4 + Luna theme tokens in `globals.css`). The layout kit (`Page`, `Grid`, `Widget`) composes page chrome; shadcn covers buttons, inputs, dialogs, sheets, cards, and tabs inside those surfaces.
 
 ## Related
 
@@ -104,4 +108,4 @@ Defined in `@theme inline` and `.app-page-*` classes in `globals.css`:
 
 ---
 
-**Document Length:** ~120 lines | **Last Updated:** 2026-06-04
+**Document Length:** ~130 lines | **Last Updated:** 2026-06-09
