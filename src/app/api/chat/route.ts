@@ -8,6 +8,10 @@ import {
   loadChatHistoryForTurn,
 } from "@/lib/assistant/sessions";
 import { textStreamResponse, errorJsonResponse } from "@/lib/assistant/stream";
+import {
+  proxyToFullEnabled,
+  proxyToFullInstance,
+} from "@/lib/full-instance-proxy";
 
 const ImageSchema = z.object({
   base64: z.string(),
@@ -22,6 +26,7 @@ const ChatSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  if (proxyToFullEnabled()) return proxyToFullInstance(req);
   try {
     let raw: unknown;
     try {

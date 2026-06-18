@@ -26,8 +26,14 @@ export async function createCursorAgent(
     name: options.name ?? "agent-os-assistant",
     model: { id: config.modelId },
     local: {
+      // Agent project root = the PARA vault (CURSOR_AGENT_CWD) → loads
+      // ${vault}/.cursor/{rules,skills} as the PROJECT setting scope.
       cwd: config.cwd,
-      settingSources: [],
+      // Load both ambient setting layers: "user" = $HOME/.cursor/{rules,skills}
+      // (container HOME=/root, mounted from ~/.cursor); "project" = cwd/.cursor.
+      // Valid values: "project" | "user" | "team" | "mdm" | "plugins" | "all"
+      // (@cursor/sdk options.d.ts); "all" cannot be mixed with explicit entries.
+      settingSources: ["user", "project"],
     },
     mcpServers: buildAgentOsMcpServers(config, options.mcpPolicyEnv),
   });

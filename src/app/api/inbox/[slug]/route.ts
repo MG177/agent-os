@@ -4,11 +4,16 @@ import {
   fileWritesDisabledResponse,
   isFileWritesDisabledError,
 } from "@/lib/deployment";
+import {
+  proxyToFullEnabled,
+  proxyToFullInstance,
+} from "@/lib/full-instance-proxy";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  if (proxyToFullEnabled()) return proxyToFullInstance(request);
   const { slug } = await params;
   const item = getInboxItem(slug);
   if (!item) return Response.json({ error: "Not found" }, { status: 404 });
@@ -16,9 +21,10 @@ export async function GET(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  if (proxyToFullEnabled()) return proxyToFullInstance(request);
   const { slug } = await params;
   let result;
   try {

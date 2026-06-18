@@ -7,6 +7,10 @@ import {
   fileWritesDisabledResponse,
   isFileWritesDisabledError,
 } from "@/lib/deployment";
+import {
+  proxyToFullEnabled,
+  proxyToFullInstance,
+} from "@/lib/full-instance-proxy";
 
 const ALLOWED_SOURCES: AuditSource[] = ["capture-ui", "whatsapp"];
 
@@ -17,12 +21,14 @@ const InboxCreateSchema = z.object({
   source: z.string().max(50).optional(),
 });
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  if (proxyToFullEnabled()) return proxyToFullInstance(request);
   const items = listInbox();
   return Response.json({ items });
 }
 
 export async function POST(request: NextRequest) {
+  if (proxyToFullEnabled()) return proxyToFullInstance(request);
   let raw: unknown;
   try {
     raw = await request.json();

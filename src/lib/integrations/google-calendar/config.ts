@@ -4,6 +4,7 @@ const CALENDAR_READONLY_SCOPE =
 const ALLOWED_HOSTS = new Set([
   "localhost:3003",
   "127.0.0.1:3003",
+  "agent-os.lumen-dev.com",
   "personal.lumen-dev.com",
   "personal-dashboard.lumen-dev.com",
   "agent-os-beta-lovat.vercel.app",
