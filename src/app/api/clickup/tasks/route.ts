@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { clearClickUpCache } from "@/lib/integrations/clickup/cache";
 import { ClickUpNotConnectedError, createTask } from "@/lib/integrations/clickup/client";
 import { isClickUpReady } from "@/lib/integrations/clickup/config";
 import { groupTasks, type DueFilter } from "@/lib/integrations/clickup/group";
+import { upsertClickUpTask } from "@/lib/integrations/clickup/sync";
 import { getMyTasksCached } from "@/lib/integrations/clickup/tasks-service";
 
 const DUE_VALUES: DueFilter[] = ["all", "overdue", "today", "week"];
@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
       dueDate: body.dueDate ?? null,
       priority: body.priority ?? null,
     });
-    // Invalidate so the next GET reflects the new task immediately.
-    clearClickUpCache();
+    // Write-through so the next GET reflects the new task immediately.
+    await upsertClickUpTask(task);
     return Response.json({ task }, { status: 201 });
   } catch (err) {
     return errorResponse(err);
