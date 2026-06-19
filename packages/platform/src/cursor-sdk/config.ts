@@ -17,7 +17,10 @@ export interface CursorSdkConfig {
 }
 
 function resolveMcpServerScript(): string {
-  return path.join(process.cwd(), "scripts", "assistant-mcp-server.ts");
+  // AGENT_OS_APP_ROOT lets the Docker runner pin the app root explicitly; dev
+  // falls back to process.cwd() (apps/web under `turbo dev`).
+  const appRoot = process.env.AGENT_OS_APP_ROOT?.trim() || process.cwd();
+  return path.join(appRoot, "scripts", "assistant-mcp-server.ts");
 }
 
 export function loadCursorSdkConfig(): CursorSdkConfig {
@@ -69,7 +72,7 @@ export function buildAgentOsMcpServers(
       args: [
         "tsx",
         "--tsconfig",
-        path.join(appRoot, "tsconfig.json"),
+        path.join(appRoot, "scripts", "tsconfig.mcp.json"),
         config.mcpServerScript,
       ],
       cwd: appRoot,

@@ -1,0 +1,22 @@
+{
+  "//": "Standalone tsconfig for the `npx tsx` MCP child. Self-contained (no extends,",
+  "//2": "no Next plugin) with explicit @agent-os/* paths relative to this file so it",
+  "//3": "resolves the workspace packages identically in dev and in the Docker runner",
+  "//4": "(which mirrors the apps/web/scripts + packages/ layout).",
+  "compilerOptions": {
+    "target": "ES2017",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@agent-os/contracts": ["../../../packages/contracts/src/index.ts"],
+      "@agent-os/contracts/*": ["../../../packages/contracts/src/*"],
+      "@agent-os/core": ["../../../packages/core/src/index.ts"],
+      "@agent-os/core/*": ["../../../packages/core/src/*"],
+      "@agent-os/platform": ["../../../packages/platform/src/index.ts"],
+      "@agent-os/platform/*": ["../../../packages/platform/src/*"]
+    }
+  }
+}

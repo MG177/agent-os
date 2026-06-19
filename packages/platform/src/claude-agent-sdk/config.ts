@@ -10,7 +10,10 @@ export interface ClaudeAgentSdkConfig {
 }
 
 function resolveMcpServerScript(): string {
-  return path.join(process.cwd(), "scripts", "assistant-mcp-server.ts");
+  // AGENT_OS_APP_ROOT lets the Docker runner pin the app root explicitly; dev
+  // falls back to process.cwd() (apps/web under `turbo dev`).
+  const appRoot = process.env.AGENT_OS_APP_ROOT?.trim() || process.cwd();
+  return path.join(appRoot, "scripts", "assistant-mcp-server.ts");
 }
 
 export function loadClaudeAgentSdkConfig(): ClaudeAgentSdkConfig {
