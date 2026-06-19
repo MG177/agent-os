@@ -4,7 +4,7 @@ import {
   listSessions,
   DEFAULT_SESSION_LIST_LIMIT,
   MAX_SESSION_LIST_LIMIT,
-} from "@/lib/assistant/sessions";
+} from "@agent-os/platform/assistant/sessions";
 
 function serializeSession(session: {
   _id: string;

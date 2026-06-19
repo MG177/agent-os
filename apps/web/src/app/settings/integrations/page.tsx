@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Page } from "@/components/ui/layout";
-import type { GoogleCalendarStatus } from "@/lib/integrations/google-calendar/types";
-import type { ClickUpStatus } from "@/lib/integrations/clickup/types";
+import type { GoogleCalendarStatus } from "@agent-os/contracts/integrations/google-calendar/types";
+import type { ClickUpStatus } from "@agent-os/contracts/integrations/clickup/types";
 
 const ERROR_MESSAGES: Record<string, string> = {
   access_denied: "Sign-in was cancelled.",

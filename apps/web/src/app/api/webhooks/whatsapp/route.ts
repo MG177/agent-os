@@ -1,10 +1,10 @@
 import { NextRequest } from "next/server";
-import { createInboxItem } from "@/lib/vault";
-import { titleFromCapture, bodyFromWhatsApp } from "@/lib/inbox-capture";
+import { createInboxItem } from "@agent-os/platform/vault";
+import { titleFromCapture, bodyFromWhatsApp } from "@agent-os/platform/inbox-capture";
 import {
   fileWritesDisabledResponse,
   isFileWritesDisabledError,
-} from "@/lib/deployment";
+} from "@agent-os/contracts/deployment";
 import {
   verifyWahaHmac,
   shouldCaptureMessage,
@@ -13,7 +13,7 @@ import {
   getWhatsAppAckMessage,
   sendWhatsAppText,
   type WahaWebhookEvent,
-} from "@/lib/waha";
+} from "@agent-os/platform/waha";
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();

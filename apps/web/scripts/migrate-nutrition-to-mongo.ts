@@ -14,8 +14,8 @@ import {
   mealsCollection,
   type FoodDoc,
   type MealDoc,
-} from "../src/lib/mongo";
-import type { FoodDb, LogEntry, MacroGoals } from "../src/lib/nutrition";
+} from "@agent-os/platform/mongo";
+import type { FoodDb, LogEntry, MacroGoals } from "@agent-os/platform/nutrition";
 
 const DEFAULT_GOALS: MacroGoals = {
   calories: 2200,

@@ -7,8 +7,8 @@ import {
   calculateTotals,
   todayISO,
   type LogEntry,
-} from '@/lib/nutrition'
-import { appendAudit, hashPayload, type AuditSource } from '@/lib/audit'
+} from '@agent-os/platform/nutrition'
+import { appendAudit, hashPayload, type AuditSource } from '@agent-os/platform/audit'
 
 const ALLOWED_SOURCES: AuditSource[] = ['nutrition-form', 'nutrition-chat']
 

@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   isGoogleOAuthConfigured,
   resolveRedirectUri,
-} from "@/lib/integrations/google-calendar/config";
-import { getAuthorizationUrl } from "@/lib/integrations/google-calendar/oauth";
-import { createOAuthState } from "@/lib/integrations/oauth-state";
+} from "@agent-os/platform/integrations/google-calendar/config";
+import { getAuthorizationUrl } from "@agent-os/platform/integrations/google-calendar/oauth";
+import { createOAuthState } from "@agent-os/core/integrations/oauth-state";
 
 export async function GET(request: NextRequest) {
   if (!isGoogleOAuthConfigured()) {

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { clearClickUpCache } from "@/lib/integrations/clickup/cache";
-import { exchangeAuthorizationCode } from "@/lib/integrations/clickup/oauth";
-import { saveTokenRecord } from "@/lib/integrations/clickup/store";
-import { verifyOAuthState } from "@/lib/integrations/oauth-state";
+import { clearClickUpCache } from "@agent-os/platform/integrations/clickup/cache";
+import { exchangeAuthorizationCode } from "@agent-os/platform/integrations/clickup/oauth";
+import { saveTokenRecord } from "@agent-os/platform/integrations/clickup/store";
+import { verifyOAuthState } from "@agent-os/core/integrations/oauth-state";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

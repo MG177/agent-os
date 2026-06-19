@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { ClickUpNotConnectedError } from "@/lib/integrations/clickup/client";
-import { isClickUpReady } from "@/lib/integrations/clickup/config";
-import { getLatestSprintTasksCached } from "@/lib/integrations/clickup/sprint-service";
+import { ClickUpNotConnectedError } from "@agent-os/platform/integrations/clickup/client";
+import { isClickUpReady } from "@agent-os/platform/integrations/clickup/config";
+import { getLatestSprintTasksCached } from "@agent-os/platform/integrations/clickup/sprint-service";
 
 export async function GET(request: NextRequest) {
   if (!isClickUpReady()) {

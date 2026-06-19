@@ -4,14 +4,14 @@ import { useEffect } from "react";
 import ProgressRing from "@/components/ProgressRing";
 import { RecentActivityButton } from "@/components/activity/RecentActivityButton";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import type { ActivityEvent } from "@/lib/activity";
+import type { ActivityEvent } from "@agent-os/platform/activity";
 import { TodayScheduleCard } from "@/components/calendar/TodayScheduleCard";
 import { TodayTasksCard } from "@/components/clickup/TodayTasksCard";
 import { DueTodosCard } from "@/components/todos/DueTodosCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Grid, Page, PageBody } from "@/components/ui/layout";
 import { useResource } from "@/lib/data/useResource";
-import { KEYS } from "@/lib/data/keys";
+import { KEYS } from "@agent-os/contracts/data/keys";
 
 interface HomeData {
   status: string;

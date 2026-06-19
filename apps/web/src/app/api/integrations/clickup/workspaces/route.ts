@@ -1,14 +1,14 @@
 import { NextRequest } from "next/server";
-import { clearClickUpCache } from "@/lib/integrations/clickup/cache";
+import { clearClickUpCache } from "@agent-os/platform/integrations/clickup/cache";
 import {
   ClickUpNotConnectedError,
   getTeams,
-} from "@/lib/integrations/clickup/client";
-import { isClickUpReady } from "@/lib/integrations/clickup/config";
+} from "@agent-os/platform/integrations/clickup/client";
+import { isClickUpReady } from "@agent-os/platform/integrations/clickup/config";
 import {
   loadTokenRecord,
   setActiveTeam,
-} from "@/lib/integrations/clickup/store";
+} from "@agent-os/platform/integrations/clickup/store";
 
 /** List the workspaces the token can access + which one is active. */
 export async function GET() {

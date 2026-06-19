@@ -8,7 +8,7 @@ import {
   findNextTimedEvent,
   formatEventTimeRange,
 } from "@/components/calendar/calendar-utils";
-import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
+import type { CalendarEventSummary } from "@agent-os/contracts/integrations/google-calendar/types";
 
 export function CalendarRightRail({
   events,

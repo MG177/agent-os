@@ -12,7 +12,7 @@ import {
   formatEventTimeShort,
 } from "@/components/calendar/calendar-utils";
 import { useScheduleClock } from "@/components/calendar/useScheduleClock";
-import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
+import type { CalendarEventSummary } from "@agent-os/contracts/integrations/google-calendar/types";
 
 const HOURS = Array.from(
   { length: TIMELINE_END_HOUR - TIMELINE_START_HOUR },

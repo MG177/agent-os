@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useResource, mutate } from "@/lib/data/useResource";
-import { KEYS } from "@/lib/data/keys";
+import { KEYS } from "@agent-os/contracts/data/keys";
 import type { ClickUpTimeEntry } from "@/components/clickup/types";
 
 type TimeResponse = { entry: ClickUpTimeEntry | null };

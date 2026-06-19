@@ -1,13 +1,13 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { runAssistantChat } from "@/lib/assistant/runtime";
+import { runAssistantChat } from "@agent-os/platform/assistant/runtime";
 import {
   appendAssistantMessage,
   appendUserMessage,
   AssistantSessionError,
   loadChatHistoryForTurn,
-} from "@/lib/assistant/sessions";
-import { textStreamResponse, errorJsonResponse } from "@/lib/assistant/stream";
+} from "@agent-os/platform/assistant/sessions";
+import { textStreamResponse, errorJsonResponse } from "@agent-os/platform/assistant/stream";
 import {
   proxyToFullEnabled,
   proxyToFullInstance,

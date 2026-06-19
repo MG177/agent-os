@@ -1,6 +1,6 @@
 import { Check, Salad, Smartphone, Undo2, type LucideIcon } from "lucide-react";
-import type { ActivityEvent } from "@/lib/activity";
-import type { AuditSource } from "@/lib/audit";
+import type { ActivityEvent } from "@agent-os/platform/activity";
+import type { AuditSource } from "@agent-os/platform/audit";
 
 /** Icon + chip styling per activity kind. Shared by ActivityRow (Home) and the timeline. */
 export const KIND_STYLE: Record<

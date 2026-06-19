@@ -20,7 +20,7 @@ import {
   minutesFromTimestamp,
   sortEventsWithinDay,
 } from "@/components/calendar/calendar-utils";
-import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
+import type { CalendarEventSummary } from "@agent-os/contracts/integrations/google-calendar/types";
 import type { EventTemporalState } from "@/components/calendar/calendar-utils";
 
 /** ~2px per minute → 2880px-wide track for 24h (horizontal scroll). */

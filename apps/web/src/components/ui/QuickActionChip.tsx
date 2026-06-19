@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@agent-os/contracts/utils";
 
 const STYLES = {
   blue: "border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100 hover:border-blue-300",

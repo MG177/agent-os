@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { readFoodDb, upsertFood } from '@/lib/nutrition'
+import { readFoodDb, upsertFood } from '@agent-os/platform/nutrition'
 
 export async function GET() {
   const db = await readFoodDb()

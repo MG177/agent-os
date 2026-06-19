@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import ColumnBrowser from "@/components/browse/ColumnBrowser";
-import { browseVault, getBrowseColumnStack } from "@/lib/vault";
+import { browseVault, getBrowseColumnStack } from "@agent-os/platform/vault";
 
 export default async function BrowsePage({
   params,

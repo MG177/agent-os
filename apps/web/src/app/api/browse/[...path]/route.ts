@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { browseVault } from '@/lib/vault'
+import { browseVault } from '@agent-os/platform/vault'
 import {
   proxyToFullEnabled,
   proxyToFullInstance,

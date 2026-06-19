@@ -16,8 +16,8 @@ import {
 } from "@/components/calendar/calendar-utils";
 import { useHiddenCalendars } from "@/components/calendar/useHiddenCalendars";
 import { useResource } from "@/lib/data/useResource";
-import { KEYS } from "@/lib/data/keys";
-import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
+import { KEYS } from "@agent-os/contracts/data/keys";
+import type { CalendarEventSummary } from "@agent-os/contracts/integrations/google-calendar/types";
 
 type CalendarStatus = { configured: boolean; connected: boolean };
 type EventsResponse = { events: CalendarEventSummary[] };

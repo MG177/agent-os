@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
-import { clearClickUpCache } from "@/lib/integrations/clickup/cache";
-import { ClickUpNotConnectedError, createTask } from "@/lib/integrations/clickup/client";
-import { isClickUpReady } from "@/lib/integrations/clickup/config";
-import { groupTasks, type DueFilter } from "@/lib/integrations/clickup/group";
-import { getMyTasksCached } from "@/lib/integrations/clickup/tasks-service";
+import { clearClickUpCache } from "@agent-os/platform/integrations/clickup/cache";
+import { ClickUpNotConnectedError, createTask } from "@agent-os/platform/integrations/clickup/client";
+import { isClickUpReady } from "@agent-os/platform/integrations/clickup/config";
+import { groupTasks, type DueFilter } from "@agent-os/platform/integrations/clickup/group";
+import { getMyTasksCached } from "@agent-os/platform/integrations/clickup/tasks-service";
 
 const DUE_VALUES: DueFilter[] = ["all", "overdue", "today", "week"];
 

@@ -1,4 +1,4 @@
-import { buildActivityFeed } from "@/lib/activity";
+import { buildActivityFeed } from "@agent-os/platform/activity";
 import {
   proxyToFullEnabled,
   proxyToFullInstance,

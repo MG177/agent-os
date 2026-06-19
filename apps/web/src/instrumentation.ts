@@ -7,10 +7,10 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 
-  const { getDeploymentMode } = await import("@/lib/deployment");
+  const { getDeploymentMode } = await import("@agent-os/contracts/deployment");
   if (getDeploymentMode() !== "full") return;
 
-  const { notifyDueTodos } = await import("@/lib/todo-notify");
+  const { notifyDueTodos } = await import("@agent-os/platform/todo-notify");
 
   const POLL_MS = 60_000;
   const tick = () => {

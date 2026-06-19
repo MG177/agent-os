@@ -1,12 +1,12 @@
-import { listInbox } from "@/lib/vault";
+import { listInbox } from "@agent-os/platform/vault";
 import {
   readLog,
   readGoals,
   calculateTotals,
   todayISO,
   type MacroGoals,
-} from "@/lib/nutrition";
-import { buildActivityFeed, countCapturesToday } from "@/lib/activity";
+} from "@agent-os/platform/nutrition";
+import { buildActivityFeed, countCapturesToday } from "@agent-os/platform/activity";
 
 const DEFAULT_GOALS: MacroGoals = { calories: 2200, protein_g: 160, carb_g: 220, fat_g: 73 };
 

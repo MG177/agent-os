@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { clearEventsCache } from "@/lib/integrations/google-calendar/cache";
-import { resolveRedirectUri } from "@/lib/integrations/google-calendar/config";
-import { exchangeAuthorizationCode } from "@/lib/integrations/google-calendar/oauth";
-import { saveTokenRecord } from "@/lib/integrations/google-calendar/store";
-import { verifyOAuthState } from "@/lib/integrations/oauth-state";
+import { clearEventsCache } from "@agent-os/platform/integrations/google-calendar/cache";
+import { resolveRedirectUri } from "@agent-os/platform/integrations/google-calendar/config";
+import { exchangeAuthorizationCode } from "@agent-os/platform/integrations/google-calendar/oauth";
+import { saveTokenRecord } from "@agent-os/platform/integrations/google-calendar/store";
+import { verifyOAuthState } from "@agent-os/core/integrations/oauth-state";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

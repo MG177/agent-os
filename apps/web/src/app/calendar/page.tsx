@@ -26,7 +26,7 @@ import {
 } from "@/components/calendar/calendar-utils";
 import { useHiddenCalendars } from "@/components/calendar/useHiddenCalendars";
 import { useScheduleClock } from "@/components/calendar/useScheduleClock";
-import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
+import type { CalendarEventSummary } from "@agent-os/contracts/integrations/google-calendar/types";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Page, PageBody } from "@/components/ui/layout";
 

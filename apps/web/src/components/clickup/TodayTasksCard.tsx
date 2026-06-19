@@ -8,7 +8,7 @@ import { ElapsedTime } from "@/components/clickup/ElapsedTime";
 import { StatusPill } from "@/components/clickup/StatusPill";
 import { useClickUpTimer } from "@/components/clickup/useClickUpTimer";
 import { useResource, mutate } from "@/lib/data/useResource";
-import { KEYS } from "@/lib/data/keys";
+import { KEYS } from "@agent-os/contracts/data/keys";
 import type { ClickUpTask, SprintLatestResponse } from "@/components/clickup/types";
 
 function TasksLoadingSkeleton() {

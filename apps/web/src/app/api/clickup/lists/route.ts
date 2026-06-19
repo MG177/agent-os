@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { ClickUpNotConnectedError } from "@/lib/integrations/clickup/client";
-import { isClickUpReady } from "@/lib/integrations/clickup/config";
-import { groupTasks } from "@/lib/integrations/clickup/group";
-import { getMyTasksCached } from "@/lib/integrations/clickup/tasks-service";
+import { ClickUpNotConnectedError } from "@agent-os/platform/integrations/clickup/client";
+import { isClickUpReady } from "@agent-os/platform/integrations/clickup/config";
+import { groupTasks } from "@agent-os/platform/integrations/clickup/group";
+import { getMyTasksCached } from "@agent-os/platform/integrations/clickup/tasks-service";
 
 /**
  * Lists the user can add tasks to — derived from the lists they already have

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, Trash2, ToggleLeft, ToggleRight, Pencil } from "lucide-react";
-import type { TodoDoc } from "@/lib/todos";
+import type { TodoDoc } from "@agent-os/platform/todos";
 
 function dueChip(nextRunAt: Date | undefined, completedAt: Date | undefined) {
   if (completedAt) {

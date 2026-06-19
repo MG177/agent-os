@@ -6,7 +6,7 @@ import { useTodos } from "@/components/todos/useTodos";
 import { TodoCommandCenter } from "@/components/todos/TodoCommandCenter";
 import { AddTodoSheet } from "@/components/todos/AddTodoSheet";
 import { CompletedRemindersButton } from "@/components/todos/CompletedRemindersButton";
-import type { TodoDoc } from "@/lib/todos";
+import type { TodoDoc } from "@agent-os/platform/todos";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Page, PageBody } from "@/components/ui/layout";
 

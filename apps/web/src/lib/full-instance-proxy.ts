@@ -7,7 +7,7 @@
  *   FULL_INSTANCE_URL    e.g. https://agent-os.lumen-dev.com
  *   FULL_INSTANCE_BASIC  "user:pass" for the VPS Caddy Basic-auth gate (optional)
  */
-import { getDeploymentMode } from "@/lib/deployment";
+import { getDeploymentMode } from "@agent-os/contracts/deployment";
 
 export function proxyToFullEnabled(): boolean {
   return (

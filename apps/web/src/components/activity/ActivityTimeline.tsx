@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import type { ActivityEvent } from "@/lib/activity";
+import type { ActivityEvent } from "@agent-os/platform/activity";
 import {
   KIND_STYLE,
   formatTime,

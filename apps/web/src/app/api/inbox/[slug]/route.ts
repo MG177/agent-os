@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
-import { getInboxItem, archiveInboxItem } from "@/lib/vault";
+import { getInboxItem, archiveInboxItem } from "@agent-os/platform/vault";
 import {
   fileWritesDisabledResponse,
   isFileWritesDisabledError,
-} from "@/lib/deployment";
+} from "@agent-os/contracts/deployment";
 import {
   proxyToFullEnabled,
   proxyToFullInstance,

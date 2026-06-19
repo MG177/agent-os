@@ -5,7 +5,7 @@ import {
   upsertFood,
   type FoodDbEntry,
   type NutritionPer100g,
-} from "@/lib/nutrition";
+} from "@agent-os/platform/nutrition";
 
 const REQUIRED_MACROS = ["calories", "protein_g", "carb_g", "fat_g"] as const;
 

@@ -10,4 +10,4 @@ export type {
   ClickUpTimeEntry,
   ClickUpTag,
   ClickUpStatus,
-} from "@/lib/integrations/clickup/types";
+} from "@agent-os/contracts/integrations/clickup/types";

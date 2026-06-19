@@ -14,7 +14,7 @@ import { useClickUpTimer } from "@/components/clickup/useClickUpTimer";
 import type { ClickUpGroupedTasks } from "@/components/clickup/types";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Page, PageBody } from "@/components/ui/layout";
-import { KEYS } from "@/lib/data/keys";
+import { KEYS } from "@agent-os/contracts/data/keys";
 import {
   clearResourceSnapshot,
   readSnapshot,

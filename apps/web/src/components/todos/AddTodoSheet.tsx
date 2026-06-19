@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { TriggerRow } from "./TriggerRow";
 import { DateTimePicker } from "./DateTimePicker";
-import type { TriggerDoc } from "@/lib/trigger-format";
-import type { TodoDoc } from "@/lib/todos";
+import type { TriggerDoc } from "@agent-os/contracts/trigger-format";
+import type { TodoDoc } from "@agent-os/platform/todos";
 import {
   AppModal,
   AppModalBody,

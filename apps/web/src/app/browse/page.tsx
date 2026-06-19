@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import InboxQueue from "@/components/browse/InboxQueue";
 import { Page, PageBody } from "@/components/ui/layout";
-import { browseVault } from "@/lib/vault";
+import { browseVault } from "@agent-os/platform/vault";
 
 type Section = {
   name: string;

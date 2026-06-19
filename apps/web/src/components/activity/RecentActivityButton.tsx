@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ClipboardList, X } from "lucide-react";
 import { ActivityRow } from "@/components/ui/ActivityRow";
-import type { ActivityEvent } from "@/lib/activity";
+import type { ActivityEvent } from "@agent-os/platform/activity";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 

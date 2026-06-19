@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { readGoals, writeGoals } from '@/lib/nutrition'
+import { readGoals, writeGoals } from '@agent-os/platform/nutrition'
 
 export async function GET() {
   return Response.json(await readGoals())

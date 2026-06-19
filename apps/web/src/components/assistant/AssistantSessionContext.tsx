@@ -15,7 +15,7 @@ import type {
   AssistantMessageRecord,
   AssistantSessionDetail,
   AssistantSessionSummary,
-} from "@/lib/assistant/session-client";
+} from "@agent-os/platform/assistant/session-client";
 
 const ACTIVE_SESSION_KEY = "assistant:activeSessionId";
 

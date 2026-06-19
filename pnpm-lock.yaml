@@ -145,13 +145,34 @@ importers:
         specifier: ^5
         version: 5.9.3
 
-  packages/contracts: {}
+  packages/contracts:
+    dependencies:
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      tailwind-merge:
+        specifier: ^3.6.0
+        version: 3.6.0
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.19.43
 
   packages/core:
     dependencies:
       '@agent-os/contracts':
         specifier: workspace:*
         version: link:../contracts
+      cron-parser:
+        specifier: ^5.5.0
+        version: 5.5.0
+    devDependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.19.43
 
   packages/platform:
     dependencies:
@@ -161,6 +182,31 @@ importers:
       '@agent-os/core':
         specifier: workspace:*
         version: link:../core
+      '@anthropic-ai/claude-agent-sdk':
+        specifier: ^0.3.178
+        version: 0.3.181(@anthropic-ai/sdk@0.104.2(zod@4.4.3))(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(zod@4.4.3)
+      '@cursor/sdk':
+        specifier: ^1.0.17
+        version: 1.0.19
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.29.0
+        version: 1.29.0(zod@4.4.3)
+      googleapis:
+        specifier: ^172.0.0
+        version: 172.0.0
+      gray-matter:
+        specifier: ^4.0.3
+        version: 4.0.3
+      mongodb:
+        specifier: ^6.10.0
+        version: 6.21.0
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@types/node':
+        specifier: ^20
+        version: 20.19.43
 
 packages:
 

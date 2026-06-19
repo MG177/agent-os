@@ -2,8 +2,8 @@
 
 import { useCallback } from "react";
 import { useResource, mutate, defaultFetcher } from "@/lib/data/useResource";
-import { KEYS } from "@/lib/data/keys";
-import type { TodoDoc } from "@/lib/todos";
+import { KEYS } from "@agent-os/contracts/data/keys";
+import type { TodoDoc } from "@agent-os/platform/todos";
 
 type TodosResponse = { todos: TodoDoc[] };
 

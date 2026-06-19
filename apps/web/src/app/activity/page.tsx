@@ -6,7 +6,7 @@ import { Page, Stack } from "@/components/ui/layout";
 import { ActivityStats } from "@/components/activity/ActivityStats";
 import { ActivityTimeline } from "@/components/activity/ActivityTimeline";
 import { computeStats, groupByDay } from "@/components/activity/activity-display";
-import type { ActivityEvent, ActivityKind } from "@/lib/activity";
+import type { ActivityEvent, ActivityKind } from "@agent-os/platform/activity";
 
 type FilterId = "all" | ActivityKind | "reverted";
 

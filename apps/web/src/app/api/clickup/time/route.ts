@@ -4,8 +4,8 @@ import {
   getCurrentTimer,
   startTimer,
   stopTimer,
-} from "@/lib/integrations/clickup/client";
-import { isClickUpReady } from "@/lib/integrations/clickup/config";
+} from "@agent-os/platform/integrations/clickup/client";
+import { isClickUpReady } from "@agent-os/platform/integrations/clickup/config";
 
 export async function GET() {
   if (!isClickUpReady()) {

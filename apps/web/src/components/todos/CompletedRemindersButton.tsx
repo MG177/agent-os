@@ -4,7 +4,7 @@ import { useState } from "react";
 import { History, X } from "lucide-react";
 import { TodoCard } from "@/components/todos/TodoCard";
 import { useTodos } from "@/components/todos/useTodos";
-import type { TodoDoc } from "@/lib/todos";
+import type { TodoDoc } from "@agent-os/platform/todos";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 

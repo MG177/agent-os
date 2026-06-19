@@ -9,7 +9,7 @@ import type {
   BrowseColumn,
   BrowseEntry,
   BrowseFileResult,
-} from "@/lib/vault";
+} from "@agent-os/platform/vault";
 
 function buildBrowseUrl(segments: string[]): string {
   return "/browse/" + segments.map(encodeURIComponent).join("/");

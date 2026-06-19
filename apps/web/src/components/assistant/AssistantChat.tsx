@@ -7,8 +7,8 @@ import {
   filterSlashCommands,
   getSlashCommandDefinition,
   type AssistantSlashCommandId,
-} from "@/lib/assistant/commands";
-import { normalizeAssistantDisplayText } from "@/lib/assistant/display-text";
+} from "@agent-os/contracts/assistant/commands";
+import { normalizeAssistantDisplayText } from "@agent-os/platform/assistant/display-text";
 import {
   useAssistantSession,
   type AssistantUiMessage,

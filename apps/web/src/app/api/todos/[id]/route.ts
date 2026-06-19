@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { doneTodo, updateTodo, deleteTodo } from "@/lib/todos";
+import { doneTodo, updateTodo, deleteTodo } from "@agent-os/platform/todos";
 
 const TriggerSchema = z.object({
   id: z.string(),

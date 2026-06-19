@@ -1,5 +1,5 @@
-import { clearClickUpCache } from "@/lib/integrations/clickup/cache";
-import { deleteTokenRecord } from "@/lib/integrations/clickup/store";
+import { clearClickUpCache } from "@agent-os/platform/integrations/clickup/cache";
+import { deleteTokenRecord } from "@agent-os/platform/integrations/clickup/store";
 
 export async function DELETE() {
   await deleteTokenRecord();

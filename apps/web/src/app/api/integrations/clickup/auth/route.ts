@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   isClickUpOAuthConfigured,
   resolveRedirectUri,
-} from "@/lib/integrations/clickup/config";
-import { getAuthorizationUrl } from "@/lib/integrations/clickup/oauth";
-import { createOAuthState } from "@/lib/integrations/oauth-state";
+} from "@agent-os/platform/integrations/clickup/config";
+import { getAuthorizationUrl } from "@agent-os/platform/integrations/clickup/oauth";
+import { createOAuthState } from "@agent-os/core/integrations/oauth-state";
 
 export async function GET(request: NextRequest) {
   if (!isClickUpOAuthConfigured()) {

@@ -6,7 +6,7 @@ import {
   type TriggerDoc,
   nextTriggerRun,
   formatNextShort,
-} from "@/lib/trigger-format";
+} from "@agent-os/contracts/trigger-format";
 
 const TYPE_OPTIONS = [
   { value: "interval", label: "Every…" },

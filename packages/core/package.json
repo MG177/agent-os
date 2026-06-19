@@ -12,6 +12,10 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@agent-os/contracts": "workspace:*"
+    "@agent-os/contracts": "workspace:*",
+    "cron-parser": "^5.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20"
   }
 }

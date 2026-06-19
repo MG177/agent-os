@@ -6,8 +6,8 @@ import {
   calculateTotals,
   todayISO,
   type LogEntry,
-} from '@/lib/nutrition'
-import { appendAudit, hashPayload, isWithinUndoWindow } from '@/lib/audit'
+} from '@agent-os/platform/nutrition'
+import { appendAudit, hashPayload, isWithinUndoWindow } from '@agent-os/platform/audit'
 
 export async function PATCH(
   request: NextRequest,

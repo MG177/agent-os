@@ -8,7 +8,7 @@ import {
   formatMonthLabel,
   isWeekendDayKey,
 } from "@/components/calendar/calendar-utils";
-import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
+import type { CalendarEventSummary } from "@agent-os/contracts/integrations/google-calendar/types";
 
 const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
 const MAX_DOTS = 3;

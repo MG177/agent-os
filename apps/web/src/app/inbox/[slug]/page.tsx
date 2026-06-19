@@ -5,7 +5,7 @@ import { LazyMarkdownRenderer } from "@/components/lazy";
 import ArchiveButton from "@/components/ArchiveButton";
 import { Page, PageBody } from "@/components/ui/layout";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { getInboxItem } from "@/lib/vault";
+import { getInboxItem } from "@agent-os/platform/vault";
 
 export default async function InboxItemPage({
   params,

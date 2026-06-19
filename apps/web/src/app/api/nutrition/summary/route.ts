@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { readLog, readGoals, calculateTotals, todayISO } from '@/lib/nutrition'
+import { readLog, readGoals, calculateTotals, todayISO } from '@agent-os/platform/nutrition'
 
 export async function GET(request: NextRequest) {
   const date = request.nextUrl.searchParams.get('date') || todayISO()

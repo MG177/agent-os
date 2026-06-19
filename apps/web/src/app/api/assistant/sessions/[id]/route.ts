@@ -5,7 +5,7 @@ import {
   deleteSession,
   getSessionWithMessages,
   updateSessionTitle,
-} from "@/lib/assistant/sessions";
+} from "@agent-os/platform/assistant/sessions";
 
 function serializeSession(session: {
   _id: string;

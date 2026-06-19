@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import {
   ClickUpNotConnectedError,
   getListStatuses,
-} from "@/lib/integrations/clickup/client";
-import { isClickUpReady } from "@/lib/integrations/clickup/config";
+} from "@agent-os/platform/integrations/clickup/client";
+import { isClickUpReady } from "@agent-os/platform/integrations/clickup/config";
 
 /** Status definitions for a list — powers the detail-panel status picker. */
 export async function GET(

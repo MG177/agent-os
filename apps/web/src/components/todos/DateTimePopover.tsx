@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Calendar } from "lucide-react";
 import { DateTimePicker } from "./DateTimePicker";
-import { formatHour12 } from "@/lib/trigger-format";
+import { formatHour12 } from "@agent-os/contracts/trigger-format";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn } from "@agent-os/contracts/utils";
 
 function parseLocal(s: string): Date | null {
   if (!s) return null;

@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
-import { clearClickUpCache } from "@/lib/integrations/clickup/cache";
+import { clearClickUpCache } from "@agent-os/platform/integrations/clickup/cache";
 import {
   ClickUpNotConnectedError,
   completeTask,
   getTaskDetail,
   updateTask,
-} from "@/lib/integrations/clickup/client";
-import { isClickUpReady } from "@/lib/integrations/clickup/config";
+} from "@agent-os/platform/integrations/clickup/client";
+import { isClickUpReady } from "@agent-os/platform/integrations/clickup/config";
 
 export async function GET(
   _request: NextRequest,

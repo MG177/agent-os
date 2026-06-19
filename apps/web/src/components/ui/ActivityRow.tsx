@@ -1,6 +1,6 @@
 "use client";
 
-import type { ActivityEvent } from "@/lib/activity";
+import type { ActivityEvent } from "@agent-os/platform/activity";
 import { formatTime } from "@/components/activity/activity-display";
 
 const DOT_COLOR: Record<ActivityEvent["kind"], string> = {

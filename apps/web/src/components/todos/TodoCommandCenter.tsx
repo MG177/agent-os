@@ -10,10 +10,10 @@ import {
   ListTodo,
   Repeat,
 } from "lucide-react";
-import type { TodoDoc } from "@/lib/todos";
-import { dueState, dueChipClass, formatClock } from "@/lib/todo-format";
+import type { TodoDoc } from "@agent-os/platform/todos";
+import { dueState, dueChipClass, formatClock } from "@agent-os/core/todo-format";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn } from "@agent-os/contracts/utils";
 
 function isToday(d: Date): boolean {
   const now = new Date();

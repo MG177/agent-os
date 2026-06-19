@@ -1,4 +1,4 @@
-import type { CalendarEventSummary } from "@/lib/integrations/google-calendar/types";
+import type { CalendarEventSummary } from "@agent-os/contracts/integrations/google-calendar/types";
 
 export type DayGroup = {
   day: string;

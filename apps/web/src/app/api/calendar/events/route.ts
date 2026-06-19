@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import {
   CalendarNotConnectedError,
   listCalendarEvents,
-} from "@/lib/integrations/google-calendar/client";
-import { isGoogleOAuthConfigured } from "@/lib/integrations/google-calendar/config";
+} from "@agent-os/platform/integrations/google-calendar/client";
+import { isGoogleOAuthConfigured } from "@agent-os/platform/integrations/google-calendar/config";
 
 export async function GET(request: NextRequest) {
   if (!isGoogleOAuthConfigured()) {

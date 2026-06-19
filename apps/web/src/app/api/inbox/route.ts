@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { listInbox, createInboxItem } from "@/lib/vault";
-import { titleFromCapture } from "@/lib/inbox-capture";
-import type { AuditSource } from "@/lib/audit";
+import { listInbox, createInboxItem } from "@agent-os/platform/vault";
+import { titleFromCapture } from "@agent-os/platform/inbox-capture";
+import type { AuditSource } from "@agent-os/platform/audit";
 import {
   fileWritesDisabledResponse,
   isFileWritesDisabledError,
-} from "@/lib/deployment";
+} from "@agent-os/contracts/deployment";
 import {
   proxyToFullEnabled,
   proxyToFullInstance,

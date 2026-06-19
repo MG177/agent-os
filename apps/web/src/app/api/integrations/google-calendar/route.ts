@@ -1,5 +1,5 @@
-import { clearEventsCache } from "@/lib/integrations/google-calendar/cache";
-import { deleteTokenRecord } from "@/lib/integrations/google-calendar/store";
+import { clearEventsCache } from "@agent-os/platform/integrations/google-calendar/cache";
+import { deleteTokenRecord } from "@agent-os/platform/integrations/google-calendar/store";
 
 export async function DELETE() {
   await deleteTokenRecord();

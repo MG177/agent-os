@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { clearClickUpCache } from "@/lib/integrations/clickup/cache";
-import { fetchClickUpIdentity } from "@/lib/integrations/clickup/client";
-import { isClickUpReady } from "@/lib/integrations/clickup/config";
-import { saveTokenRecord } from "@/lib/integrations/clickup/store";
+import { clearClickUpCache } from "@agent-os/platform/integrations/clickup/cache";
+import { fetchClickUpIdentity } from "@agent-os/platform/integrations/clickup/client";
+import { isClickUpReady } from "@agent-os/platform/integrations/clickup/config";
+import { saveTokenRecord } from "@agent-os/platform/integrations/clickup/store";
 
 /**
  * Connect ClickUp with a Personal API Token (pk_...). No admin / app
