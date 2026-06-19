@@ -23,6 +23,7 @@
     "@swc/core": "^1.10.0",
     "@types/express": "^5.0.0",
     "@types/node": "^20",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.19.0"
   }
 }
