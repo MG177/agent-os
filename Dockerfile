@@ -19,6 +19,7 @@ RUN corepack enable
 # source-only changes. allowBuilds (esbuild/sharp/unrs-resolver) is in pnpm-workspace.yaml.
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml .npmrc ./
 COPY apps/web/package.json ./apps/web/package.json
+COPY apps/api/package.json ./apps/api/package.json
 COPY packages/contracts/package.json ./packages/contracts/package.json
 COPY packages/core/package.json ./packages/core/package.json
 COPY packages/platform/package.json ./packages/platform/package.json
@@ -36,6 +37,6 @@ ENV AGENT_OS_DATA_PATH=/var/lib/agent-os
 # Pin the app root so the MCP child resolves scripts/ + packages/ deterministically.
 ENV AGENT_OS_APP_ROOT=/app/apps/web
 
-RUN chmod +x /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh /app/docker-entrypoint.api.sh
 EXPOSE 3003
 ENTRYPOINT ["/app/docker-entrypoint.sh"]

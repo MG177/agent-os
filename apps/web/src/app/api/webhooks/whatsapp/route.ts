@@ -14,8 +14,13 @@ import {
   sendWhatsAppText,
   type WahaWebhookEvent,
 } from "@agent-os/platform/waha";
+import {
+  proxyToFullEnabled,
+  proxyToFullInstance,
+} from "@/lib/full-instance-proxy";
 
 export async function POST(request: NextRequest) {
+  if (proxyToFullEnabled()) return proxyToFullInstance(request);
   const rawBody = await request.text();
 
   const hmacHeader = request.headers.get("x-webhook-hmac");
