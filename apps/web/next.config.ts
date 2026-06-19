@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Run via `next start` in the container (not standalone): the assistant MCP
+  // child needs the full node_modules + raw packages/*/src anyway, so standalone's
+  // pruning gives no benefit and complicates the monorepo layout.
   // Workspace packages ship raw TS; Next must transpile them like local src/.
   transpilePackages: ["@agent-os/contracts", "@agent-os/core", "@agent-os/platform"],
   // Cursor SDK ships native binaries + LICENSE.txt; keep it out of Turbopack bundle (Vercel build).

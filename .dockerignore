@@ -1,17 +1,18 @@
-# dependencies — reinstalled in-image via `npm ci` (host build is macOS/arm64)
-node_modules
+# dependencies — reinstalled in-image via pnpm (nested across the workspace)
+**/node_modules
 .pnp
 .pnp.*
 
-# next.js build output — rebuilt in-image
-.next
-out
-build
+# build output — rebuilt in-image
+**/.next
+**/.turbo
+**/out
+**/build
 
-# env / secrets — provided at runtime via compose/Dokploy, never baked in
-.env
-.env.local
-.env.*.local
+# env / secrets — provided at runtime via compose, never baked in
+**/.env
+**/.env.local
+**/.env.*.local
 
 # vcs & ci
 .git
@@ -19,11 +20,11 @@ build
 .github
 
 # typescript incremental
-*.tsbuildinfo
-next-env.d.ts
+**/*.tsbuildinfo
+**/next-env.d.ts
 
 # scratch / throwaway mockups
-temp
+**/temp
 
 # docs & design references (not needed at runtime)
 docs
@@ -31,6 +32,7 @@ README.md
 AGENTS.md
 CLAUDE.md
 Design System — Nutrition & PARA.html
+deploy
 
 # editor / os
 .DS_Store
@@ -39,5 +41,5 @@ Design System — Nutrition & PARA.html
 
 # docker (avoid recursive copy of build files into context)
 Dockerfile
-docker-compose.yml
+docker-compose*.yml
 .dockerignore
