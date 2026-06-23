@@ -10,12 +10,29 @@ const ALLOWED_HOSTS = new Set([
 ]);
 
 /**
- * The integration can run as long as we can encrypt/decrypt a stored token.
- * This covers the personal-API-token path (no OAuth app needed) and is the gate
- * for all data routes.
+ * Personal ClickUp API token supplied via env (CLICKUP_API_KEY / CLICKUP_API_TOKEN).
+ * When set it takes precedence over any stored token — lets you configure ClickUp
+ * from the environment instead of the in-app "paste token" / OAuth input. No
+ * encryption key or DB storage is needed for this path.
+ */
+export function getClickUpEnvToken(): string | null {
+  return (
+    process.env.CLICKUP_API_KEY?.trim() ||
+    process.env.CLICKUP_API_TOKEN?.trim() ||
+    null
+  );
+}
+
+export function hasClickUpEnvToken(): boolean {
+  return getClickUpEnvToken() !== null;
+}
+
+/**
+ * The integration can run with either an env API token (no storage needed) or a
+ * stored token we can encrypt/decrypt. This is the gate for all data routes.
  */
 export function isClickUpReady(): boolean {
-  return hasEncryptionKey();
+  return hasClickUpEnvToken() || hasEncryptionKey();
 }
 
 /** Stricter: the optional OAuth "Connect" button requires a registered app. */

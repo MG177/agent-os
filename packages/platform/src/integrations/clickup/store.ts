@@ -5,6 +5,7 @@ import {
   hasEncryptionKey,
 } from "@agent-os/core/integrations/token-crypto";
 import type { ClickUpTokenRecord } from "@agent-os/contracts/integrations/clickup/types";
+import { hasClickUpEnvToken } from "@agent-os/platform/integrations/clickup/config";
 
 const INTEGRATION_ID = "clickup";
 
@@ -88,5 +89,6 @@ export async function deleteTokenRecord(): Promise<void> {
 }
 
 export async function isClickUpConnected(): Promise<boolean> {
+  if (hasClickUpEnvToken()) return true;
   return (await getAccessToken()) !== null;
 }

@@ -27,9 +27,12 @@ services:
       - TZ=Asia/Jakarta
       - MONGODB_URI=${MONGODB_URI:-mongodb://127.0.0.1:27017/nutrition-tracker}
       - ASSISTANT_OAUTH_HOST=${ASSISTANT_OAUTH_HOST:-agent-os.lumen-dev.com}
-      # Nutrition /nutrition/chat (Gemini) + ClickUp sprint grouping (web-served, stateless).
+      # Nutrition /nutrition/chat (Gemini) + ClickUp (web-served, stateless).
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - CLICKUP_SPRINT_FOLDERS=${CLICKUP_SPRINT_FOLDERS:-Sprint}
+      # ClickUp personal API token via env (skips the in-app paste/OAuth input).
+      - CLICKUP_API_KEY=${CLICKUP_API_KEY:-}
+      - CLICKUP_TEAM_ID=${CLICKUP_TEAM_ID:-}
       # Google Calendar (read-only OAuth) — web serves the connect/callback flow.
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
       - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}

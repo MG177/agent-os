@@ -7,6 +7,7 @@ import {
   getAccessToken,
   loadTokenRecord,
 } from "@agent-os/platform/integrations/clickup/store";
+import { getClickUpEnvToken } from "@agent-os/platform/integrations/clickup/config";
 import type {
   ClickUpComment,
   ClickUpTask,
@@ -39,7 +40,23 @@ interface AuthContext {
   userId: number;
 }
 
+let envAuthCache: { token: string; ctx: AuthContext } | null = null;
+
+/** Resolve user/team for an env-supplied token once, then cache (identity is stable). */
+async function resolveEnvAuthContext(token: string): Promise<AuthContext> {
+  if (envAuthCache && envAuthCache.token === token) return envAuthCache.ctx;
+  const identity = await fetchClickUpIdentity(token);
+  const teamId = process.env.CLICKUP_TEAM_ID?.trim() || identity.teamId;
+  const ctx: AuthContext = { token, teamId, userId: identity.userId };
+  envAuthCache = { token, ctx };
+  return ctx;
+}
+
 async function getAuthContext(): Promise<AuthContext> {
+  // Env token wins: configure ClickUp from the environment, no input/OAuth needed.
+  const envToken = getClickUpEnvToken();
+  if (envToken) return resolveEnvAuthContext(envToken);
+
   const [token, record] = await Promise.all([getAccessToken(), loadTokenRecord()]);
   if (!token || !record) {
     throw new ClickUpNotConnectedError();
