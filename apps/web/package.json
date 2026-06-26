@@ -7,7 +7,7 @@
     "build": "next build",
     "analyze": "ANALYZE=true next build",
     "start": "next start --port 3003",
-    "lint": "next lint .",
+    "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "migrate:nutrition": "tsx --env-file=.env.local scripts/migrate-nutrition-to-mongo.ts"
   },
