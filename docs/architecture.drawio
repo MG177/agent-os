@@ -1,0 +1,191 @@
+<mxfile host="app.diagrams.net" type="device">
+  <diagram name="Deployment" id="deploy">
+    <mxGraphModel dx="900" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="760" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="d_client" value="Client&#10;(browser PWA / WhatsApp)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="80" y="40" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="d_waha" value="WAHA (WhatsApp)&#10;inbound webhook + API out" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="560" y="40" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d_vercel" value="Vercel — lite mode (apps/web, Next.js 16)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 4;fillColor=none;strokeColor=#6c8ebf;verticalAlign=top;fontStyle=2;fontColor=#3b5b8c;" vertex="1" parent="1">
+          <mxGeometry x="40" y="130" width="760" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="d_stateless" value="Stateless routes (run everywhere):&#10;/api/home, /api/calendar/events,&#10;/api/todos, /api/assistant/sessions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="70" y="180" width="330" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="d_stateful" value="Stateful routes (proxied when FULL_INSTANCE_URL set):&#10;/api/inbox, /api/chat, /api/browse,&#10;/api/webhooks/whatsapp, /api/activity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="430" y="180" width="340" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d_vps" value="VPS — full mode (Docker Compose)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 4;fillColor=none;strokeColor=#82b366;verticalAlign=top;fontStyle=2;fontColor=#4a7a3a;" vertex="1" parent="1">
+          <mxGeometry x="40" y="360" width="760" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="d_caddy" value="Caddy&#10;reverse proxy :1777" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="80" y="410" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="d_fullweb" value="agent-os&#10;web (lite)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="300" y="410" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="d_api" value="agent-os-api&#10;NestJS :3004" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="560" y="410" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d_mongo" value="MongoDB Atlas" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="80" y="570" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="d_vault" value="FS vault&#10;(PARA dirs)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="260" y="570" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="d_gcal" value="Google Calendar&#10;(OAuth read-only)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="460" y="575" width="150" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="d_clickup" value="ClickUp&#10;(OAuth / PAT)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="640" y="575" width="150" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="d_e1" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="d_client" target="d_stateless">
+          <mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="d_e2" value="webhook" style="endArrow=classic;html=1;fontSize=10;" edge="1" parent="1" source="d_waha" target="d_stateful">
+          <mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="d_e3" value="proxy → FULL_INSTANCE_URL (+ optional Basic auth)" style="endArrow=classic;html=1;strokeColor=#9673a6;fontColor=#9673a6;fontSize=11;" edge="1" parent="1" source="d_stateful" target="d_caddy">
+          <mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="d_e4" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="d_caddy" target="d_fullweb">
+          <mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="d_e5" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="d_fullweb" target="d_api">
+          <mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="d_e6" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="d_api" target="d_mongo">
+          <mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="d_e7" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="d_api" target="d_vault">
+          <mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="d_e8" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="d_api" target="d_gcal">
+          <mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="d_e9" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="d_api" target="d_clickup">
+          <mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram name="Agent seam" id="agentseam">
+    <mxGraphModel dx="900" dy="760" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="780" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="a_ctrl" value="apps/api assistant.controller&#10;(REST /chat, sessions)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="300" y="40" width="240" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="a_runtime" value="runtime.ts — runAssistantChat&#10;(validate, resolve commands, persist)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="300" y="130" width="240" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="a_mongo" value="MongoDB&#10;assistant_sessions / messages" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="620" y="125" width="190" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_factory" value="provider-factory.ts&#10;select by ASSISTANT_PROVIDER" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="300" y="220" width="240" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_cursor" value="cursor-sdk (default)&#10;CURSOR_API_KEY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="330" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_claude" value="claude-agent-sdk&#10;ANTHROPIC_API_KEY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="250" y="330" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_http" value="http-provider&#10;OpenAI-compatible (no MCP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="460" y="330" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_cloud" value="LLM cloud APIs&#10;Cursor / Anthropic /&#10;custom HTTP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="670" y="320" width="140" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_seam" value="MCP seam — swappable (Hermes = future)" style="endArrow=none;dashed=1;html=1;strokeColor=#b85450;strokeWidth=2;dashPattern=8 4;fontColor=#b85450;fontStyle=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="40" y="435" as="sourcePoint" />
+            <mxPoint x="810" y="435" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="a_child" value="stdio MCP child&#10;assistant-mcp-server.ts → platform mcp/server.ts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="120" y="470" width="320" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_registry" value="tool-registry.ts&#10;executeAssistantTool()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="160" y="580" width="240" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_t1" value="nutrition" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="40" y="680" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="a_t2" value="vault&#10;(Inbox write only)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="180" y="680" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="a_t3" value="calendar&#10;(read-only)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="350" y="680" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="a_t4" value="activity&#10;(audit)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="520" y="680" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a_e1" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="a_ctrl" target="a_runtime"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e2" value="persist" style="endArrow=classic;html=1;fontSize=10;" edge="1" parent="1" source="a_runtime" target="a_mongo"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e3" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="a_runtime" target="a_factory"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e4" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="a_factory" target="a_cursor"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e5" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="a_factory" target="a_claude"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e6" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="a_factory" target="a_http"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e7" value="" style="endArrow=open;dashed=1;html=1;strokeColor=#b85450;" edge="1" parent="1" source="a_cursor" target="a_cloud"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e8" value="" style="endArrow=open;dashed=1;html=1;strokeColor=#b85450;" edge="1" parent="1" source="a_claude" target="a_cloud"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e9" value="" style="endArrow=open;dashed=1;html=1;strokeColor=#b85450;" edge="1" parent="1" source="a_http" target="a_cloud"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e10" value="spawn" style="endArrow=classic;html=1;fontSize=10;" edge="1" parent="1" source="a_cursor" target="a_child"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e11" value="spawn" style="endArrow=classic;html=1;fontSize=10;" edge="1" parent="1" source="a_claude" target="a_child"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e12" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="a_child" target="a_registry"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e13" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="a_registry" target="a_t1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e14" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="a_registry" target="a_t2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e15" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="a_registry" target="a_t3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="a_e16" value="" style="endArrow=classic;html=1;" edge="1" parent="1" source="a_registry" target="a_t4"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <diagram name="Packages" id="packages">
+    <mxGraphModel dx="900" dy="650" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="620" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="p_web" value="apps/web&#10;(browser + node)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="120" y="60" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p_api" value="apps/api&#10;(node)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="520" y="60" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_contracts" value="@agent-os/contracts&#10;Zod schemas + types — isomorphic (browser + node)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="290" y="220" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p_core" value="@agent-os/core&#10;pure logic, no I/O — isomorphic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="290" y="340" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p_platform" value="@agent-os/platform&#10;FS, Mongo, Google, MCP + agent SDKs — node only" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="290" y="460" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_legend" value="arrow = depends on (imports)" style="text;html=1;align=left;verticalAlign=middle;fontStyle=2;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="540" width="240" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p_e1" value="" style="endArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="p_core" target="p_contracts"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p_e2" value="" style="endArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="p_platform" target="p_core"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p_e3" value="" style="endArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="p_platform" target="p_contracts"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p_e4" value="" style="endArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="p_web" target="p_contracts"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p_e5" value="" style="endArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="p_web" target="p_core"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p_e6" value="" style="endArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="p_api" target="p_contracts"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p_e7" value="" style="endArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="p_api" target="p_core"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p_e8" value="" style="endArrow=classic;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="p_api" target="p_platform"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p_forbid" value="✗ web must NOT import platform" style="endArrow=none;dashed=1;html=1;strokeColor=#b85450;strokeWidth=2;dashPattern=6 6;fontColor=#b85450;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="p_web" target="p_platform"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
