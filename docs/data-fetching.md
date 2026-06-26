@@ -21,7 +21,7 @@ const { data, error, isLoading, isValidating, mutate } = useResource<T>(key, fet
 
 | Feature | How |
 |---|---|
-| Instant paint on revisit | `localStorage` snapshot seeds SWR after mount; SWR always revalidates in background |
+| Instant paint on revisit | `localStorage` snapshot seeds SWR **after mount** (`useEffect`) to avoid SSR hydration mismatches; SWR always revalidates in background |
 | Request dedup | SWR dedupes concurrent mounts with the same key within `dedupingInterval` (4 s) |
 | Revalidate on focus / reconnect | SWR defaults (`revalidateOnFocus`, `revalidateOnReconnect`) |
 | Optimistic update | `mutate(KEYS.x, optimisticData)` or `mutate(KEYS.x)` to revalidate |

@@ -161,7 +161,7 @@ Vault git push/pull is **out of scope** — an external sync system keeps `VAULT
 - Nutrition UI + Mongo-backed API; ClickUp tasks board + OAuth; personal todos (`/todo`)
 - Cursor SDK assistant (`/assistant`) with Mongo session history
 - Google Calendar read-only; layout kit; client cache (`useResource`); perf measurement (Lighthouse CI + budgets)
-- Luna PNG PWA icons (192/512 + maskable + apple-touch); perf epic (cache, virtualization, `lazy.tsx` code-split); Dockerfile + docker-compose for VPS
+- Luna PNG PWA icons (192/512 + maskable + apple-touch); perf epic (cache, virtualization, `lazy.tsx` code-split); shadcn/ui component kit with Luna tokens; Dockerfile + docker-compose for VPS
 
 **Not yet:**
 - VPS deploy + production smoke on `personal.lumen-dev.com`
@@ -172,7 +172,9 @@ Vault runbooks: `runbook-whatsapp-inbox-capture`, `runbook-google-calendar-conne
 
 ## Design
 
-`Design System — Nutrition & PARA.html` at repo root.
+`Design System — Nutrition & PARA.html` at repo root (canonical tokens and patterns).
+
+**Component kit:** [shadcn/ui](https://ui.shadcn.com/) v4 (Base UI + Tailwind 4) under `src/components/ui/`, configured via `components.json`. Theme CSS variables in `globals.css` map shadcn tokens to the Luna slate/blue palette. Prefer shadcn `Dialog` / `Sheet` / `Popover` + `AppModal` (`src/components/ui/app-modal.tsx`) for new overlays instead of hand-rolled modal CSS.
 
 ## Technical reference
 
