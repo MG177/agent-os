@@ -1,8 +1,6 @@
 import type {
   AssistantToolDefinition,
   AssistantToolCallResult,
-  ToolBoundary,
-  AssistantModule,
 } from "@agent-os/contracts/assistant/types";
 import { allAssistantTools } from "@agent-os/platform/assistant/tools";
 import {
@@ -30,18 +28,6 @@ export function listAssistantToolsForMcp(): AssistantToolDefinition[] {
     return allAssistantTools.filter((t) => policy.allowedTools!.has(t.name));
   }
   return [...allAssistantTools];
-}
-
-export function listToolsByBoundary(
-  boundary: ToolBoundary,
-): AssistantToolDefinition[] {
-  return allAssistantTools.filter((t) => t.boundary === boundary);
-}
-
-export function listToolsByModule(
-  module: AssistantModule,
-): AssistantToolDefinition[] {
-  return allAssistantTools.filter((t) => t.module === module);
 }
 
 export async function executeAssistantTool(

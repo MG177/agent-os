@@ -4,53 +4,10 @@ import {
   AssistantSessionError,
   deleteSession,
   getSessionWithMessages,
+  serializeMessageDoc,
+  serializeSessionDoc,
   updateSessionTitle,
 } from "@agent-os/platform/assistant/sessions";
-
-function serializeSession(session: {
-  _id: string;
-  title: string;
-  createdAt: Date;
-  updatedAt: Date;
-  lastMessageAt: Date;
-  messageCount: number;
-  preview?: string;
-}) {
-  return {
-    id: session._id,
-    title: session.title,
-    createdAt: session.createdAt.toISOString(),
-    updatedAt: session.updatedAt.toISOString(),
-    lastMessageAt: session.lastMessageAt.toISOString(),
-    messageCount: session.messageCount,
-    preview: session.preview ?? null,
-  };
-}
-
-function serializeMessage(message: {
-  _id: string;
-  sessionId: string;
-  role: "user" | "assistant";
-  content: string;
-  command?: string;
-  image?: { mediaType: string; base64: string };
-  createdAt: Date;
-}) {
-  return {
-    id: message._id,
-    sessionId: message.sessionId,
-    role: message.role,
-    content: message.content,
-    command: message.command ?? null,
-    image: message.image
-      ? {
-          mediaType: message.image.mediaType,
-          base64: message.image.base64,
-        }
-      : null,
-    createdAt: message.createdAt.toISOString(),
-  };
-}
 
 const PatchSchema = z.object({
   title: z.string().min(1).max(200),
@@ -63,18 +20,15 @@ export async function GET(_req: NextRequest, context: RouteContext) {
   try {
     const { session, messages } = await getSessionWithMessages(id);
     return NextResponse.json({
-      session: serializeSession(session),
-      messages: messages.map(serializeMessage),
+      session: serializeSessionDoc(session),
+      messages: messages.map(serializeMessageDoc),
     });
   } catch (err) {
     if (err instanceof AssistantSessionError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     console.error("GET /api/assistant/sessions/[id]", err);
-    return NextResponse.json(
-      { error: "Failed to load session" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to load session" }, { status: 500 });
   }
 }
 
@@ -94,16 +48,13 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
 
   try {
     const session = await updateSessionTitle(id, parsed.data.title);
-    return NextResponse.json({ session: serializeSession(session) });
+    return NextResponse.json({ session: serializeSessionDoc(session) });
   } catch (err) {
     if (err instanceof AssistantSessionError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     console.error("PATCH /api/assistant/sessions/[id]", err);
-    return NextResponse.json(
-      { error: "Failed to update session" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to update session" }, { status: 500 });
   }
 }
 
@@ -117,9 +68,6 @@ export async function DELETE(_req: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     console.error("DELETE /api/assistant/sessions/[id]", err);
-    return NextResponse.json(
-      { error: "Failed to delete session" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to delete session" }, { status: 500 });
   }
 }

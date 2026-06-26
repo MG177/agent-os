@@ -3,7 +3,6 @@ import { Geist } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import AppShell from "@/components/AppShell";
-import ParaShell from "@/components/ParaShell";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -60,7 +59,7 @@ export default function RootLayout({
     <html lang="en" className={`${geist.variable} h-full antialiased`}>
       <body className="h-full overflow-hidden bg-slate-50 font-sans">
         <AppShell>
-          <ParaShell>{children}</ParaShell>
+          {children}
         </AppShell>
         <ServiceWorkerRegister />
         <Toaster position="top-center" richColors />

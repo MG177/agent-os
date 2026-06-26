@@ -20,7 +20,11 @@ import {
 import { titleFromCapture } from "@agent-os/platform/inbox-capture";
 import type { AuditSource } from "@agent-os/platform/audit";
 import { buildActivityFeed } from "@agent-os/platform/activity";
-import { isFileWritesDisabledError } from "@agent-os/contracts/deployment";
+import {
+  FILE_WRITES_DISABLED_CODE,
+  FILE_WRITES_DISABLED_MESSAGE,
+  isFileWritesDisabledError,
+} from "@agent-os/contracts/deployment";
 
 const ALLOWED_SOURCES: AuditSource[] = ["capture-ui", "whatsapp"];
 
@@ -30,14 +34,6 @@ const InboxCreateSchema = z.object({
   tags: z.array(z.string().max(50)).max(20).optional(),
   source: z.string().max(50).optional(),
 });
-
-function writesDisabled(res: Response) {
-  return res.status(503).json({
-    error:
-      "Filesystem writes are disabled on this deployment (lite/read-only).",
-    code: "FILE_WRITES_DISABLED",
-  });
-}
 
 @Controller()
 export class VaultController {
@@ -77,7 +73,7 @@ export class VaultController {
       const item = createInboxItem(resolvedTitle, noteBody, resolvedSource);
       return res.status(201).json({ item });
     } catch (error) {
-      if (isFileWritesDisabledError(error)) return writesDisabled(res);
+      if (isFileWritesDisabledError(error)) return res.status(503).json({ error: FILE_WRITES_DISABLED_MESSAGE, code: FILE_WRITES_DISABLED_CODE });
       throw error;
     }
   }
@@ -95,7 +91,7 @@ export class VaultController {
     try {
       result = archiveInboxItem(slug);
     } catch (error) {
-      if (isFileWritesDisabledError(error)) return writesDisabled(res);
+      if (isFileWritesDisabledError(error)) return res.status(503).json({ error: FILE_WRITES_DISABLED_MESSAGE, code: FILE_WRITES_DISABLED_CODE });
       throw error;
     }
     if (!result.ok) {
