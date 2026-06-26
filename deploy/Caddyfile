@@ -1,0 +1,28 @@
+# Caddy edge proxy for this VPS — replaces nginx (which holds 80/443 for waha/n8n).
+# Install: see deploy/README-vps.md. Deploy to /etc/caddy/Caddyfile, then cut over.
+# Generate the gate hash:  caddy hash-password --plaintext 'YOUR_PASSWORD'
+{
+    email mg.terok77@gmail.com
+}
+
+# ── Personal Agent OS (OPEN — no gate) ──────────────────────────────────
+# WARNING: the app has no auth of its own, so every route is public, including
+# /api/browse (PARA vault) and /api/chat (assistant). The WAHA webhook is still
+# HMAC-protected by the app.
+agent-os.lumen-dev.com {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:1777
+}
+
+# ── Existing services migrated off nginx (auto-HTTPS) ───────────────────
+waha.lumen-dev.com {
+    reverse_proxy 127.0.0.1:3001
+}
+
+n8n.lumen-dev.com {
+    reverse_proxy 127.0.0.1:5678
+}
+
+waha.aksara-karir.com {
+    reverse_proxy 127.0.0.1:3000
+}

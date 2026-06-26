@@ -1,0 +1,112 @@
+# Self-contained compose for this nginx/Caddy VPS (no Dokploy/Traefik).
+# Run with:  docker compose -f docker-compose.vps.yml up -d
+#
+# Topology: Caddy -> web (:1777). web runs LITE and proxies the stateful routes
+# (chat/inbox/browse/activity/whatsapp) to the NestJS api over the internal
+# compose network (http://agent-os-api:3004). The api owns vault/inbox/audit,
+# the assistant MCP child, and the todo-notify scheduler. MongoDB is Atlas.
+services:
+  agent-os:
+    image: agent-os:latest
+    build: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1777:3003"
+    volumes:
+      - /home/mg177/PARA:/root/PARA
+      - /home/mg177/.cursor:/root/.cursor
+      - agent-os-data:/var/lib/agent-os
+    environment:
+      - NODE_ENV=production
+      # Lite: serve UI + stateless (nutrition/todos/clickup/calendar) directly;
+      # proxy stateful routes to the api; skip the todo-notify poll (api owns it).
+      - AGENT_OS_DEPLOYMENT=lite
+      - FULL_INSTANCE_URL=${FULL_INSTANCE_URL:-http://agent-os-api:3004}
+      - VAULT_PATH=/root/PARA
+      - AGENT_OS_DATA_PATH=/var/lib/agent-os
+      - TZ=Asia/Jakarta
+      - MONGODB_URI=${MONGODB_URI:-mongodb://127.0.0.1:27017/nutrition-tracker}
+      - ASSISTANT_OAUTH_HOST=${ASSISTANT_OAUTH_HOST:-agent-os.lumen-dev.com}
+      # Nutrition /nutrition/chat (Gemini) + ClickUp (web-served, stateless).
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - CLICKUP_SPRINT_FOLDERS=${CLICKUP_SPRINT_FOLDERS:-Sprint}
+      # ClickUp personal API token via env (skips the in-app paste/OAuth input).
+      - CLICKUP_API_KEY=${CLICKUP_API_KEY:-}
+      - CLICKUP_TEAM_ID=${CLICKUP_TEAM_ID:-}
+      # Google Calendar (read-only OAuth) — web serves the connect/callback flow.
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+      - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
+      - GOOGLE_OAUTH_REDIRECT_URI=${GOOGLE_OAUTH_REDIRECT_URI:-}
+      - TOKEN_ENCRYPTION_KEY=${TOKEN_ENCRYPTION_KEY}
+      - OAUTH_STATE_SECRET=${OAUTH_STATE_SECRET}
+      # App-level password gate is OFF here — the gate is enforced at Caddy.
+      - DEV_PREVIEW_PASSWORD=${DEV_PREVIEW_PASSWORD:-}
+      - DEV_PREVIEW_SECRET=${DEV_PREVIEW_SECRET:-}
+      - DEV_PREVIEW_COOKIE_MAX_AGE=${DEV_PREVIEW_COOKIE_MAX_AGE:-604800}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3003/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  agent-os-api:
+    image: agent-os:latest
+    entrypoint: ["/app/docker-entrypoint.api.sh"]
+    restart: unless-stopped
+    # Internal only — web proxies to it over the compose network.
+    expose:
+      - "3004"
+    volumes:
+      - /home/mg177/PARA:/root/PARA
+      - /home/mg177/.cursor:/root/.cursor
+      - agent-os-data:/var/lib/agent-os
+    environment:
+      - NODE_ENV=production
+      - API_PORT=3004
+      - AGENT_OS_APP_ROOT=/app/apps/api
+      - AGENT_OS_DEPLOYMENT=full
+      - VAULT_PATH=/root/PARA
+      - AGENT_OS_DATA_PATH=/var/lib/agent-os
+      - TZ=Asia/Jakarta
+      - MONGODB_URI=${MONGODB_URI:-mongodb://127.0.0.1:27017/nutrition-tracker}
+      # Cursor SDK (/assistant). CURSOR_AGENT_CWD = vault → PARA-scope rules/skills.
+      - CURSOR_API_KEY=${CURSOR_API_KEY}
+      - CURSOR_ASSISTANT_MODEL=${CURSOR_ASSISTANT_MODEL:-composer-2.5}
+      - CURSOR_AGENT_CWD=${CURSOR_AGENT_CWD:-/root/PARA}
+      - ASSISTANT_OAUTH_HOST=${ASSISTANT_OAUTH_HOST:-agent-os.lumen-dev.com}
+      # WAHA webhook → /api/webhooks/whatsapp (proxied from web); outbound via WAHA_BASE_URL.
+      - WAHA_WEBHOOK_SECRET=${WAHA_WEBHOOK_SECRET}
+      - WAHA_BASE_URL=${WAHA_BASE_URL:-https://waha.lumen-dev.com}
+      - WAHA_API_KEY=${WAHA_API_KEY}
+      - WAHA_SESSION=${WAHA_SESSION:-default}
+      - WHATSAPP_ALLOWED_JIDS=${WHATSAPP_ALLOWED_JIDS}
+      - WHATSAPP_ACK_MESSAGE=${WHATSAPP_ACK_MESSAGE:-Saved to Inbox}
+      - WHATSAPP_NOTIFY_JID=${WHATSAPP_NOTIFY_JID:-}
+      # Google Calendar tokens (read) for the calendar MCP tool.
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+      - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
+      - GOOGLE_OAUTH_REDIRECT_URI=${GOOGLE_OAUTH_REDIRECT_URI:-}
+      - TOKEN_ENCRYPTION_KEY=${TOKEN_ENCRYPTION_KEY}
+      - OAUTH_STATE_SECRET=${OAUTH_STATE_SECRET}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3004/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  agent-os-data:

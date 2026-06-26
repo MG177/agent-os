@@ -1,0 +1,21 @@
+{
+  "//": "Standalone tsconfig for the `npx tsx` MCP child spawned by the NestJS api.",
+  "//2": "Explicit @agent-os/* paths relative to this file (apps/api/scripts) so the",
+  "//3": "child resolves the workspace packages in dev and in the Docker runner alike.",
+  "compilerOptions": {
+    "target": "ES2017",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@agent-os/contracts": ["../../../packages/contracts/src/index.ts"],
+      "@agent-os/contracts/*": ["../../../packages/contracts/src/*"],
+      "@agent-os/core": ["../../../packages/core/src/index.ts"],
+      "@agent-os/core/*": ["../../../packages/core/src/*"],
+      "@agent-os/platform": ["../../../packages/platform/src/index.ts"],
+      "@agent-os/platform/*": ["../../../packages/platform/src/*"]
+    }
+  }
+}

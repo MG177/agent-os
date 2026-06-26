@@ -11,19 +11,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 22
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Type check
-        run: npm run type-check
+        run: pnpm type-check
 
       - name: Lint
-        run: npm run lint
+        run: pnpm lint
         env:
           VAULT_PATH: /tmp/vault
           MONGODB_URI: mongodb://localhost:27017/test
@@ -39,16 +41,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 22
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build (production)
-        run: npm run build
+        run: pnpm --filter agent-os build
         env:
           # Lock disabled (no DEV_PREVIEW_PASSWORD) so routes are reachable;
           # integrations unconfigured → cards render their empty/skeleton states.
@@ -57,6 +61,7 @@ jobs:
           AGENT_OS_DATA_PATH: /tmp/agent-os-data
 
       - name: Lighthouse CI
+        working-directory: apps/web
         run: |
           mkdir -p /tmp/vault
           npx --yes @lhci/cli@0.16.x autorun
