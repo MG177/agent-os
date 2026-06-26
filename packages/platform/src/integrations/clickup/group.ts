@@ -10,10 +10,6 @@ import { getAppTimeZone } from "@agent-os/contracts/timezone";
 
 export type DueFilter = "all" | "overdue" | "today" | "week";
 
-function getTimeZone(): string {
-  return getAppTimeZone();
-}
-
 function tzOffsetMinutes(timeZone: string, probe: Date): number {
   const utc = Date.parse(probe.toLocaleString("en-US", { timeZone: "UTC" }));
   const zoned = Date.parse(probe.toLocaleString("en-US", { timeZone }));
@@ -22,7 +18,7 @@ function tzOffsetMinutes(timeZone: string, probe: Date): number {
 
 /** Epoch ms for local midnight today in the app timezone. */
 function startOfTodayMs(): number {
-  const tz = getTimeZone();
+  const tz = getAppTimeZone();
   const now = new Date();
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: tz,

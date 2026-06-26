@@ -336,3 +336,39 @@ export async function loadChatHistoryForTurn(
   const messages = await listSessionMessages(sessionId);
   return messagesToChatHistory(messages);
 }
+
+export function serializeSessionDoc(s: AssistantSessionDoc) {
+  return {
+    id: s._id,
+    title: s.title,
+    createdAt: s.createdAt.toISOString(),
+    updatedAt: s.updatedAt.toISOString(),
+    lastMessageAt: s.lastMessageAt.toISOString(),
+    messageCount: s.messageCount,
+    preview: s.preview ?? null,
+  };
+}
+
+export function serializeMessageDoc(m: AssistantMessageDoc) {
+  return {
+    id: m._id,
+    sessionId: m.sessionId,
+    role: m.role,
+    content: m.content,
+    command: m.command ?? null,
+    image: m.image
+      ? { mediaType: m.image.mediaType, base64: m.image.base64 }
+      : null,
+    createdAt: m.createdAt.toISOString(),
+  };
+}
+
+export function parseSessionLimit(
+  raw: string | undefined,
+  defaultLimit = DEFAULT_SESSION_LIST_LIMIT,
+): number {
+  return Math.min(
+    Math.max(1, parseInt(raw ?? "", 10) || defaultLimit),
+    MAX_SESSION_LIST_LIMIT,
+  );
+}

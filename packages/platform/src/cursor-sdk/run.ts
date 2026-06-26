@@ -10,7 +10,6 @@ import type { SDKAgent } from "@cursor/sdk";
 export interface SendAndWaitOptions {
   agent: SDKAgent;
   message: string | SDKUserMessage;
-  logIds?: boolean;
 }
 
 export interface SendAndWaitSuccess {
@@ -65,7 +64,7 @@ function extractAssistantText(messages: SDKMessage[]): string {
 export async function sendAndCollectText(
   options: SendAndWaitOptions,
 ): Promise<SendAndWaitOutcome> {
-  const { agent, message, logIds = true } = options;
+  const { agent, message } = options;
 
   let run: Run;
   try {
@@ -74,11 +73,9 @@ export async function sendAndCollectText(
     return { ok: false, error: normalizeStartupError(err) };
   }
 
-  if (logIds) {
-    console.info(
-      `[cursor-sdk] agentId=${agent.agentId} runId=${run.id} status=${run.status}`,
-    );
-  }
+  console.info(
+    `[cursor-sdk] agentId=${agent.agentId} runId=${run.id} status=${run.status}`,
+  );
 
   const streamed: SDKMessage[] = [];
   try {

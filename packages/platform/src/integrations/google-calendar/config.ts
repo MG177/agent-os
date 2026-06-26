@@ -1,4 +1,4 @@
-const CALENDAR_READONLY_SCOPE =
+export const CALENDAR_READONLY_SCOPE =
   "https://www.googleapis.com/auth/calendar.readonly";
 
 const ALLOWED_HOSTS = new Set([
@@ -9,10 +9,6 @@ const ALLOWED_HOSTS = new Set([
   "personal-dashboard.lumen-dev.com",
   "agent-os-beta-lovat.vercel.app",
 ]);
-
-export function getCalendarReadonlyScope(): string {
-  return CALENDAR_READONLY_SCOPE;
-}
 
 export function isGoogleOAuthConfigured(): boolean {
   return Boolean(

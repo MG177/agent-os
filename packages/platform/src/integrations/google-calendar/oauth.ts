@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import {
-  getCalendarReadonlyScope,
+  CALENDAR_READONLY_SCOPE,
   getGoogleOAuthClientConfig,
 } from "@agent-os/platform/integrations/google-calendar/config";
 
@@ -14,7 +14,7 @@ export function getAuthorizationUrl(redirectUri: string, state: string): string 
   return client.generateAuthUrl({
     access_type: "offline",
     prompt: "consent",
-    scope: [getCalendarReadonlyScope()],
+    scope: [CALENDAR_READONLY_SCOPE],
     state,
   });
 }

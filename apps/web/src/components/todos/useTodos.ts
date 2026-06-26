@@ -9,6 +9,15 @@ type TodosResponse = { todos: TodoDoc[] };
 
 const TODO_POLL_MS = 60_000;
 
+export async function markTodoDone(id: string): Promise<void> {
+  await fetch(`/api/todos/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "done" }),
+  });
+  await Promise.all([mutate(KEYS.todosDue), mutate(KEYS.todosActive)]);
+}
+
 export function useDueTodos() {
   const { data, isLoading, mutate: revalidate } = useResource<TodosResponse>(
     KEYS.todosDue,
@@ -16,18 +25,7 @@ export function useDueTodos() {
     { refreshInterval: TODO_POLL_MS },
   );
 
-  const markDone = useCallback(async (id: string) => {
-    await fetch(`/api/todos/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "done" }),
-    });
-    // Revalidate both due and active lists since completing a todo affects both.
-    await Promise.all([
-      mutate(KEYS.todosDue),
-      mutate(KEYS.todosActive),
-    ]);
-  }, []);
+  const markDone = useCallback((id: string) => markTodoDone(id), []);
 
   return {
     todos: data?.todos ?? [],
@@ -50,14 +48,7 @@ export function useTodos(status: "active" | "completed" | "all" = "active") {
 
   const refresh = useCallback(() => revalidate(), [revalidate]);
 
-  const markDone = useCallback(async (id: string) => {
-    await fetch(`/api/todos/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "done" }),
-    });
-    await Promise.all([mutate(KEYS.todosDue), mutate(KEYS.todosActive)]);
-  }, []);
+  const markDone = useCallback((id: string) => markTodoDone(id), []);
 
   const toggle = useCallback(async (id: string, enabled: boolean) => {
     await fetch(`/api/todos/${id}`, {

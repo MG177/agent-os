@@ -64,7 +64,7 @@ jobs:
         working-directory: apps/web
         run: |
           mkdir -p /tmp/vault
-          npx --yes @lhci/cli@0.16.x autorun
+          npx --yes @lhci/cli@0.15.x autorun
         env:
           VAULT_PATH: /tmp/vault
           MONGODB_URI: mongodb://localhost:27017/test

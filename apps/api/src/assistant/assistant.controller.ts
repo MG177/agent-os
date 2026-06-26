@@ -21,9 +21,10 @@ import {
   getSessionWithMessages,
   listSessions,
   loadChatHistoryForTurn,
+  parseSessionLimit,
+  serializeMessageDoc,
+  serializeSessionDoc,
   updateSessionTitle,
-  DEFAULT_SESSION_LIST_LIMIT,
-  MAX_SESSION_LIST_LIMIT,
 } from "@agent-os/platform/assistant/sessions";
 
 const ImageSchema = z.object({ base64: z.string(), mediaType: z.string() });
@@ -36,51 +37,6 @@ const ChatSchema = z.object({
 const PatchSchema = z.object({ title: z.string().min(1).max(200) });
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-type SessionDoc = {
-  _id: string;
-  title: string;
-  createdAt: Date;
-  updatedAt: Date;
-  lastMessageAt: Date;
-  messageCount: number;
-  preview?: string;
-};
-type MessageDoc = {
-  _id: string;
-  sessionId: string;
-  role: "user" | "assistant";
-  content: string;
-  command?: string;
-  image?: { mediaType: string; base64: string };
-  createdAt: Date;
-};
-
-function serializeSession(s: SessionDoc) {
-  return {
-    id: s._id,
-    title: s.title,
-    createdAt: s.createdAt.toISOString(),
-    updatedAt: s.updatedAt.toISOString(),
-    lastMessageAt: s.lastMessageAt.toISOString(),
-    messageCount: s.messageCount,
-    preview: s.preview ?? null,
-  };
-}
-
-function serializeMessage(m: MessageDoc) {
-  return {
-    id: m._id,
-    sessionId: m.sessionId,
-    role: m.role,
-    content: m.content,
-    command: m.command ?? null,
-    image: m.image
-      ? { mediaType: m.image.mediaType, base64: m.image.base64 }
-      : null,
-    createdAt: m.createdAt.toISOString(),
-  };
-}
 
 @Controller()
 export class AssistantController {
@@ -154,14 +110,8 @@ export class AssistantController {
   @Get("assistant/sessions")
   async list(@Query("limit") limitRaw: string | undefined, @Res() res: Response) {
     try {
-      const limit = limitRaw
-        ? Math.min(
-            Math.max(1, parseInt(limitRaw, 10) || DEFAULT_SESSION_LIST_LIMIT),
-            MAX_SESSION_LIST_LIMIT,
-          )
-        : DEFAULT_SESSION_LIST_LIMIT;
-      const sessions = await listSessions(limit);
-      return res.json({ sessions: sessions.map(serializeSession) });
+      const sessions = await listSessions(parseSessionLimit(limitRaw));
+      return res.json({ sessions: sessions.map(serializeSessionDoc) });
     } catch (err) {
       console.error("GET /api/assistant/sessions", err);
       return res.status(500).json({ error: "Failed to list sessions" });
@@ -172,7 +122,7 @@ export class AssistantController {
   async create(@Res() res: Response) {
     try {
       const session = await createSession();
-      return res.status(201).json({ session: serializeSession(session) });
+      return res.status(201).json({ session: serializeSessionDoc(session) });
     } catch (err) {
       console.error("POST /api/assistant/sessions", err);
       return res.status(500).json({ error: "Failed to create session" });
@@ -184,8 +134,8 @@ export class AssistantController {
     try {
       const { session, messages } = await getSessionWithMessages(id);
       return res.json({
-        session: serializeSession(session),
-        messages: messages.map(serializeMessage),
+        session: serializeSessionDoc(session),
+        messages: messages.map(serializeMessageDoc),
       });
     } catch (err) {
       if (err instanceof AssistantSessionError) {
@@ -208,7 +158,7 @@ export class AssistantController {
     }
     try {
       const session = await updateSessionTitle(id, parsed.data.title);
-      return res.json({ session: serializeSession(session) });
+      return res.json({ session: serializeSessionDoc(session) });
     } catch (err) {
       if (err instanceof AssistantSessionError) {
         return res.status(err.status).json({ error: err.message });
