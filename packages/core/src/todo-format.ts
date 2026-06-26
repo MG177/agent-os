@@ -15,9 +15,12 @@ export interface DueState {
 const SOON_MS = 2 * 60 * 60 * 1000;
 
 /** Classify a next-run time into an urgency tone + short label, or null if no date. */
-export function dueState(next: Date | undefined | null): DueState | null {
+export function dueState(
+  next: Date | undefined | null,
+  now: number = Date.now(),
+): DueState | null {
   if (!next) return null;
-  const ms = next.getTime() - Date.now();
+  const ms = next.getTime() - now;
 
   if (ms < 0) {
     const mins = Math.round(Math.abs(ms) / 60000);

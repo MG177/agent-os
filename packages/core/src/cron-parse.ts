@@ -23,6 +23,15 @@ export function nextCronOccurrence(cronExpr: string, from = new Date()): Date {
   return interval.next().toDate();
 }
 
+/** Authoritative previous occurrence at-or-before `from` (server-side). */
+export function prevCronOccurrence(cronExpr: string, from = new Date()): Date {
+  const interval = CronExpressionParser.parse(cronExpr, {
+    currentDate: from,
+    tz: getAppTimeZone(),
+  });
+  return interval.prev().toDate();
+}
+
 /** Next run for a single trigger — interval (anchor math) or cron pattern. */
 export function triggerNextRun(t: TriggerDoc, from = new Date()): Date | undefined {
   if (t.type === "interval") {

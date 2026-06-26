@@ -144,6 +144,33 @@ export async function getDueTodos(): Promise<TodoDoc[]> {
     .slice(0, 10);
 }
 
+/**
+ * Enabled, incomplete todos whose due time has already passed (`nextRunAt < now`).
+ * Drives the recurring overdue WhatsApp reminder digest — distinct from
+ * `getDueTodos`, which looks ahead within a horizon for the due-on-arrival ping.
+ */
+export async function getOverdueTodos(now = new Date()): Promise<TodoDoc[]> {
+  const col = await todosCollection();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const query: Record<string, any> = {
+    enabled: true,
+    $or: [{ completedAt: { $exists: false } }, { completedAt: null }],
+  };
+  const docs = await col.find(query).toArray();
+  const resolved = docs.map((d) => withResolvedSchedule(d, now));
+  await Promise.all(
+    resolved.map((d, i) =>
+      persistScheduleIfDrifted(col, docs[i], d.nextRunAt, now),
+    ),
+  );
+  return resolved
+    .filter((d) => d.nextRunAt && d.nextRunAt.getTime() < now.getTime())
+    .sort(
+      (a, b) =>
+        (a.nextRunAt?.getTime() ?? 0) - (b.nextRunAt?.getTime() ?? 0),
+    );
+}
+
 export interface CreateTodoInput {
   title: string;
   notes?: string;
