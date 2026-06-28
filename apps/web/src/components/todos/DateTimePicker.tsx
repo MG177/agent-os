@@ -185,7 +185,7 @@ export function DateTimePicker({
   }
 
   const cell =
-    "rounded-xl bg-slate-50 px-2.5 py-2 text-sm text-slate-700 ring-1 ring-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500";
+    "rounded-2xl bg-slate-50 px-2.5 py-2 text-sm text-slate-700 ring-1 ring-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring";
 
   const presetButtons = (
     <div className="flex flex-wrap gap-1.5">
@@ -194,7 +194,7 @@ export function DateTimePicker({
           key={p.label}
           type="button"
           onClick={p.go}
-          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-primary/30 hover:bg-accent hover:text-primary"
         >
           {p.label}
         </button>
@@ -264,11 +264,11 @@ export function DateTimePicker({
                   onClick={() => pickDay(c)}
                   className={`h-9 rounded-lg text-sm transition-colors ${
                     isSel
-                      ? "bg-blue-600 font-semibold text-white"
+                      ? "bg-primary font-semibold text-white"
                       : disabled
                         ? "cursor-not-allowed text-slate-300"
                         : isToday
-                          ? "font-semibold text-blue-600 ring-1 ring-inset ring-blue-200 hover:bg-blue-50"
+                          ? "font-semibold text-primary ring-1 ring-inset ring-ring hover:bg-accent"
                           : "text-slate-700 hover:bg-slate-100"
                   }`}
                 >

@@ -69,7 +69,7 @@ function UserBubble({ msg }: { msg: AssistantUiMessage }) {
           </div>
         )}
         {msg.content && (
-          <div className="rounded-3xl rounded-br-lg bg-blue-600 px-4 py-3 text-sm leading-relaxed text-white shadow-sm shadow-blue-200">
+          <div className="rounded-3xl rounded-br-lg bg-primary px-4 py-3 text-sm leading-relaxed text-white shadow-sm">
             {msg.content}
           </div>
         )}
@@ -90,7 +90,7 @@ function AssistantBubble({
   return (
     <div className="mb-3 w-full">
       <div className="grid w-full grid-cols-[1.75rem_minmax(0,1fr)] items-start gap-2">
-        <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-xs text-white">
+        <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
           AI
         </div>
         <div className="min-w-0 overflow-hidden rounded-3xl rounded-bl-lg border border-slate-100 bg-white px-3.5 py-2.5 shadow-sm">
@@ -354,7 +354,7 @@ export default function AssistantChat() {
       <div className="flex-1 overflow-y-auto py-2 w-full min-w-0">
         {isEmpty && (
           <div className="flex h-full min-h-[12rem] flex-col items-center justify-center pb-6 text-center">
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 to-blue-500 text-xl font-bold text-white shadow-lg shadow-blue-200">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-primary text-xl font-bold text-primary-foreground shadow-lg">
               AI
             </div>
             <h2 className="mb-1 text-base font-bold text-slate-800">
@@ -374,7 +374,7 @@ export default function AssistantChat() {
                     setActiveCommand(command === "general" ? null : command);
                     handleSend(text, command === "general" ? null : command);
                   }}
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-blue-200 hover:bg-slate-50 hover:text-blue-600 active:scale-95"
+                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:border-primary/30 hover:bg-slate-50 hover:text-primary active:scale-95"
                 >
                   {label}
                 </button>
@@ -423,7 +423,7 @@ export default function AssistantChat() {
                   selectSlashCommand(cmd.id);
                 }}
                 className={`flex w-full flex-col gap-0.5 px-3 py-2 text-left transition-colors ${i === slashHighlight
-                  ? "bg-blue-50 text-blue-900"
+                  ? "bg-accent text-primary"
                   : "text-slate-800 hover:bg-slate-50"
                   }`}
               >
@@ -483,7 +483,7 @@ export default function AssistantChat() {
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl text-slate-400 transition-colors hover:bg-blue-50 hover:text-blue-500"
+            className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl text-slate-400 transition-colors hover:bg-accent hover:text-primary"
             aria-label="Attach image"
           >
             <ImageIcon strokeWidth={1.8} className="h-5 w-5" aria-hidden />
@@ -519,7 +519,7 @@ export default function AssistantChat() {
               !activeSessionId ||
               (!input.trim() && !imageBase64)
             }
-            className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm shadow-blue-200 transition-all active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:opacity-30 disabled:shadow-none"
+            className="mb-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-primary text-white shadow-sm transition-all active:scale-95 disabled:bg-slate-200 disabled:text-slate-400 disabled:opacity-30 disabled:shadow-none"
             aria-label="Send message"
           >
             {streaming ? (

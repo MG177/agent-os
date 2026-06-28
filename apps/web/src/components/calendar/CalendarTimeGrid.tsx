@@ -154,7 +154,7 @@ function DayHeader({
       type="button"
       onClick={onClick}
       aria-label={`Open ${day}`}
-      className={`flex flex-col items-center gap-0.5 border-l border-slate-50 py-1.5 transition-colors first:border-l-0 hover:bg-slate-50 ${selected ? "bg-blue-50" : ""
+      className={`flex flex-col items-center gap-0.5 border-l border-slate-50 py-1.5 transition-colors first:border-l-0 hover:bg-slate-50 ${selected ? "bg-accent" : ""
         }`}
     >
       <span className="text-[10px] font-semibold uppercase text-slate-400">
@@ -163,7 +163,7 @@ function DayHeader({
       <span
         className={
           isToday
-            ? "inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white"
+            ? "inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white"
             : "text-sm font-bold tabular-nums text-slate-700"
         }
       >

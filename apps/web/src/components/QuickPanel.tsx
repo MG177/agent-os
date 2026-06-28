@@ -51,7 +51,7 @@ function Rail({
             title={label}
             aria-label={label}
             className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-colors ${isActive
-                ? "bg-blue-600 text-white shadow-sm shadow-blue-200"
+                ? "bg-primary text-white shadow-sm"
                 : "text-slate-400 hover:bg-slate-50 hover:text-slate-700"
               }`}
           >
@@ -109,7 +109,7 @@ function AssistantPanelHeaderActions({ onClose }: { onClose?: () => void }) {
         title="Open full screen"
         aria-label="Open Assistant full screen"
         onClick={onClose}
-        className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
+        className="flex h-8 w-8 items-center justify-center rounded-2xl text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
       >
         <Maximize2 strokeWidth={1.8} className="h-4 w-4" aria-hidden />
       </Link>
@@ -146,7 +146,7 @@ export default function QuickPanel() {
             <header className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 py-3">
               <div className="flex items-center gap-2">
                 {shown === "assistant" && (
-                  <span className="flex h-8 w-8 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 text-xs font-bold text-white">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-2xl bg-primary text-xs font-bold text-primary-foreground">
                     AI
                   </span>
                 )}
@@ -160,7 +160,7 @@ export default function QuickPanel() {
                   type="button"
                   onClick={close}
                   aria-label="Close panel"
-                  className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                  className="flex h-8 w-8 items-center justify-center rounded-2xl text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
                 >
                   <X strokeWidth={2} className="h-4 w-4" aria-hidden />
                 </button>
@@ -190,7 +190,7 @@ export default function QuickPanel() {
           <header className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-4 py-3">
             <div className="flex items-center gap-2">
               {shown === "assistant" && (
-                <span className="flex h-8 w-8 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 text-xs font-bold text-white">
+                <span className="flex h-8 w-8 items-center justify-center rounded-2xl bg-primary text-xs font-bold text-primary-foreground">
                   AI
                 </span>
               )}
@@ -205,7 +205,7 @@ export default function QuickPanel() {
                 onClick={close}
                 title="Collapse"
                 aria-label="Collapse panel"
-                className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                className="flex h-8 w-8 items-center justify-center rounded-2xl text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-700"
               >
                 <ChevronRight strokeWidth={2} className="h-4 w-4" aria-hidden />
               </button>

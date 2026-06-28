@@ -134,8 +134,8 @@ function markdownComponents(variant: MarkdownVariant) {
         <code
           className={
             compact
-              ? 'mb-2 block overflow-x-auto whitespace-pre rounded-xl bg-slate-100 px-3 py-2 text-xs font-mono text-slate-800'
-              : 'mb-3 block overflow-x-auto whitespace-pre rounded-xl bg-slate-100 px-4 py-3 text-xs font-mono text-slate-800'
+              ? 'mb-2 block overflow-x-auto whitespace-pre rounded-2xl bg-slate-100 px-3 py-2 text-xs font-mono text-slate-800'
+              : 'mb-3 block overflow-x-auto whitespace-pre rounded-2xl bg-slate-100 px-4 py-3 text-xs font-mono text-slate-800'
           }
         >
           {children}
@@ -155,8 +155,8 @@ function markdownComponents(variant: MarkdownVariant) {
       <blockquote
         className={
           compact
-            ? 'mb-2 border-l-4 border-blue-200 pl-3 text-sm italic text-slate-600 last:mb-0'
-            : 'mb-3 border-l-4 border-blue-200 pl-4 italic text-slate-600'
+            ? 'mb-2 border-l-4 border-primary/30 pl-3 text-sm italic text-slate-600 last:mb-0'
+            : 'mb-3 border-l-4 border-primary/30 pl-4 italic text-slate-600'
         }
       >
         {children}
@@ -166,7 +166,7 @@ function markdownComponents(variant: MarkdownVariant) {
     a: ({ href, children }: { href?: string; children?: ReactNode }) => (
       <a
         href={href}
-        className="break-all text-blue-600 underline hover:text-blue-700"
+        className="break-all text-primary underline hover:text-primary"
         target="_blank"
         rel="noopener noreferrer"
       >

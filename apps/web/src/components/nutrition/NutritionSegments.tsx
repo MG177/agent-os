@@ -32,7 +32,7 @@ export default function NutritionSegments({
             onClick={() => onChange(id)}
             className={`flex min-h-11 flex-1 items-center justify-center rounded-2xl px-4 text-xs font-semibold transition-colors ${
               active
-                ? "bg-blue-600 text-white shadow-sm shadow-blue-200"
+                ? "bg-primary text-white shadow-sm"
                 : "bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-800"
             }`}
           >

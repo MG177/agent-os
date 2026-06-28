@@ -24,9 +24,9 @@ const SECTIONS: Section[] = [
     name: "Projects",
     description: "Active efforts with a goal and a finish line.",
     Icon: FolderKanban,
-    tile: "bg-blue-50 text-blue-600",
-    dot: "bg-blue-500",
-    accent: "text-blue-600",
+    tile: "bg-accent text-primary",
+    dot: "bg-primary",
+    accent: "text-primary",
   },
   {
     name: "Areas",

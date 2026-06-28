@@ -91,7 +91,7 @@ const PROSE_COMPONENTS = {
   li: ({ children }: { children?: React.ReactNode }) => <li>{children}</li>,
   code: ({ children, className }: { children?: React.ReactNode; className?: string }) =>
     className ? (
-      <code className="block overflow-x-auto rounded-xl bg-slate-50 px-3 py-2 text-xs font-mono text-slate-700">
+      <code className="block overflow-x-auto rounded-2xl bg-slate-50 px-3 py-2 text-xs font-mono text-slate-700">
         {children}
       </code>
     ) : (
@@ -100,7 +100,7 @@ const PROSE_COMPONENTS = {
       </code>
     ),
   pre: ({ children }: { children?: React.ReactNode }) => (
-    <pre className="mb-2 overflow-x-auto rounded-xl bg-slate-50 px-3 py-2 text-xs">{children}</pre>
+    <pre className="mb-2 overflow-x-auto rounded-2xl bg-slate-50 px-3 py-2 text-xs">{children}</pre>
   ),
   blockquote: ({ children }: { children?: React.ReactNode }) => (
     <blockquote className="mb-2 border-l-2 border-slate-200 pl-3 text-sm italic text-slate-500">
@@ -112,7 +112,7 @@ const PROSE_COMPONENTS = {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-blue-600 underline hover:text-blue-700"
+      className="text-primary underline hover:text-primary"
     >
       {children}
     </a>
@@ -253,7 +253,7 @@ export function TaskDetailModal({
               href={`clickup://t/${task.id}`}
               aria-label="Open in ClickUp app"
               title="Open in ClickUp desktop"
-              className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              className="rounded-2xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
             >
               <Monitor className="h-4 w-4" strokeWidth={1.8} />
             </a>
@@ -265,7 +265,7 @@ export function TaskDetailModal({
                 rel="noopener noreferrer"
                 aria-label="Open in ClickUp web"
                 title="Open in browser"
-                className="rounded-xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+                className="rounded-2xl p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
               >
                 <ExternalLink className="h-4 w-4" strokeWidth={1.8} />
               </a>
@@ -276,7 +276,7 @@ export function TaskDetailModal({
               size="icon-sm"
               onClick={onClose}
               aria-label="Close"
-              className="rounded-xl text-slate-400 hover:text-slate-700"
+              className="rounded-2xl text-slate-400 hover:text-slate-700"
             >
               <X className="size-4" strokeWidth={1.8} />
             </Button>
@@ -317,7 +317,7 @@ export function TaskDetailModal({
                   writeBranch("be", task.id, e.target.value);
                 }}
                 placeholder="feature/…"
-                className="rounded-xl px-3 py-2 font-mono"
+                className="rounded-2xl px-3 py-2 font-mono"
               />
             </div>
             <div>
@@ -332,7 +332,7 @@ export function TaskDetailModal({
                   writeBranch("fe", task.id, e.target.value);
                 }}
                 placeholder="feature/…"
-                className="rounded-xl px-3 py-2 font-mono"
+                className="rounded-2xl px-3 py-2 font-mono"
               />
             </div>
           </div>
@@ -346,7 +346,7 @@ export function TaskDetailModal({
                   value={task.status.status}
                   disabled={saving}
                   onChange={(e) => patch({ status: e.target.value })}
-                  className="w-full rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  className="w-full rounded-2xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
                 >
                   {statuses.map((s) => (
                     <option key={s.status} value={s.status}>
@@ -434,7 +434,7 @@ export function TaskDetailModal({
                 type="button"
                 onClick={onStopTimer}
                 disabled={timerBusy}
-                className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:opacity-50"
               >
                 {timerBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Square className="h-3.5 w-3.5 fill-current" />}
                 Stop timer
@@ -444,7 +444,7 @@ export function TaskDetailModal({
                 type="button"
                 onClick={() => onStartTimer(task.id)}
                 disabled={timerBusy}
-                className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-2xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50"
               >
                 {timerBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-3.5 w-3.5 fill-current" />}
                 Start timer

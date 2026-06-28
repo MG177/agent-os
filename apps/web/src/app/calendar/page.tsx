@@ -59,8 +59,8 @@ function Segmented<T extends string>({
           role="tab"
           aria-selected={value === id}
           onClick={() => onChange(id)}
-          className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors ${value === id
-            ? "bg-white text-blue-600 shadow-sm"
+          className={`rounded-2xl px-3 py-1.5 text-xs font-semibold transition-colors ${value === id
+            ? "bg-white text-primary shadow-sm"
             : "text-slate-500 hover:text-slate-700"
             }`}
         >
@@ -286,14 +286,14 @@ export default function CalendarPage() {
                   type="button"
                   onClick={stepPrev}
                   aria-label="Previous"
-                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  className="flex h-8 w-8 items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
                 >
                   ‹
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedDay(today)}
-                  className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  className="rounded-2xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
                 >
                   Today
                 </button>
@@ -301,7 +301,7 @@ export default function CalendarPage() {
                   type="button"
                   onClick={stepNext}
                   aria-label="Next"
-                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  className="flex h-8 w-8 items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
                 >
                   ›
                 </button>
@@ -377,7 +377,7 @@ export default function CalendarPage() {
         <p className="shrink-0 text-center text-xs text-slate-400 md:hidden">
           <Link
             href="/settings/integrations"
-            className="font-semibold text-blue-600 hover:text-blue-700"
+            className="font-semibold text-primary hover:text-primary"
           >
             Integration settings
           </Link>

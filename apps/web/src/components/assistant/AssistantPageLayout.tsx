@@ -18,7 +18,7 @@ export default function AssistantPageLayout() {
           className="relative flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 bg-white px-0 py-3 md:py-4"
         >
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 text-sm font-bold text-white shadow-sm shadow-blue-200">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary text-sm font-bold text-primary-foreground shadow-sm">
               AI
             </div>
             <div className="min-w-0">

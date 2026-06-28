@@ -53,7 +53,7 @@ export function CalendarEventRow({
       temporalState === "now"
         ? "border-l-[3px] border-emerald-500 bg-gradient-to-r from-emerald-50/90 to-white pl-2.5"
         : temporalState === "next"
-          ? "bg-blue-50/40"
+          ? "bg-accent/40"
           : isPast
             ? "opacity-45"
             : "";
@@ -85,7 +85,7 @@ export function CalendarEventRow({
               </span>
             )}
             {isUpNext && (
-              <span className="ml-1.5 rounded bg-blue-50 px-1 py-px text-[10px] font-bold uppercase text-blue-700">
+              <span className="ml-1.5 rounded bg-accent px-1 py-px text-[10px] font-bold uppercase text-primary">
                 Up next
               </span>
             )}
@@ -126,7 +126,7 @@ export function CalendarEventRow({
     temporalState === "now"
       ? "border-l-[3px] border-emerald-500 bg-gradient-to-r from-emerald-50/90 to-white pl-2"
       : temporalState === "next"
-        ? "bg-blue-50/40"
+        ? "bg-accent/40"
         : isPast
           ? "opacity-45"
           : "";
@@ -162,7 +162,7 @@ export function CalendarEventRow({
       </div>
 
       <div
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border ${visual.box}`}
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl border ${visual.box}`}
         aria-hidden
       >
         <IconCalendar className="h-4 w-4" />
@@ -177,7 +177,7 @@ export function CalendarEventRow({
             </span>
           )}
           {isUpNext && (
-            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
+            <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
               Up next
             </span>
           )}
@@ -205,7 +205,7 @@ export function CalendarEventRow({
       </div>
 
       {event.htmlLink && !compact && (
-        <span className="shrink-0 self-center text-xs font-semibold text-blue-600">
+        <span className="shrink-0 self-center text-xs font-semibold text-primary">
           Open
         </span>
       )}

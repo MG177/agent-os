@@ -13,39 +13,44 @@
   --app-z-nav: 50;
   --app-z-modal: 60;
   --app-z-popover: 70;
-  /* Luna Apps — slate/blue palette mapped to shadcn semantic tokens */
+  /* Luna Apps — one slate neutral ramp + one desaturated blue accent.
+     Accent chroma pulled 0.215 → 0.16 so it reads confident, not neon, and
+     blends with the neutrals. Every neutral shares the slate hue (~256);
+     no pure-grey drift between background, charts, and sidebar. */
   --background: oklch(0.984 0.003 247.858);
   --foreground: oklch(0.208 0.042 265.755);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.208 0.042 265.755);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.208 0.042 265.755);
-  --primary: oklch(0.546 0.215 264);
-  --primary-foreground: oklch(1 0 0);
+  --primary: oklch(0.55 0.16 258);
+  --primary-foreground: oklch(0.985 0.002 247);
   --secondary: oklch(1 0 0);
   --secondary-foreground: oklch(0.446 0.043 257.281);
   --muted: oklch(0.968 0.007 247.896);
   --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.962 0.018 272.314);
-  --accent-foreground: oklch(0.488 0.217 264.376);
-  --destructive: oklch(0.577 0.245 27.325);
+  --accent: oklch(0.97 0.012 256);
+  --accent-foreground: oklch(0.48 0.16 258);
+  --destructive: oklch(0.577 0.22 25);
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.546 0.215 264);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --ring: oklch(0.55 0.16 258);
+  /* charts: muted categorical ramp (was pure grey), all chroma < 0.17 */
+  --chart-1: oklch(0.55 0.16 258);
+  --chart-2: oklch(0.62 0.13 162);
+  --chart-3: oklch(0.72 0.13 75);
+  --chart-4: oklch(0.60 0.16 16);
+  --chart-5: oklch(0.55 0.035 256);
   --radius: 0.5rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* sidebar: slate ramp (was pure grey); active item uses the accent */
+  --sidebar: oklch(0.985 0.003 247.858);
+  --sidebar-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-primary: oklch(0.55 0.16 258);
+  --sidebar-primary-foreground: oklch(0.985 0.002 247);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.55 0.16 258);
 }
 
 /* Full-viewport modal / bottom-sheet overlay — must sit above `.app-bottom-nav`. */
@@ -64,15 +69,23 @@
   --font-sans: var(--font-geist-sans);
   --color-background: #f8fafc;
   --color-foreground: #0f172a;
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-primary-light: #eff6ff;
+  /* Accent has ONE source of truth — the --primary token above. */
+  --color-primary: var(--primary);
+  --color-primary-hover: oklch(0.48 0.16 258);
+  --color-primary-light: oklch(0.97 0.012 256);
   --color-muted: #94a3b8;
   --color-border: #f1f5f9;
   --color-border-strong: #e2e8f0;
+  /* state / categorical accents — never the brand identity */
   --color-violet: #7c3aed;
   --color-emerald: #10b981;
   --color-amber: #f59e0b;
+  /* Elevation: soft, slate-tinted. Never a colored glow, never pure black.
+     Overrides Tailwind's default shadow scale so every shadow-sm/md/lg is calm. */
+  --shadow-xs: 0 1px 2px 0 oklch(0.45 0.05 256 / 0.05);
+  --shadow-sm: 0 1px 2px -1px oklch(0.45 0.05 256 / 0.08), 0 1px 3px 0 oklch(0.45 0.05 256 / 0.05);
+  --shadow-md: 0 2px 4px -2px oklch(0.45 0.05 256 / 0.08), 0 4px 12px -2px oklch(0.45 0.05 256 / 0.08);
+  --shadow-lg: 0 4px 8px -3px oklch(0.45 0.05 256 / 0.10), 0 12px 24px -4px oklch(0.45 0.05 256 / 0.10);
   --radius-card: 0.75rem;
   --radius-btn: 0.5rem;
   /* Layout tokens — referenced by .app-page-* / .app-stack primitives */
@@ -258,11 +271,11 @@ body {
 }
 
 .app-hero {
-  @apply rounded-xl bg-indigo-600 p-5 text-white shadow-lg shadow-indigo-200;
+  @apply rounded-3xl bg-primary p-5 text-primary-foreground shadow-md;
 }
 
 .app-btn-primary {
-  @apply flex min-h-11 w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-blue-200 transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60;
+  @apply flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-[var(--color-primary-hover)] active:scale-[0.98] disabled:opacity-60;
 }
 
 .app-btn-secondary {
@@ -270,17 +283,17 @@ body {
 }
 
 .app-chip {
-  @apply inline-flex min-h-11 shrink-0 items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 active:scale-[0.98];
+  @apply inline-flex min-h-11 shrink-0 items-center rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition-colors hover:border-primary/30 hover:bg-accent hover:text-primary active:scale-[0.98];
 }
 
 .app-chip-active {
-  @apply border-blue-600 bg-blue-50 font-semibold text-blue-700;
+  @apply border-primary bg-accent font-semibold text-primary;
 }
 
 /* text-base (16px) on mobile prevents iOS Safari from zooming the viewport
    on focus. md:text-sm restores the compact size on desktop. */
 .app-input {
-  @apply w-full rounded-lg bg-slate-50 px-4 py-3 text-base md:text-sm text-slate-800 transition-colors placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500;
+  @apply w-full rounded-lg bg-slate-50 px-4 py-3 text-base md:text-sm text-slate-800 transition-colors placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring;
 }
 
 .app-status-pill {
@@ -313,7 +326,7 @@ body {
   --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: oklch(0.55 0.16 258);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);

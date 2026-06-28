@@ -9,7 +9,7 @@ export const KIND_STYLE: Record<
 > = {
   capture: {
     Icon: Check,
-    box: "border-blue-200 bg-blue-50 text-blue-600",
+    box: "border-primary/30 bg-accent text-primary",
   },
   nutrition: {
     Icon: Salad,
@@ -26,7 +26,7 @@ export const KIND_STYLE: Record<
 };
 
 const SOURCE_META: Record<AuditSource, { label: string; bar: string }> = {
-  "capture-ui": { label: "Capture", bar: "bg-blue-500" },
+  "capture-ui": { label: "Capture", bar: "bg-primary" },
   whatsapp: { label: "WhatsApp", bar: "bg-violet-500" },
   "nutrition-form": { label: "Nutrition form", bar: "bg-emerald-500" },
   "nutrition-chat": { label: "Nutrition chat", bar: "bg-emerald-400" },

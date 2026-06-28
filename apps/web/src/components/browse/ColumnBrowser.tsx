@@ -77,7 +77,7 @@ const ColumnRow = memo(function ColumnRow({
         type="button"
         onClick={onClick}
         className={`flex w-full min-h-[1.625rem] items-center gap-1.5 rounded-md px-2 py-1 text-left text-sm leading-tight transition-colors ${selected
-            ? "bg-blue-600 text-white shadow-sm"
+            ? "bg-primary text-white shadow-sm"
             : "text-slate-800 hover:bg-slate-100/90"
           }`}
         role="option"
@@ -86,7 +86,7 @@ const ColumnRow = memo(function ColumnRow({
         {isDirectory ? (
           <FolderIcon
             filled={selected}
-            className={selected ? "text-white" : "text-blue-500"}
+            className={selected ? "text-white" : "text-primary"}
           />
         ) : (
           <FileIcon className={selected ? "text-white" : "text-slate-400"} />
@@ -155,7 +155,7 @@ function FilePreview({ file }: { file: BrowseFileResult }) {
             {tags?.map((tag) => (
               <span
                 key={String(tag)}
-                className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600"
+                className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-primary"
               >
                 {String(tag)}
               </span>

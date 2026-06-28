@@ -28,7 +28,7 @@ const TimelineRow = memo(function TimelineRow({
       {/* Rail: node + connecting line down to the next row */}
       <div className="flex flex-col items-center">
         <div
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border ${style.box}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl border ${style.box}`}
           aria-hidden
         >
           <style.Icon strokeWidth={1.8} className="h-4 w-4" />
@@ -57,7 +57,7 @@ const TimelineRow = memo(function TimelineRow({
               type="button"
               onClick={() => onUndo(event)}
               disabled={undoing}
-              className="font-semibold text-blue-600 underline decoration-blue-200 underline-offset-2 hover:text-blue-700 disabled:opacity-50"
+              className="font-semibold text-primary underline decoration-primary/40 underline-offset-2 hover:text-primary disabled:opacity-50"
             >
               {undoing ? "Undoing…" : "Undo"}
             </button>

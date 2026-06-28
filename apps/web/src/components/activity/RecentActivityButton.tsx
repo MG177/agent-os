@@ -24,7 +24,7 @@ export function RecentActivityButton({ events }: { events: ActivityEvent[] }) {
         <span className="hidden sm:inline">Recent activity</span>
         <span className="sm:hidden">Activity</span>
         {events.length > 0 && (
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 text-[10px] font-bold tabular-nums text-white">
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold tabular-nums text-white">
             {events.length}
           </span>
         )}
@@ -40,7 +40,7 @@ export function RecentActivityButton({ events }: { events: ActivityEvent[] }) {
             <Link
               href="/activity"
               onClick={() => setOpen(false)}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+              className="text-xs font-semibold text-primary hover:text-primary"
             >
               View all →
             </Link>

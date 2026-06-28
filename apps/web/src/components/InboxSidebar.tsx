@@ -79,7 +79,7 @@ export default function InboxSidebar({ open, onToggle }: Props) {
           <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 flex-shrink-0">
             <h2 className="text-sm font-bold text-slate-800 flex-1">Inbox</h2>
             {items.length > 0 && (
-              <span className="text-xs bg-blue-50 text-blue-600 font-bold px-2 py-0.5 rounded-full tabular-nums">
+              <span className="text-xs bg-accent text-primary font-bold px-2 py-0.5 rounded-full tabular-nums">
                 {items.length}
               </span>
             )}
@@ -94,7 +94,7 @@ export default function InboxSidebar({ open, onToggle }: Props) {
 
           {/* Quick capture */}
           <div className="px-3 py-2.5 border-b border-slate-100 flex-shrink-0">
-            <div className="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:bg-white transition-all">
+            <div className="flex items-center gap-2 bg-slate-50 rounded-2xl px-3 py-2 focus-within:ring-2 focus-within:ring-ring focus-within:bg-white transition-all">
               <Plus strokeWidth={2} className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" aria-hidden />
               <input
                 type="text"
@@ -108,7 +108,7 @@ export default function InboxSidebar({ open, onToggle }: Props) {
                 <button
                   onClick={handleQuickSave}
                   disabled={saving}
-                  className="text-[10px] font-bold text-blue-600 hover:text-blue-700 flex-shrink-0 disabled:opacity-40"
+                  className="text-[10px] font-bold text-primary hover:text-primary flex-shrink-0 disabled:opacity-40"
                 >
                   {saving ? '…' : 'Add'}
                 </button>
@@ -174,7 +174,7 @@ export default function InboxSidebar({ open, onToggle }: Props) {
           <div className="relative">
             <Inbox strokeWidth={1.8} className="w-5 h-5 text-slate-400" aria-hidden />
             {items.length > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-blue-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center tabular-nums leading-none">
+              <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center tabular-nums leading-none">
                 {items.length > 9 ? '9+' : items.length}
               </span>
             )}

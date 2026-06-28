@@ -177,7 +177,7 @@ export function TaskDetailPanel({
               value={task.status.status}
               disabled={saving}
               onChange={(e) => patch({ status: e.target.value })}
-              className="w-full rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="w-full rounded-2xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
             >
               {statuses.map((s) => (
                 <option key={s.status} value={s.status}>
@@ -273,7 +273,7 @@ export function TaskDetailPanel({
               type="button"
               onClick={onStopTimer}
               disabled={timerBusy}
-              className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:opacity-50"
             >
               {timerBusy ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -287,7 +287,7 @@ export function TaskDetailPanel({
               type="button"
               onClick={() => onStartTimer(task.id)}
               disabled={timerBusy}
-              className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-2xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50"
             >
               {timerBusy ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -309,7 +309,7 @@ export function TaskDetailPanel({
           ) : (
             <ul className="space-y-2">
               {comments.map((c) => (
-                <li key={c.id} className="rounded-xl bg-slate-50 px-3 py-2">
+                <li key={c.id} className="rounded-2xl bg-slate-50 px-3 py-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-slate-700">
                       {c.user.username ?? c.user.initials ?? "User"}
@@ -337,13 +337,13 @@ export function TaskDetailPanel({
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
           placeholder="Add a comment…"
-          className="min-w-0 flex-1 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="min-w-0 flex-1 rounded-2xl bg-slate-50 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring"
         />
         <button
           type="submit"
           disabled={posting || !commentText.trim()}
           aria-label="Send comment"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-primary text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
         >
           {posting ? (
             <Loader2 className="h-4 w-4 animate-spin" />

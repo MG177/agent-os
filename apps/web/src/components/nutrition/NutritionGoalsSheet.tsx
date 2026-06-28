@@ -24,8 +24,8 @@ const GOAL_FIELDS = [
     key: "protein_g" as const,
     label: "Protein",
     unit: "g",
-    color: "text-blue-600",
-    bg: "bg-blue-50",
+    color: "text-primary",
+    bg: "bg-accent",
     hint: "~0.8–1.2g per lb of bodyweight",
   },
   {
@@ -181,7 +181,7 @@ export default function NutritionGoalsSheet({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className={`flex-1 font-bold ${saved ? "bg-emerald-500 shadow-emerald-200 hover:bg-emerald-500" : ""}`}
+            className={`flex-1 font-bold ${saved ? "bg-emerald-500 hover:bg-emerald-500" : ""}`}
           >
             {saving ? "Saving…" : saved ? "Saved" : "Save goals"}
           </Button>

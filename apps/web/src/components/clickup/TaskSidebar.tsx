@@ -173,15 +173,15 @@ export function TaskSidebar({
                 key={key}
                 type="button"
                 onClick={() => onDueChange(key)}
-                className={`flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${
+                className={`flex w-full items-center gap-2.5 rounded-2xl px-2.5 py-2 text-left text-sm transition-colors ${
                   active
-                    ? "bg-blue-50 font-semibold text-blue-700"
+                    ? "bg-accent font-semibold text-primary"
                     : "text-slate-600 hover:bg-slate-50"
                 }`}
               >
                 <Icon
                   className={`h-4 w-4 shrink-0 ${
-                    overdue ? "text-rose-500" : active ? "text-blue-600" : "text-slate-400"
+                    overdue ? "text-rose-500" : active ? "text-primary" : "text-slate-400"
                   }`}
                   strokeWidth={1.8}
                 />
@@ -200,9 +200,9 @@ export function TaskSidebar({
           <button
             type="button"
             onClick={() => onSelectList(null)}
-            className={`flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm transition-colors ${
+            className={`flex w-full items-center gap-2 rounded-2xl px-2.5 py-2 text-left text-sm transition-colors ${
               activeListId === null
-                ? "bg-blue-50 font-semibold text-blue-700"
+                ? "bg-accent font-semibold text-primary"
                 : "text-slate-600 hover:bg-slate-50"
             }`}
           >
@@ -247,11 +247,11 @@ export function TaskSidebar({
                   reorderFolders(dragFolder, folder);
                   setDragOverFolder(null);
                 }}
-                className={`rounded-xl ${
-                  dragOverFolder === folder ? "ring-2 ring-blue-300" : ""
+                className={`rounded-2xl ${
+                  dragOverFolder === folder ? "ring-2 ring-ring" : ""
                 } ${dragFolder === folder ? "opacity-50" : ""}`}
               >
-                <div className="group flex items-center rounded-xl transition-colors hover:bg-slate-50">
+                <div className="group flex items-center rounded-2xl transition-colors hover:bg-slate-50">
                   <span
                     draggable
                     onDragStart={() => setDragFolder(folder)}
@@ -305,7 +305,7 @@ export function TaskSidebar({
                       <button
                         type="button"
                         onClick={() => toggleSprintExpand(folder)}
-                        className="flex w-full items-center rounded-xl py-1.5 pl-8 pr-2.5 text-left text-xs font-medium text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600"
+                        className="flex w-full items-center rounded-2xl py-1.5 pl-8 pr-2.5 text-left text-xs font-medium text-slate-400 transition-colors hover:bg-slate-50 hover:text-slate-600"
                       >
                         {expanded ? "Show fewer" : `+${hidden} older sprint${hidden === 1 ? "" : "s"}`}
                       </button>
@@ -336,7 +336,7 @@ export function TaskSidebar({
             value={activeTeamId ?? ""}
             disabled={switching}
             onChange={(e) => onSwitchWorkspace(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
             aria-label="Workspace"
           >
             {workspaces.map((w) => (
@@ -368,11 +368,11 @@ function ListRow({
     <button
       type="button"
       onClick={onSelect}
-      className={`flex w-full items-center gap-2 rounded-xl py-2 pr-2.5 text-left text-sm transition-colors ${
+      className={`flex w-full items-center gap-2 rounded-2xl py-2 pr-2.5 text-left text-sm transition-colors ${
         nested ? "pl-8" : "pl-2.5"
       } ${
         active
-          ? "bg-blue-50 font-semibold text-blue-700"
+          ? "bg-accent font-semibold text-primary"
           : `text-slate-600 hover:bg-slate-50 ${count === 0 ? "opacity-50" : ""}`
       }`}
     >
@@ -392,7 +392,7 @@ function CountBadge({
   tone: "default" | "rose" | "violet";
 }) {
   const cls = active
-    ? "bg-blue-100 text-blue-700"
+    ? "bg-accent text-primary"
     : tone === "rose"
       ? "bg-rose-50 text-rose-600"
       : tone === "violet"

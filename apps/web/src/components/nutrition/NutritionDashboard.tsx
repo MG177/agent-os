@@ -163,7 +163,7 @@ function NutritionDashboardInner() {
               type="button"
               onClick={() => setSelectedDate((d) => addDaysToKey(d, -1))}
               aria-label="Previous day"
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+              className="flex h-8 w-8 items-center justify-center rounded-2xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
             >
               <ChevronLeft strokeWidth={2} className="h-4 w-4" aria-hidden />
             </button>
@@ -183,7 +183,7 @@ function NutritionDashboardInner() {
               onClick={() => setSelectedDate((d) => addDaysToKey(d, 1))}
               disabled={isToday}
               aria-label="Next day"
-              className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:opacity-30 disabled:hover:bg-transparent"
+              className="flex h-8 w-8 items-center justify-center rounded-2xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:opacity-30 disabled:hover:bg-transparent"
             >
               <ChevronRight strokeWidth={2} className="h-4 w-4" aria-hidden />
             </button>

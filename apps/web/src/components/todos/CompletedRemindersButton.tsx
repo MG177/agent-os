@@ -24,7 +24,7 @@ export function CompletedRemindersButton({ onEdit }: Props) {
         <History strokeWidth={1.8} className="size-4 text-slate-500" aria-hidden />
         <span className="hidden sm:inline">History</span>
         {!loading && todos.length > 0 && (
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 text-[10px] font-bold tabular-nums text-white">
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold tabular-nums text-white">
             {todos.length}
           </span>
         )}

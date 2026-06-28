@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-sm shadow-blue-200 hover:bg-[oklch(0.488_0.217_264.376)]",
+          "bg-primary text-primary-foreground shadow-sm hover:bg-[var(--color-primary-hover)]",
         outline:
           "border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50 aria-expanded:bg-slate-50",
         secondary:
@@ -20,15 +20,13 @@ const buttonVariants = cva(
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20",
         link: "text-primary underline-offset-4 hover:underline",
         chip:
-          "min-h-11 rounded-full border-slate-200 bg-white px-4 font-medium text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 data-[state=on]:border-blue-600 data-[state=on]:bg-blue-50 data-[state=on]:font-semibold data-[state=on]:text-blue-700",
+          "min-h-11 rounded-full border-slate-200 bg-white px-4 font-medium text-slate-700 hover:border-primary/30 hover:bg-accent hover:text-primary data-[state=on]:border-primary data-[state=on]:bg-accent data-[state=on]:font-semibold data-[state=on]:text-primary",
         "chip-blue":
-          "gap-2 rounded-full border-blue-200 bg-blue-50 px-4 font-semibold text-blue-800 shadow-sm hover:border-blue-300 hover:bg-blue-100",
+          "gap-2 rounded-full border-primary/30 bg-accent px-4 font-semibold text-primary shadow-sm hover:border-primary/30 hover:bg-accent",
         "chip-emerald":
           "gap-2 rounded-full border-emerald-200 bg-emerald-50 px-4 font-semibold text-emerald-800 shadow-sm hover:border-emerald-300 hover:bg-emerald-100",
         "chip-violet":
           "gap-2 rounded-full border-violet-200 bg-violet-50 px-4 font-semibold text-violet-800 shadow-sm hover:border-violet-300 hover:bg-violet-100",
-        "chip-indigo":
-          "gap-2 rounded-full border-indigo-200 bg-indigo-50 px-4 font-semibold text-indigo-800 shadow-sm hover:border-indigo-300 hover:bg-indigo-100",
       },
       size: {
         default:

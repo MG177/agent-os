@@ -13,7 +13,7 @@ function StatTile({
     tone === "amber"
       ? "text-amber-600"
       : tone === "blue"
-        ? "text-blue-600"
+        ? "text-primary"
         : "text-slate-900";
   return (
     <div className="rounded-2xl bg-slate-50 px-3 py-2.5">

@@ -146,7 +146,7 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
       {allFoods.length === 0 && (
         <p className="text-xs text-slate-500">
           No foods in library yet. Visit the{" "}
-          <a href="/nutrition" className="font-semibold text-blue-600 hover:underline">
+          <a href="/nutrition" className="font-semibold text-primary hover:underline">
             Nutrition page
           </a>{" "}
           to add items.
@@ -163,14 +163,14 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
                 key={food.key}
                 type="button"
                 onClick={() => selectFood(food)}
-                className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-blue-200"
+                className="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-primary/30"
               >
                 <span className="min-w-0">
                   <span className="block truncate text-sm font-medium text-slate-800">
                     {food.display_name}
                   </span>
                   <span className="mt-0.5 flex gap-2 text-[11px]">
-                    <span className="font-semibold text-blue-600">{food.per_100g.protein_g}g</span>
+                    <span className="font-semibold text-primary">{food.per_100g.protein_g}g</span>
                     <span className="text-slate-300">·</span>
                     <span className="font-semibold text-emerald-600">{food.per_100g.carb_g}g</span>
                     <span className="text-slate-300">·</span>
@@ -188,7 +188,7 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
             <button
               type="button"
               onClick={() => setShowAllFrequent((v) => !v)}
-              className="w-full rounded-xl py-1.5 text-xs font-semibold text-blue-600 transition-colors hover:bg-blue-50"
+              className="w-full rounded-2xl py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-accent"
             >
               {showAllFrequent
                 ? "Show less"
@@ -208,11 +208,11 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
             key={f.key}
             type="button"
             onClick={() => selectFood(f)}
-            className="flex w-full flex-col rounded-2xl border border-slate-100 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-blue-200"
+            className="flex w-full flex-col rounded-2xl border border-slate-100 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-primary/30"
           >
             <p className="text-sm font-medium text-slate-800">{f.display_name}</p>
             <span className="mt-0.5 flex gap-2 text-[11px]">
-              <span className="font-semibold text-blue-600">{f.per_100g.protein_g}g</span>
+              <span className="font-semibold text-primary">{f.per_100g.protein_g}g</span>
               <span className="text-slate-300">·</span>
               <span className="font-semibold text-emerald-600">{f.per_100g.carb_g}g</span>
               <span className="text-slate-300">·</span>
@@ -231,7 +231,7 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
               <button
                 type="button"
                 onClick={() => setQuantity((q) => Math.max(0, q - 25))}
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-lg text-slate-600 hover:bg-slate-50"
+                className="flex h-9 w-9 items-center justify-center rounded-2xl text-lg text-slate-600 hover:bg-slate-50"
                 aria-label="Decrease portion"
               >
                 −
@@ -255,7 +255,7 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
               <button
                 type="button"
                 onClick={() => setQuantity((q) => q + 25)}
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-lg text-slate-600 hover:bg-slate-50"
+                className="flex h-9 w-9 items-center justify-center rounded-2xl text-lg text-slate-600 hover:bg-slate-50"
                 aria-label="Increase portion"
               >
                 +

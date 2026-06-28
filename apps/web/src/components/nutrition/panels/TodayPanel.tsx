@@ -87,7 +87,7 @@ function MealRowMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`Options for ${label}`}
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-slate-300 transition-colors hover:bg-slate-50 hover:text-slate-600 disabled:opacity-40"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl text-slate-300 transition-colors hover:bg-slate-50 hover:text-slate-600 disabled:opacity-40"
       >
         <MoreHorizontal className="h-4 w-4" strokeWidth={1.8} aria-hidden />
       </button>
@@ -111,7 +111,7 @@ function MealRowMenu({
                   <button
                     type="button"
                     onClick={close}
-                    className="flex-1 rounded-xl border border-slate-200 px-2 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                    className="flex-1 rounded-2xl border border-slate-200 px-2 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
                   >
                     Cancel
                   </button>
@@ -121,7 +121,7 @@ function MealRowMenu({
                       close();
                       onDelete();
                     }}
-                    className="flex-1 rounded-xl bg-red-600 px-2 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700"
+                    className="flex-1 rounded-2xl bg-red-600 px-2 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-700"
                   >
                     Delete
                   </button>
@@ -211,7 +211,7 @@ function MealRow({
       <div className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100">
         <p className="text-sm font-medium text-slate-800">{entry.food_name}</p>
         <div className="mt-2 flex items-center gap-2">
-          <div className="flex items-baseline gap-1 rounded-xl border border-slate-200 px-2.5 py-1.5">
+          <div className="flex items-baseline gap-1 rounded-2xl border border-slate-200 px-2.5 py-1.5">
             <input
               ref={inputRef}
               type="number"
@@ -239,7 +239,7 @@ function MealRow({
             type="button"
             onClick={save}
             disabled={!canSave}
-            className="inline-flex items-center gap-1 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-40"
+            className="inline-flex items-center gap-1 rounded-2xl bg-primary px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-40"
           >
             <Check className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
             {saving ? "Saving…" : "Save"}
@@ -247,7 +247,7 @@ function MealRow({
           <button
             type="button"
             onClick={() => setEditing(false)}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+            className="rounded-2xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
           >
             Cancel
           </button>
@@ -282,13 +282,13 @@ function MealRow({
       </div>
 
       <div className="mt-2.5 flex h-1 overflow-hidden rounded-full bg-slate-100">
-        <div className="rounded-full bg-blue-600" style={{ width: `${pPct}%` }} />
+        <div className="rounded-full bg-primary" style={{ width: `${pPct}%` }} />
         <div className="rounded-full bg-green-600" style={{ width: `${cPct}%` }} />
         <div className="rounded-full bg-orange-500" style={{ width: `${fPct}%` }} />
       </div>
       <div className="mt-1.5 flex gap-3">
         <span className="text-[11px] text-slate-400">
-          <strong className="font-semibold text-blue-600">{Math.round(protein_g)}g</strong> P
+          <strong className="font-semibold text-primary">{Math.round(protein_g)}g</strong> P
         </span>
         <span className="text-[11px] text-slate-400">
           <strong className="font-semibold text-green-600">{Math.round(carb_g)}g</strong> C
@@ -323,7 +323,7 @@ export default function TodayPanel({
           <button
             type="button"
             onClick={onLogMeal}
-            className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+            className="text-xs font-semibold text-primary hover:text-primary"
           >
             + Log meal
           </button>
@@ -337,7 +337,7 @@ export default function TodayPanel({
             <button
               type="button"
               onClick={onLogMeal}
-              className="mt-3 text-sm font-semibold text-blue-600 hover:text-blue-700"
+              className="mt-3 text-sm font-semibold text-primary hover:text-primary"
             >
               Log your first meal →
             </button>

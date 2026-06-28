@@ -38,17 +38,17 @@ export function DueTodosCard() {
     <div className="app-card flex h-full min-h-[5.5rem] flex-col gap-3 p-4 md:p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <BellRing strokeWidth={1.8} className="h-4 w-4 text-blue-500" />
+          <BellRing strokeWidth={1.8} className="h-4 w-4 text-primary" />
           <span className="text-sm font-bold text-slate-900">Reminders</span>
           {todos.length > 0 && (
-            <span className="flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold text-white">
+            <span className="flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
               {todos.length}
             </span>
           )}
         </div>
         <Link
           href="/todo"
-          className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+          className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary"
         >
           View all
           <ArrowRight strokeWidth={2} className="h-3 w-3" />
@@ -58,7 +58,7 @@ export function DueTodosCard() {
       {loading ? (
         <div className="flex min-h-0 flex-1 flex-col gap-2">
           {[1, 2].map((i) => (
-            <div key={i} className="h-8 animate-pulse rounded-xl bg-slate-100" />
+            <div key={i} className="h-8 animate-pulse rounded-2xl bg-slate-100" />
           ))}
         </div>
       ) : todos.length === 0 ? (
@@ -70,7 +70,7 @@ export function DueTodosCard() {
           {todos.slice(0, 5).map((todo) => (
             <li
               key={todo._id}
-              className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2"
+              className="flex items-center gap-2 rounded-2xl bg-slate-50 px-3 py-2"
             >
               <button
                 type="button"

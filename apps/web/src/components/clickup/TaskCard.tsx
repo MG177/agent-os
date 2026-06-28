@@ -27,7 +27,7 @@ function TaskCardImpl({
       onClick={() => onSelect(task.id)}
       className={`group cursor-pointer rounded-2xl border bg-white p-3 shadow-sm transition-colors ${
         selected
-          ? "border-blue-300 ring-1 ring-blue-200"
+          ? "border-primary/30 ring-1 ring-ring"
           : "border-slate-100 hover:border-slate-200"
       }`}
     >

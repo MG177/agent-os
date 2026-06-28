@@ -28,7 +28,7 @@ function TaskRowImpl({
     <div
       onClick={() => onSelect(task.id)}
       className={`group flex cursor-pointer items-start gap-2.5 border-t border-slate-50 px-3 py-2.5 transition-colors ${
-        selected ? "bg-blue-50/70" : "hover:bg-slate-50"
+        selected ? "bg-accent/70" : "hover:bg-slate-50"
       }`}
     >
       <button
