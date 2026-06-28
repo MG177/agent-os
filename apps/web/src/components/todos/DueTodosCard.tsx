@@ -62,8 +62,8 @@ export function DueTodosCard() {
           ))}
         </div>
       ) : todos.length === 0 ? (
-        <p className="flex flex-1 items-center justify-center py-2 text-center text-xs text-slate-400">
-          Nothing due — you&apos;re on track
+        <p className="flex flex-1 items-center justify-center py-2 text-center text-xs text-slate-500">
+          Nothing due, you&apos;re on track
         </p>
       ) : (
         <ul className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto overscroll-contain">

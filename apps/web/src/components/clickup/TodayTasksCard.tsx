@@ -92,8 +92,8 @@ export function TodayTasksCard() {
             Connect ClickUp to see your tasks →
           </Link>
         ) : !sprintList ? (
-          <p className="px-4 py-6 text-center text-xs text-slate-400">
-            No sprint folder — set{" "}
+          <p className="px-4 py-6 text-center text-xs text-slate-500">
+            No sprint folder. Set{" "}
             <code className="rounded bg-slate-100 px-1 py-0.5 text-[10px]">
               CLICKUP_SPRINT_FOLDERS
             </code>{" "}

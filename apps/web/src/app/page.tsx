@@ -47,7 +47,7 @@ function HeroStat({
       ) : (
         <p className="text-sm font-bold tabular-nums text-white md:text-base">{value}</p>
       )}
-      <p className="text-[8px] font-bold uppercase tracking-widest text-white/70">
+      <p className="text-[8px] font-bold uppercase tracking-widest text-white/90">
         {label}
       </p>
     </div>
@@ -132,7 +132,7 @@ export default function HomePage() {
                         <p className="text-sm font-bold tabular-nums text-white">
                           {calories}
                         </p>
-                        <p className="text-[8px] text-white/70">kcal</p>
+                        <p className="text-[8px] text-white/90">kcal</p>
                       </>
                     )}
                   </div>
@@ -154,7 +154,7 @@ export default function HomePage() {
                         <p className="text-base font-bold tabular-nums text-white">
                           {calories}
                         </p>
-                        <p className="text-[8px] text-white/70">kcal</p>
+                        <p className="text-[8px] text-white/90">kcal</p>
                       </>
                     )}
                   </div>
@@ -165,17 +165,17 @@ export default function HomePage() {
                 {loading ? (
                   <>
                     <span className="block h-6 w-20 animate-pulse rounded-lg bg-white/25 md:h-7" />
-                    <p className="mt-0.5 text-[10px] text-white/75">kcal left</p>
+                    <p className="mt-0.5 text-[10px] text-white/90">kcal left</p>
                   </>
                 ) : (
                   <>
                     <p className="text-lg font-bold tabular-nums leading-none text-white md:text-2xl">
                       {remaining}
-                      <span className="ml-1 text-sm font-semibold text-white/75 md:text-base">
+                      <span className="ml-1 text-sm font-semibold text-white/90 md:text-base">
                         kcal left
                       </span>
                     </p>
-                    <p className="mt-0.5 text-[10px] text-white/55">
+                    <p className="mt-0.5 text-[10px] text-white/80">
                       {calories} / {goal} eaten · {Math.round(calPct * 100)}%
                     </p>
                   </>
@@ -186,12 +186,12 @@ export default function HomePage() {
             <div className="grid shrink-0 grid-cols-2 gap-1">
               <HeroStat
                 loading={loading}
-                value={data?.capturesToday ?? "—"}
+                value={data?.capturesToday ?? "0"}
                 label="Captures"
               />
               <HeroStat
                 loading={loading}
-                value={data?.mealsToday ?? "—"}
+                value={data?.mealsToday ?? "0"}
                 label="Meals"
               />
             </div>
@@ -221,8 +221,8 @@ export default function HomePage() {
         <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-4 shadow-lg shadow-indigo-200/60 md:p-5">
           <p className="text-sm font-bold text-white">Coming soon</p>
           <p className="mt-1.5 text-xs leading-relaxed text-white/75">
-            Finance dashboards, project health, and agent status will land here —
-            same PWA, more domains.
+            Finance dashboards, project health, and agent status will land here.
+            Same PWA, more domains.
           </p>
         </div>
       </PageBody>

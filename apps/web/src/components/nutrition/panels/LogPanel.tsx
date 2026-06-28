@@ -145,7 +145,7 @@ export default function LogPanel({ onSuccess }: { onSuccess: () => void }) {
 
       {allFoods.length === 0 && (
         <p className="text-xs text-slate-500">
-          No foods in library yet — visit the{" "}
+          No foods in library yet. Visit the{" "}
           <a href="/nutrition" className="font-semibold text-blue-600 hover:underline">
             Nutrition page
           </a>{" "}

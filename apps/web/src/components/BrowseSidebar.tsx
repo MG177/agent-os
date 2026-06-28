@@ -143,7 +143,7 @@ export default function BrowseSidebar() {
                     </div>
                   )}
                   {sectionEntries?.length === 0 && (
-                    <p className="pl-10 py-1.5 text-xs text-slate-400">Empty</p>
+                    <p className="pl-10 py-1.5 text-xs text-slate-500">Empty</p>
                   )}
                   {sectionEntries?.map(entry => {
                     const encodedName = encodeURIComponent(entry.name)

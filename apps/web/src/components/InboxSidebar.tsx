@@ -121,7 +121,7 @@ export default function InboxSidebar({ open, onToggle }: Props) {
             {items.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center px-4">
                 <Inbox strokeWidth={1.8} className="w-7 h-7 mb-2 text-slate-300" aria-hidden />
-                <p className="text-xs text-slate-400">Inbox zero</p>
+                <p className="text-xs text-slate-500">Inbox zero</p>
               </div>
             ) : (
               <ul>
@@ -139,7 +139,7 @@ export default function InboxSidebar({ open, onToggle }: Props) {
                       <p className="text-sm font-medium text-slate-700 leading-snug line-clamp-2 group-hover:text-slate-900 transition-colors">
                         {item.title}
                       </p>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-xs text-slate-500 mt-0.5">
                         {item.date ?? formatDate(item.mtime)}
                       </p>
                     </Link>
