@@ -1,27 +1,25 @@
+// Flat categorical tints (not brand). One soft fill per metric — no
+// gradient, no decorative dot. The value color carries the category.
 const VARIANTS = {
   blue: {
-    card: "border-blue-100 bg-gradient-to-br from-blue-50 to-white",
-    value: "text-blue-700",
-    label: "text-blue-600/80",
-    dot: "bg-blue-500",
+    card: "border-primary/30 bg-accent/50",
+    value: "text-primary",
+    label: "text-primary/80",
   },
   emerald: {
-    card: "border-emerald-100 bg-gradient-to-br from-emerald-50 to-white",
+    card: "border-emerald-100 bg-emerald-50/50",
     value: "text-emerald-700",
     label: "text-emerald-600/80",
-    dot: "bg-emerald-500",
   },
   violet: {
-    card: "border-violet-100 bg-gradient-to-br from-violet-50 to-white",
+    card: "border-violet-100 bg-violet-50/50",
     value: "text-violet-700",
     label: "text-violet-600/80",
-    dot: "bg-violet-500",
   },
   amber: {
-    card: "border-amber-100 bg-gradient-to-br from-amber-50 to-white",
+    card: "border-amber-100 bg-amber-50/50",
     value: "text-amber-700",
     label: "text-amber-600/80",
-    dot: "bg-amber-500",
   },
 } as const;
 
@@ -39,12 +37,9 @@ export function StatCard({
     <div
       className={`rounded-2xl border px-3 py-2.5 shadow-sm ${v.card}`}
     >
-      <div className="mb-1.5 flex items-center gap-1.5">
-        <span className={`h-1.5 w-1.5 rounded-full ${v.dot}`} aria-hidden />
-        <p className={`text-[10px] font-bold uppercase tracking-wide ${v.label}`}>
-          {label}
-        </p>
-      </div>
+      <p className={`mb-1.5 text-[10px] font-bold uppercase tracking-wide ${v.label}`}>
+        {label}
+      </p>
       <p className={`text-xl font-bold leading-tight tabular-nums ${v.value}`}>
         {value}
       </p>

@@ -5,13 +5,11 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@agent-os/contracts/utils";
 
 const STYLES = {
-  blue: "border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100 hover:border-blue-300",
+  blue: "border-primary/30 bg-accent text-primary hover:bg-accent hover:border-primary/30",
   emerald:
     "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300",
   violet:
     "border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100 hover:border-violet-300",
-  indigo:
-    "border-indigo-200 bg-indigo-50 text-indigo-800 hover:bg-indigo-100 hover:border-indigo-300",
 } as const;
 
 export function QuickActionChip({

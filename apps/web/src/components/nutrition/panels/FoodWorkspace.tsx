@@ -48,13 +48,13 @@ const FoodRow = memo(function FoodRow({
   return (
     <tr
       onClick={(e) => onRowClick(e, food)}
-      className={`cursor-pointer transition-colors ${active ? "bg-blue-50" : "hover:bg-slate-50"
+      className={`cursor-pointer transition-colors ${active ? "bg-accent" : "hover:bg-slate-50"
         }`}
     >
       <td className="px-4 py-3 font-medium text-slate-800">
         {food.display_name}
       </td>
-      <td className="px-3 py-3 text-right tabular-nums text-blue-600">
+      <td className="px-3 py-3 text-right tabular-nums text-primary">
         {food.per_100g.protein_g}g
       </td>
       <td className="px-3 py-3 text-right tabular-nums text-emerald-600">
@@ -73,7 +73,7 @@ const FoodRow = memo(function FoodRow({
             e.stopPropagation();
             onEdit(food);
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-2xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-primary"
           aria-label={`Edit ${food.display_name}`}
         >
           <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden />
@@ -373,7 +373,7 @@ export default function FoodWorkspace({
             {foods.length} {foods.length === 1 ? "food" : "foods"}
           </p>
           {!q && (
-            <div className="flex items-center rounded-xl border border-slate-100 bg-white p-0.5 shadow-sm">
+            <div className="flex items-center rounded-2xl border border-slate-100 bg-white p-0.5 shadow-sm">
               {(["most-logged", "latest", "az"] as const).map((s) => (
                 <button
                   key={s}
@@ -396,7 +396,7 @@ export default function FoodWorkspace({
           disabled={showForm && !!editingKey}
           className={`flex items-center gap-1.5 rounded-2xl px-3 py-3 text-xs font-semibold shadow-sm transition-colors ${showForm && !editingKey
             ? "bg-slate-100 text-slate-600"
-            : "bg-blue-600 text-white shadow-blue-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            : "bg-primary text-white hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
             }`}
         >
           {!(showForm && !editingKey) && (
@@ -428,7 +428,7 @@ export default function FoodWorkspace({
             placeholder="Food name e.g. Chicken Breast"
             value={form.name}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-            className="w-full rounded-2xl border border-transparent bg-slate-50 px-4 py-3 text-sm font-medium transition-colors focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-2xl border border-transparent bg-slate-50 px-4 py-3 text-sm font-medium transition-colors focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <div className="grid grid-cols-2 gap-3">
             {MACRO_FIELDS.map(({ field, label, unit, required }) => (
@@ -444,7 +444,7 @@ export default function FoodWorkspace({
                     setForm((p) => ({ ...p, [field]: e.target.value }))
                   }
                   placeholder="0"
-                  className="w-full rounded-xl bg-slate-50 px-3 py-3.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-2xl bg-slate-50 px-3 py-3.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
             ))}
@@ -458,7 +458,7 @@ export default function FoodWorkspace({
             type="button"
             onClick={handleSaveFood}
             disabled={saving}
-            className="w-full rounded-2xl bg-blue-600 py-3 text-sm font-bold text-white shadow-sm shadow-blue-200 transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-60"
+            className="w-full rounded-2xl bg-primary py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-[var(--color-primary-hover)] active:scale-95 disabled:opacity-60"
           >
             {saving ? "Saving…" : editingKey ? "Save changes" : "Save food"}
           </button>
@@ -477,7 +477,7 @@ export default function FoodWorkspace({
               <button
                 type="button"
                 onClick={() => openAddForm(query.trim())}
-                className="mt-3 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                className="mt-3 text-sm font-semibold text-primary hover:text-primary"
               >
                 + Add &quot;{query.trim()}&quot; to your library
               </button>
@@ -491,7 +491,7 @@ export default function FoodWorkspace({
                   <th className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">
                     Food
                   </th>
-                  <th className="px-3 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-blue-400">P</th>
+                  <th className="px-3 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-primary">P</th>
                   <th className="px-3 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-emerald-400">C</th>
                   <th className="px-3 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-amber-400">F</th>
                   <th className="hidden px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400 md:table-cell">
@@ -513,8 +513,8 @@ export default function FoodWorkspace({
                       />
 
                       {active && (
-                        <tr className="bg-blue-50/60 md:hidden">
-                          <td colSpan={6} className="border-t border-blue-100 px-3 py-3.5">
+                        <tr className="bg-accent/60 md:hidden">
+                          <td colSpan={6} className="border-t border-primary/30 px-3 py-3.5">
                             <div className="flex flex-col gap-2.5">
                               <div className="flex flex-wrap items-center gap-2">
                                 <button
@@ -565,7 +565,7 @@ export default function FoodWorkspace({
                                     e.stopPropagation();
                                     openEditForm(food);
                                   }}
-                                  className="inline-flex flex-1 items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                                  className="inline-flex flex-1 items-center justify-center gap-1 rounded-2xl border border-slate-200 bg-white px-2.5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
                                 >
                                   <Pencil className="h-3 w-3" strokeWidth={1.8} aria-hidden />
                                   Edit
@@ -574,7 +574,7 @@ export default function FoodWorkspace({
                                   type="button"
                                   onClick={() => logMeal(food)}
                                   disabled={logging}
-                                  className="flex-1 rounded-xl bg-blue-600 px-3 py-2.5 text-xs font-bold text-white shadow-sm shadow-blue-200 transition-colors hover:bg-blue-700 disabled:opacity-60"
+                                  className="flex-1 rounded-2xl bg-primary px-3 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-60"
                                 >
                                   {logging ? "Logging…" : "Log"}
                                 </button>
@@ -624,7 +624,7 @@ export default function FoodWorkspace({
                 placeholder="0"
                 aria-label="Portion in grams"
                 autoFocus
-                className="w-12 rounded-lg bg-slate-50 px-1 py-1 text-center text-sm font-bold tabular-nums text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                className="w-12 rounded-lg bg-slate-50 px-1 py-1 text-center text-sm font-bold tabular-nums text-slate-900 outline-none focus:bg-white focus:ring-2 focus:ring-ring [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
               />
               <span className="text-xs font-semibold text-slate-500">g</span>
             </div>
@@ -649,7 +649,7 @@ export default function FoodWorkspace({
               onClick={() => {
                 openEditForm(popoverFood);
               }}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"
             >
               <Pencil className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden />
               Edit
@@ -658,7 +658,7 @@ export default function FoodWorkspace({
               type="button"
               onClick={() => logMeal(popoverFood)}
               disabled={logging}
-              className="flex-[2] rounded-xl bg-blue-600 py-2 text-xs font-bold text-white shadow-sm shadow-blue-200 transition-colors hover:bg-blue-700 disabled:opacity-60"
+              className="flex-[2] rounded-2xl bg-primary py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-60"
             >
               {logging ? "Logging…" : "Log meal"}
             </button>

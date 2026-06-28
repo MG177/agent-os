@@ -26,7 +26,7 @@ export default function AssistantSessionToolbar({
         disabled={loading || streaming}
         title="New chat"
         aria-label="New chat"
-        className="flex h-8 items-center gap-1 rounded-xl px-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-blue-600 disabled:opacity-40"
+        className="flex h-8 items-center gap-1 rounded-2xl px-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-primary disabled:opacity-40"
       >
         <Plus className="h-4 w-4" strokeWidth={1.8} aria-hidden />
         <span className="hidden sm:inline">New</span>
@@ -38,8 +38,8 @@ export default function AssistantSessionToolbar({
           title="Chat history"
           aria-label="Chat history"
           aria-expanded={historyOpen}
-          className={`flex h-8 w-8 items-center justify-center rounded-xl transition-colors ${historyOpen
-              ? "bg-blue-50 text-blue-600"
+          className={`flex h-8 w-8 items-center justify-center rounded-2xl transition-colors ${historyOpen
+              ? "bg-accent text-primary"
               : "text-slate-400 hover:bg-slate-50 hover:text-slate-700"
             }`}
         >

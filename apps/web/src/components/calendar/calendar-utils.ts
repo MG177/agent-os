@@ -6,12 +6,14 @@ export type DayGroup = {
   events: CalendarEventSummary[];
 };
 
+// Categorical palette hashed to calendars — 6 distinct hues, none of them the
+// brand accent (so an event chip never reads as a primary action).
 const CALENDAR_ACCENTS = [
-  { box: "border-blue-200 bg-blue-50 text-blue-700", dot: "bg-blue-500" },
+  { box: "border-sky-200 bg-sky-50 text-sky-700", dot: "bg-sky-500" },
   { box: "border-violet-200 bg-violet-50 text-violet-700", dot: "bg-violet-500" },
   { box: "border-emerald-200 bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" },
   { box: "border-amber-200 bg-amber-50 text-amber-700", dot: "bg-amber-500" },
-  { box: "border-indigo-200 bg-indigo-50 text-indigo-700", dot: "bg-indigo-500" },
+  { box: "border-cyan-200 bg-cyan-50 text-cyan-700", dot: "bg-cyan-500" },
   { box: "border-rose-200 bg-rose-50 text-rose-700", dot: "bg-rose-500" },
 ] as const;
 

@@ -4,7 +4,7 @@ import type { ActivityEvent } from "@agent-os/platform/activity";
 import { formatTime } from "@/components/activity/activity-display";
 
 const DOT_COLOR: Record<ActivityEvent["kind"], string> = {
-  capture:   "bg-blue-500",
+  capture:   "bg-primary",
   nutrition: "bg-emerald-500",
   reverted:  "bg-amber-500",
   whatsapp:  "bg-violet-500",
@@ -37,7 +37,7 @@ export function ActivityRow({
               type="button"
               onClick={onUndo}
               disabled={undoing}
-              className="font-semibold text-blue-600 underline decoration-blue-200 underline-offset-2 hover:text-blue-700 disabled:opacity-50"
+              className="font-semibold text-primary underline decoration-primary/40 underline-offset-2 hover:text-primary disabled:opacity-50"
             >
               {undoing ? "Undoing…" : "Undo"}
             </button>

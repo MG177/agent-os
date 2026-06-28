@@ -67,7 +67,7 @@ export default function InboxQueue() {
       <div className="flex items-center justify-between">
         <p className="app-section-label">Inbox · to triage</p>
         {!loading && count > 0 && (
-          <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold tabular-nums text-blue-600">
+          <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold tabular-nums text-primary">
             {count}
           </span>
         )}

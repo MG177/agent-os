@@ -121,7 +121,7 @@ export function QuickCaptureField({
   return (
     <section className={className} aria-label="Quick capture">
       {showLabel && <p className="app-section-label mb-2">Quick capture</p>}
-      <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-shadow focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-500/20 md:rounded-3xl md:p-2.5">
+      <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition-shadow focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-ring/20 md:rounded-3xl md:p-2.5">
         <div
           className={
             tall ? "flex min-w-0 flex-col gap-2" : "flex min-w-0 items-end gap-2"
@@ -138,7 +138,7 @@ export function QuickCaptureField({
             onKeyDown={onKeyDown}
             placeholder="What's on your mind?"
             rows={tall ? 5 : 2}
-            className={`w-full min-w-0 flex-1 resize-none overflow-y-auto rounded-xl bg-slate-50 px-3 py-2.5 text-base md:text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 ${
+            className={`w-full min-w-0 flex-1 resize-none overflow-y-auto rounded-2xl bg-slate-50 px-3 py-2.5 text-base md:text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring/30 ${
               tall ? "min-h-[7.5rem]" : "min-h-[3.25rem]"
             }`}
           />
@@ -148,7 +148,7 @@ export function QuickCaptureField({
               onClick={() => void handleSave()}
               disabled={saving || !text.trim()}
               aria-label={saving ? "Saving to Inbox" : "Save to Inbox"}
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white shadow-sm transition-colors hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? (
                 <span
@@ -169,14 +169,14 @@ export function QuickCaptureField({
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 rounded-full bg-blue-50 py-0.5 pl-2 pr-1 text-xs font-medium text-blue-700"
+                className="inline-flex items-center gap-1 rounded-full bg-accent py-0.5 pl-2 pr-1 text-xs font-medium text-primary"
               >
                 #{tag}
                 <button
                   type="button"
                   onClick={() => removeTag(tag)}
                   aria-label={`Remove tag ${tag}`}
-                  className="flex h-4 w-4 items-center justify-center rounded-full text-blue-400 transition-colors hover:bg-blue-100 hover:text-blue-600"
+                  className="flex h-4 w-4 items-center justify-center rounded-full text-primary transition-colors hover:bg-accent hover:text-primary"
                 >
                   <X className="h-3 w-3" strokeWidth={2} aria-hidden />
                 </button>
@@ -206,7 +206,7 @@ export function QuickCaptureField({
                   key={s}
                   type="button"
                   onClick={() => addTag(s)}
-                  className="rounded-full border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-500 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                  className="rounded-full border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-500 transition-colors hover:border-primary/30 hover:bg-accent hover:text-primary"
                 >
                   #{s}
                 </button>

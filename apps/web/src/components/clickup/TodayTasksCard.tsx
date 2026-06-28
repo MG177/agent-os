@@ -75,7 +75,7 @@ export function TodayTasksCard() {
         </div>
         <Link
           href="/tasks"
-          className="shrink-0 text-xs font-semibold text-blue-600 hover:text-blue-700"
+          className="shrink-0 text-xs font-semibold text-primary hover:text-primary"
         >
           All tasks →
         </Link>
@@ -87,7 +87,7 @@ export function TodayTasksCard() {
         ) : error?.status === 401 ? (
           <Link
             href="/settings/integrations"
-            className="flex flex-1 items-center justify-center px-4 py-6 text-center text-xs font-medium text-blue-600 hover:text-blue-700"
+            className="flex flex-1 items-center justify-center px-4 py-6 text-center text-xs font-medium text-primary hover:text-primary"
           >
             Connect ClickUp to see your tasks →
           </Link>

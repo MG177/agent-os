@@ -197,7 +197,7 @@ export function AddTodoSheet({ open, onClose, onSaved, editing }: Props) {
                   <ToggleGroupItem
                     key={t}
                     value={t}
-                    className="flex-1 rounded-lg border py-2.5 text-xs data-[state=on]:border-blue-600 data-[state=on]:bg-blue-50 data-[state=on]:font-semibold data-[state=on]:text-blue-700"
+                    className="flex-1 rounded-lg border py-2.5 text-xs data-[state=on]:border-primary data-[state=on]:bg-accent data-[state=on]:font-semibold data-[state=on]:text-primary"
                   >
                     {t === "once" ? "Once" : "Recurring"}
                   </ToggleGroupItem>

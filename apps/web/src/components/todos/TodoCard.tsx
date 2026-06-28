@@ -143,7 +143,7 @@ export function TodoCard({ todo, onDone, onToggle, onDelete, onEdit }: Props) {
             className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
           >
             {todo.enabled ? (
-              <ToggleRight strokeWidth={1.8} className="h-4 w-4 text-blue-500" />
+              <ToggleRight strokeWidth={1.8} className="h-4 w-4 text-primary" />
             ) : (
               <ToggleLeft strokeWidth={1.8} className="h-4 w-4" />
             )}

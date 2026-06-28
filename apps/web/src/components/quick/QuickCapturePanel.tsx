@@ -70,7 +70,7 @@ export default function QuickCapturePanel() {
       <div className="flex shrink-0 items-center gap-2 px-0.5">
         <p className="app-section-label">Inbox</p>
         {items.length > 0 && (
-          <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold tabular-nums text-blue-600">
+          <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold tabular-nums text-primary">
             {items.length}
           </span>
         )}

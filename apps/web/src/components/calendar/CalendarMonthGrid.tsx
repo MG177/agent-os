@@ -106,12 +106,12 @@ export function CalendarMonthGrid({
           const dayNum = Number(cell.day.slice(8, 10));
 
           const cellBg =
-            isHighlighted && !isSelected ? "bg-blue-50" : "hover:bg-slate-100";
+            isHighlighted && !isSelected ? "bg-accent" : "hover:bg-slate-100";
 
           const numClass = isSelected
-            ? "flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white"
+            ? "flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white"
             : isToday
-              ? "flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-[11px] font-bold text-blue-700"
+              ? "flex h-6 w-6 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-primary"
               : `text-[11px] font-semibold ${
                   !cell.inMonth
                     ? "text-slate-300"

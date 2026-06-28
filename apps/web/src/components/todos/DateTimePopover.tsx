@@ -59,7 +59,7 @@ export function DateTimePopover({
       <PopoverTrigger
         disabled={disabled}
         className={cn(
-          "inline-flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-1.5 text-slate-700 ring-1 ring-slate-200 transition-colors hover:ring-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50",
+          "inline-flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-1.5 text-slate-700 ring-1 ring-slate-200 transition-colors hover:ring-slate-300 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
           className,
         )}
       >
@@ -71,7 +71,7 @@ export function DateTimePopover({
       <PopoverContent
         align="start"
         sideOffset={6}
-        className="w-[min(560px,calc(100vw-2rem))] rounded-xl border-slate-200 p-3"
+        className="w-[min(560px,calc(100vw-2rem))] rounded-2xl border-slate-200 p-3"
       >
         <DateTimePicker
           value={value}

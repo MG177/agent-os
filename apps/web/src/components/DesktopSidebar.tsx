@@ -56,7 +56,7 @@ const ACTIVITY = {
 } as const;
 
 const VAULT_SECTIONS = [
-  { href: "/browse/Projects", label: "Projects", dot: "bg-blue-500" },
+  { href: "/browse/Projects", label: "Projects", dot: "bg-primary" },
   { href: "/browse/Areas", label: "Areas", dot: "bg-violet-500" },
   { href: "/browse/Resources", label: "Resources", dot: "bg-emerald-500" },
   { href: "/browse/Ideas", label: "Ideas", dot: "bg-amber-400" },
@@ -84,9 +84,9 @@ function NavItem({
     <Link
       href={href}
       title={collapsed ? label : undefined}
-      className={`flex items-center rounded-xl text-sm font-medium transition-colors ${collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
+      className={`flex items-center rounded-2xl text-sm font-medium transition-colors ${collapsed ? "justify-center p-2.5" : "gap-2.5 px-3 py-2"
         } ${active
-          ? "bg-blue-50 text-blue-600"
+          ? "bg-accent text-primary"
           : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
         }`}
     >
@@ -131,12 +131,12 @@ export default function DesktopSidebar() {
           title={collapsed ? "Agent OS" : undefined}
         >
           {collapsed ? (
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 text-sm font-bold text-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-sm font-bold text-primary-foreground">
               A
             </span>
           ) : (
             <>
-              <p className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-lg font-bold tracking-tight text-transparent">
+              <p className="text-lg font-bold tracking-tight text-slate-900">
                 Agent OS
               </p>
               <p className="mt-0.5 text-xs text-slate-500">Luna Apps · Personal</p>
@@ -203,8 +203,8 @@ export default function DesktopSidebar() {
               <li key={href}>
                 <Link
                   href={href}
-                  className={`flex items-center gap-2 rounded-xl py-1.5 pl-11 pr-3 text-sm transition-colors ${pathname === href || pathname.startsWith(`${href}/`)
-                      ? "font-medium text-blue-700"
+                  className={`flex items-center gap-2 rounded-2xl py-1.5 pl-11 pr-3 text-sm transition-colors ${pathname === href || pathname.startsWith(`${href}/`)
+                      ? "font-medium text-primary"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-800"
                     }`}
                 >
@@ -246,7 +246,7 @@ export default function DesktopSidebar() {
         <button
           type="button"
           onClick={toggle}
-          className={`mt-3 flex w-full items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 ${collapsed ? "justify-center p-2.5" : "gap-2 px-3 py-2.5 text-xs font-semibold"
+          className={`mt-3 flex w-full items-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 ${collapsed ? "justify-center p-2.5" : "gap-2 px-3 py-2.5 text-xs font-semibold"
             }`}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >

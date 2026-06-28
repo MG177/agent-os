@@ -20,7 +20,7 @@ const SECTIONS = ['Projects', 'Areas', 'Resources', 'Ideas'] as const
 type Section = typeof SECTIONS[number]
 
 const SECTION_META: Record<Section, { color: string; dot: string }> = {
-  Projects: { color: 'text-blue-600', dot: 'bg-blue-500' },
+  Projects: { color: 'text-primary', dot: 'bg-primary' },
   Areas:    { color: 'text-violet-600', dot: 'bg-violet-500' },
   Resources:{ color: 'text-emerald-600', dot: 'bg-emerald-500' },
   Ideas:    { color: 'text-amber-500', dot: 'bg-amber-400' },
@@ -159,13 +159,13 @@ export default function BrowseSidebar() {
                         href={href}
                         className={`flex items-center gap-2 pl-8 pr-3 py-1.5 mx-1 rounded-lg transition-colors text-sm ${
                           isItemActive
-                            ? 'bg-blue-50 text-blue-700 font-medium'
+                            ? 'bg-accent text-primary font-medium'
                             : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                         }`}
                         style={{ width: 'calc(100% - 8px)' }}
                         title={displayName}
                       >
-                        <span className={`flex-shrink-0 ${isItemActive ? 'text-blue-500' : 'text-slate-400'}`}>
+                        <span className={`flex-shrink-0 ${isItemActive ? 'text-primary' : 'text-slate-400'}`}>
                           {entry.type === 'directory'
                             ? <FolderIcon filled={isItemActive} />
                             : <FileIcon />}

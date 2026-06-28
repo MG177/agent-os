@@ -305,7 +305,7 @@ export function HomeScheduleNowWindow({
             <button
               type="button"
               onClick={() => jumpToNow(true)}
-              className="rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-red-600 shadow-sm hover:border-red-200 hover:bg-red-50"
+              className="rounded-2xl border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-red-600 shadow-sm hover:border-red-200 hover:bg-red-50"
               aria-label="Scroll schedule to now"
             >
               Now
@@ -379,7 +379,7 @@ export function HomeScheduleNowWindow({
               ·{" "}
               <Link
                 href="/calendar"
-                className="font-medium text-blue-600 hover:text-blue-700"
+                className="font-medium text-primary hover:text-primary"
               >
                 +{agendaHiddenCount} more
               </Link>
@@ -446,7 +446,7 @@ export function HomeScheduleNowWindow({
                     isNow
                       ? "z-30 ring-2 ring-emerald-500 ring-inset"
                       : temporal === "next"
-                        ? "z-20 ring-1 ring-inset ring-blue-300"
+                        ? "z-20 ring-1 ring-inset ring-ring"
                         : "",
                     event.htmlLink
                       ? "cursor-pointer hover:brightness-110"
@@ -503,7 +503,7 @@ export function HomeScheduleNowWindow({
         <div className="flex h-8 shrink-0 items-center justify-center border-t border-slate-100 px-2">
           <Link
             href="/calendar"
-            className="text-[10px] font-medium leading-none text-blue-600 hover:text-blue-700"
+            className="text-[10px] font-medium leading-none text-primary hover:text-primary"
           >
             +{moreCount} outside this window · Calendar →
           </Link>

@@ -329,7 +329,7 @@ export default function TasksScreen() {
             </p>
             <Link
               href="/settings/integrations"
-              className="mt-4 inline-block rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+              className="mt-4 inline-block rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--color-primary-hover)]"
             >
               Open integrations
             </Link>
@@ -354,7 +354,7 @@ export default function TasksScreen() {
             value={activeTeamId ?? ""}
             disabled={switching}
             onChange={(e) => switchWorkspace(e.target.value)}
-            className="max-w-[12rem] rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="max-w-[12rem] rounded-2xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
             aria-label="Workspace"
           >
             {workspaces.map((w) => (
@@ -367,7 +367,7 @@ export default function TasksScreen() {
         <select
           value={due}
           onChange={(e) => setDue(e.target.value as Due)}
-          className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="rounded-2xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-ring"
           aria-label="Due filter"
         >
           {(Object.keys(DUE_LABELS) as Due[]).map((key) => (
@@ -377,7 +377,7 @@ export default function TasksScreen() {
           ))}
         </select>
       </div>
-      <div className="flex rounded-xl bg-slate-100 p-0.5 text-xs font-semibold">
+      <div className="flex rounded-2xl bg-slate-100 p-0.5 text-xs font-semibold">
         {(["list", "board"] as View[]).map((v) => (
           <button
             key={v}
@@ -393,7 +393,7 @@ export default function TasksScreen() {
       <select
         value={priority}
         onChange={(e) => setPriority(e.target.value)}
-        className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="rounded-2xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-ring"
         aria-label="Priority filter"
       >
         <option value="">Any priority</option>
@@ -406,8 +406,8 @@ export default function TasksScreen() {
       <button
         type="button"
         onClick={() => setIncludeClosed((v) => !v)}
-        className={`rounded-xl border px-2.5 py-1.5 text-xs font-medium transition-colors ${includeClosed
-          ? "border-blue-200 bg-blue-50 text-blue-700"
+        className={`rounded-2xl border px-2.5 py-1.5 text-xs font-medium transition-colors ${includeClosed
+          ? "border-primary/30 bg-accent text-primary"
           : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
           }`}
       >
@@ -417,7 +417,7 @@ export default function TasksScreen() {
         type="button"
         onClick={refresh}
         aria-label="Refresh"
-        className="rounded-xl border border-slate-200 bg-white p-2 text-slate-500 transition-colors hover:bg-slate-50"
+        className="rounded-2xl border border-slate-200 bg-white p-2 text-slate-500 transition-colors hover:bg-slate-50"
       >
         <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`} />
       </button>

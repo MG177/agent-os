@@ -36,14 +36,14 @@ export function StatusFilter({
         onClick={() => setOpen((v) => !v)}
         className={`flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium transition-colors ${
           hiddenCount > 0
-            ? "bg-blue-50 text-blue-700 hover:bg-blue-100"
+            ? "bg-accent text-primary hover:bg-accent"
             : "text-slate-500 hover:bg-slate-100"
         }`}
       >
         <SlidersHorizontal className="h-3.5 w-3.5" strokeWidth={1.8} />
         Status
         {hiddenCount > 0 && (
-          <span className="rounded-full bg-blue-100 px-1.5 text-[10px] font-semibold text-blue-700">
+          <span className="rounded-full bg-accent px-1.5 text-[10px] font-semibold text-primary">
             {hiddenCount} hidden
           </span>
         )}
@@ -89,7 +89,7 @@ export function StatusFilter({
                       setDragOver(null);
                     }}
                     className={`flex items-center gap-1.5 rounded-lg px-1 py-1 ${
-                      dragOver === s.status ? "ring-2 ring-blue-300" : ""
+                      dragOver === s.status ? "ring-2 ring-ring" : ""
                     } ${dragStatus === s.status ? "opacity-50" : ""}`}
                   >
                     <span

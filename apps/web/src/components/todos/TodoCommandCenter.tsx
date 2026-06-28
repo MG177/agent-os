@@ -98,7 +98,7 @@ function RowActions({
           className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
         >
           {todo.enabled ? (
-            <ToggleRight strokeWidth={1.8} className="h-4 w-4 text-blue-500" />
+            <ToggleRight strokeWidth={1.8} className="h-4 w-4 text-primary" />
           ) : (
             <ToggleLeft strokeWidth={1.8} className="h-4 w-4" />
           )}
@@ -380,7 +380,7 @@ export function TodoCommandCenter({
     <div className="grid items-start gap-4 lg:grid-cols-3">
       <div className="min-w-0 lg:col-span-2">
         <Panel
-          icon={<ListTodo strokeWidth={1.8} className="h-4 w-4 text-blue-500" />}
+          icon={<ListTodo strokeWidth={1.8} className="h-4 w-4 text-primary" />}
           title="Todo"
           subtitle={
             overdueCount > 0

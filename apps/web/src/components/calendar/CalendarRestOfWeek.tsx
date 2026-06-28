@@ -25,14 +25,14 @@ export function CalendarRestOfWeek({
             <button
               type="button"
               onClick={() => onSelectDay(d.day)}
-              className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+              className="flex w-full items-center justify-between gap-2 rounded-2xl px-3 py-2.5 text-left text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
             >
               <span>{d.label}</span>
               <span className="text-xs font-medium text-slate-400">
                 {d.events.length === 0
                   ? "No events"
                   : `${d.events.length} event${d.events.length === 1 ? "" : "s"}`}
-                <span className="ml-1 text-blue-600" aria-hidden>
+                <span className="ml-1 text-primary" aria-hidden>
                   →
                 </span>
               </span>

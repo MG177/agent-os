@@ -59,12 +59,12 @@ function TabInner({
 }) {
   return (
     <>
-      <div className={`rounded-lg p-1 ${active ? "bg-blue-50" : ""}`}>
+      <div className={`rounded-lg p-1 ${active ? "bg-accent" : ""}`}>
         <Icon active={active} className="h-4 w-4" />
       </div>
       <span
         className={`text-[10px] font-semibold tracking-wide ${
-          active ? "text-blue-600" : "text-slate-400"
+          active ? "text-primary" : "text-slate-400"
         }`}
       >
         {label}
@@ -86,9 +86,9 @@ export default function AppNav() {
         aria-label="Open Assistant"
         aria-current={assistantActive ? "page" : undefined}
         style={{ bottom: "calc(var(--app-mobile-nav-offset) + 1rem)" }}
-        className={`app-assistant-fab fixed right-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-lg shadow-blue-300/50 transition-transform active:scale-95 md:hidden ${
+        className={`app-assistant-fab fixed right-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-95 md:hidden ${
           panel ? "hidden" : ""
-        } ${assistantActive ? "ring-2 ring-blue-300 ring-offset-2" : ""}`}
+        } ${assistantActive ? "ring-2 ring-ring ring-offset-2" : ""}`}
       >
         <IconAssistant className="h-6 w-6" />
       </Link>
@@ -108,7 +108,7 @@ export default function AppNav() {
                   type="button"
                   onClick={() => toggle("capture")}
                   aria-pressed={active}
-                  className={`${ITEM_CLASS} ${active ? "text-blue-600" : "text-slate-400"}`}
+                  className={`${ITEM_CLASS} ${active ? "text-primary" : "text-slate-400"}`}
                 >
                   <TabInner label={tab.label} Icon={tab.Icon} active={active} />
                 </button>
@@ -120,7 +120,7 @@ export default function AppNav() {
                 key={tab.href}
                 href={tab.href}
                 onClick={() => panel && close()}
-                className={`${ITEM_CLASS} ${active ? "text-blue-600" : "text-slate-400"}`}
+                className={`${ITEM_CLASS} ${active ? "text-primary" : "text-slate-400"}`}
               >
                 <TabInner label={tab.label} Icon={tab.Icon} active={active} />
               </Link>

@@ -97,7 +97,7 @@ export default function HomePage() {
             {vpsOnline !== null && (
               <span
                 className={`rounded-full px-3 py-1.5 text-[10px] font-bold text-white shadow-sm md:hidden ${vpsOnline
-                  ? "bg-emerald-500 shadow-emerald-200"
+                  ? "bg-emerald-500"
                   : "bg-red-500 shadow-red-200"
                   }`}
               >
@@ -218,7 +218,7 @@ export default function HomePage() {
         </Grid>
 
         {/* Coming soon — full width */}
-        <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 p-4 shadow-lg shadow-indigo-200/60 md:p-5">
+        <div className="rounded-3xl bg-primary p-4 shadow-lg md:p-5">
           <p className="text-sm font-bold text-white">Coming soon</p>
           <p className="mt-1.5 text-xs leading-relaxed text-white/75">
             Finance dashboards, project health, and agent status will land here.

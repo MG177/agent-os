@@ -92,7 +92,7 @@ export function TodayScheduleCard() {
         <p className="app-section-label">Next 24 hours</p>
         <Link
           href="/calendar"
-          className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+          className="text-xs font-semibold text-primary hover:text-primary"
         >
           Full week →
         </Link>

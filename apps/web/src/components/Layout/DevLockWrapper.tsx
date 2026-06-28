@@ -60,7 +60,7 @@ export default function DevLockWrapper({
     <div className="flex min-h-[100dvh] items-center justify-center bg-slate-50 px-4 py-8">
       <div className="app-card w-full max-w-sm space-y-5 p-6 md:p-7">
         <div className="space-y-2 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-primary">
             <LockKeyhole className="h-5 w-5" strokeWidth={1.8} aria-hidden />
           </div>
           <h1 className="text-lg font-semibold text-slate-900">Agent OS</h1>
@@ -81,7 +81,7 @@ export default function DevLockWrapper({
               disabled={misconfigured || submitting}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-blue-300 focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
+              className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-primary/30 focus:ring-2 focus:ring-ring disabled:opacity-60"
             />
           </div>
 

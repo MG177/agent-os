@@ -42,7 +42,7 @@ export function CalendarRightRail({
               href={happening.htmlLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-xs font-semibold text-blue-600 hover:text-blue-700"
+              className="inline-block text-xs font-semibold text-primary hover:text-primary"
             >
               Open in Google Calendar →
             </a>
@@ -63,7 +63,7 @@ export function CalendarRightRail({
                 href={next.htmlLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block text-xs font-semibold text-blue-600 hover:text-blue-700"
+                className="inline-block text-xs font-semibold text-primary hover:text-primary"
               >
                 Open in Google Calendar →
               </a>
@@ -86,8 +86,8 @@ export function CalendarRightRail({
                   <button
                     type="button"
                     onClick={() => onToggleCalendar(cal.id)}
-                    className={`flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold transition-colors ${visible
-                        ? "bg-blue-50 text-blue-800"
+                    className={`flex w-full items-center gap-2 rounded-2xl px-2 py-2 text-left text-xs font-semibold transition-colors ${visible
+                        ? "bg-accent text-primary"
                         : "text-slate-400 hover:bg-slate-50"
                       }`}
                   >
@@ -108,7 +108,7 @@ export function CalendarRightRail({
         <p className="app-section-label">Quick links</p>
         <Link
           href="/settings/integrations"
-          className="block text-xs font-semibold text-blue-600 hover:text-blue-700"
+          className="block text-xs font-semibold text-primary hover:text-primary"
         >
           Integration settings →
         </Link>
@@ -116,7 +116,7 @@ export function CalendarRightRail({
           href="https://calendar.google.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="block text-xs font-semibold text-blue-600 hover:text-blue-700"
+          className="block text-xs font-semibold text-primary hover:text-primary"
         >
           Open Google Calendar →
         </a>

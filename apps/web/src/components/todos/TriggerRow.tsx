@@ -34,7 +34,7 @@ const HOUR_OPTIONS = Array.from({ length: 24 }, (_, h) => ({
 }));
 
 const CELL =
-  "rounded-xl bg-slate-50 px-2 py-1.5 text-sm text-slate-700 ring-1 ring-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500";
+  "rounded-2xl bg-slate-50 px-2 py-1.5 text-sm text-slate-700 ring-1 ring-slate-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring";
 
 function minuteLabel(m: number) {
   return `:${String(m).padStart(2, "0")}`;
@@ -198,7 +198,7 @@ export function TriggerRow({ trigger, onChange, onRemove, canRemove }: Props) {
                   }}
                   className={`rounded-lg px-2 py-1 text-[11px] font-semibold transition-colors ${
                     active
-                      ? "bg-blue-600 text-white"
+                      ? "bg-primary text-white"
                       : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                   }`}
                 >

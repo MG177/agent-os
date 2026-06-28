@@ -61,7 +61,7 @@ function FoodWorkspaceSkeleton() {
     >
       <div className="h-10 animate-pulse rounded-2xl bg-slate-100" />
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="h-12 animate-pulse rounded-xl bg-slate-50" />
+        <div key={i} className="h-12 animate-pulse rounded-2xl bg-slate-50" />
       ))}
     </div>
   );

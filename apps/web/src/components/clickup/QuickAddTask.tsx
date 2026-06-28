@@ -50,7 +50,7 @@ export function QuickAddTask({
       <select
         value={effectiveListId}
         onChange={(e) => setListId(e.target.value)}
-        className="rounded-xl bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="rounded-2xl bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-ring"
         aria-label="Target list"
       >
         {lists.map((list) => (
@@ -71,7 +71,7 @@ export function QuickAddTask({
       <button
         type="submit"
         disabled={!canAdd}
-        className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:opacity-50"
+        className="flex items-center gap-1.5 rounded-2xl bg-primary px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
       >
         {creating ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />

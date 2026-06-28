@@ -35,7 +35,7 @@ const SearchField = forwardRef<HTMLInputElement, SearchFieldProps>(
           value={value}
           placeholder={placeholder}
           className={cn(
-            "border border-slate-200 bg-white py-3 pl-11 font-medium text-slate-900 shadow-sm placeholder:font-normal placeholder:text-slate-500 focus:border-blue-500 focus:bg-white focus-visible:ring-blue-500/25",
+            "border border-slate-200 bg-white py-3 pl-11 font-medium text-slate-900 shadow-sm placeholder:font-normal placeholder:text-slate-500 focus:border-primary focus:bg-white focus-visible:ring-ring/25",
             onClear && hasValue ? "pr-11" : "pr-4",
             className,
           )}

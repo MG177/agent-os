@@ -4,8 +4,8 @@ import Link from "next/link";
 
 const STYLES = {
   blue: {
-    card: "border-blue-100 bg-white/95 hover:border-blue-200 hover:bg-blue-50/50",
-    icon: "bg-blue-100 text-blue-600",
+    card: "border-primary/30 bg-white/95 hover:border-primary/30 hover:bg-accent/50",
+    icon: "bg-accent text-primary",
   },
   emerald: {
     card: "border-emerald-100 bg-white/95 hover:border-emerald-200 hover:bg-emerald-50/50",
@@ -14,10 +14,6 @@ const STYLES = {
   violet: {
     card: "border-violet-100 bg-white/95 hover:border-violet-200 hover:bg-violet-50/50",
     icon: "bg-violet-100 text-violet-600",
-  },
-  indigo: {
-    card: "border-indigo-100 bg-white/95 hover:border-indigo-200 hover:bg-indigo-50/50",
-    icon: "bg-indigo-100 text-indigo-600",
   },
 } as const;
 
@@ -42,14 +38,14 @@ export function QuickActionCard({
 
   const className =
     layout === "grid"
-      ? `group flex h-full min-h-[4.5rem] w-full items-center gap-3 rounded-2xl border px-3.5 py-3 text-left shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 ${s.card}`
-      : `flex w-full items-start gap-4 rounded-3xl border p-4 text-left shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70 focus-visible:ring-offset-2 ${s.card}`;
+      ? `group flex h-full min-h-[4.5rem] w-full items-center gap-3 rounded-2xl border px-3.5 py-3 text-left shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:ring-offset-2 ${s.card}`
+      : `flex w-full items-start gap-4 rounded-3xl border p-4 text-left shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/70 focus-visible:ring-offset-2 ${s.card}`;
 
   const content =
     layout === "grid" ? (
       <>
         <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm ${s.icon}`}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-sm ${s.icon}`}
         >
           {icon}
         </span>

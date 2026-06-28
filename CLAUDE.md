@@ -28,15 +28,19 @@ See vault ADR: `Projects/lumendev-personal-agent-os/decisions/adr-2026-05-26-age
 
 ## Design system
 
-UI work must follow **`Design System — Nutrition & PARA.html`** (repo root). Open in a browser for live reference.
+UI work must follow **`docs/design-system.md`**. Tokens live in `apps/web/src/app/globals.css`
+(authoritative); the doc is the human-readable summary. Run `apps/web/scripts/check-design-tokens.sh`
+after UI changes — it fails if blue/indigo literals, colored glow shadows, or brand gradients reappear.
 
 - **Brand:** Luna Apps · shared visual language for Nutrition + PARA surfaces
 - **Stack:** Next.js 16 · Tailwind 4 · Geist · [`lucide-react`](https://lucide.dev/icons/) icons (stroke 1.8). Shared icon set in `src/components/ui/icons.tsx`; import other glyphs directly from `lucide-react`.
-- **Tokens:** slate-50 background, slate-900 foreground, blue-600 primary, violet→blue hero gradients, `rounded-3xl` cards
+- **Accent (one, token-only):** desaturated blue `--primary`, the only brand color — set once in `globals.css`, consumed via `bg-primary` / `text-primary-foreground` / `text-primary` / `bg-accent` / `border-primary` / `ring-ring`. **Never** a literal `bg-blue-600` / `text-blue-700` / `ring-blue-500`. Hover = `hover:bg-[var(--color-primary-hover)]`.
+- **Categorical/state colors (keep as literals):** emerald (success), amber (warning), rose/red (danger), violet (recurrence/tool-call), sky+cyan (calendar categories). One brand accent only.
+- **No AI-slop tells:** no gradient brand marks (solid `bg-primary`), no colored glow shadows (`shadow-sm`/`md`/`lg` are slate-tinted in `@theme`; never `shadow-blue-200`).
+- **Shape:** `rounded-full` pills · `rounded-lg` controls · `rounded-2xl` cards/tiles · `rounded-3xl` hero/primary/modals · `rounded-md` badges. (`rounded-xl` retired.)
 - **Modes:** light only (no dark theme)
-- **Sections:** foundations, color scales, typography, spacing/radius/elevation, components, app-specific patterns (meal rows, macro bars, inbox rows, vault sidebar), full-page mockups
 
-Extracted from `nutrition-tracker` and `para-dashboard` — mirror `globals.css` and Tailwind classes when implementing components.
+Mirror `globals.css` tokens and the shadcn primitives in `src/components/ui/` when implementing components.
 
 ## Layout & density
 

@@ -107,7 +107,7 @@ export default function IntegrationsSettingsPage() {
       <header className="space-y-1">
         <Link
           href="/"
-          className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+          className="text-xs font-semibold text-primary hover:text-primary"
         >
           ← Home
         </Link>
@@ -180,7 +180,7 @@ export default function IntegrationsSettingsPage() {
             ) : (
               <a
                 href="/api/integrations/google-calendar/auth"
-                className="block w-full rounded-2xl bg-blue-600 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+                className="block w-full rounded-2xl bg-primary py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-[var(--color-primary-hover)]"
               >
                 Connect Google Calendar
               </a>
@@ -247,7 +247,7 @@ export default function IntegrationsSettingsPage() {
                 value={clickupToken}
                 onChange={(e) => setClickupToken(e.target.value)}
                 placeholder="pk_••••••••••••"
-                className="w-full rounded-2xl bg-slate-50 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-2xl bg-slate-50 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <p className="text-[11px] text-slate-400">
                 ClickUp → Settings → Apps → API Token (no admin needed).
@@ -257,7 +257,7 @@ export default function IntegrationsSettingsPage() {
               type="button"
               onClick={saveClickUpToken}
               disabled={savingToken || !clickupToken.trim()}
-              className="block w-full rounded-2xl bg-blue-600 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
+              className="block w-full rounded-2xl bg-primary py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
             >
               {savingToken ? "Connecting…" : "Connect ClickUp"}
             </button>
@@ -284,10 +284,10 @@ export default function IntegrationsSettingsPage() {
       </div>
 
       <div className="flex justify-center gap-4 text-center text-xs text-slate-400">
-        <Link href="/calendar" className="font-semibold text-blue-600 hover:text-blue-700">
+        <Link href="/calendar" className="font-semibold text-primary hover:text-primary">
           Open calendar →
         </Link>
-        <Link href="/tasks" className="font-semibold text-blue-600 hover:text-blue-700">
+        <Link href="/tasks" className="font-semibold text-primary hover:text-primary">
           Open tasks →
         </Link>
       </div>

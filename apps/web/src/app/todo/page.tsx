@@ -31,8 +31,8 @@ export default function TodoPage() {
       <PageHeader>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-50">
-              <BellRing strokeWidth={1.8} className="h-5 w-5 text-blue-600" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-accent">
+              <BellRing strokeWidth={1.8} className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-900">Reminders</h1>
@@ -44,7 +44,7 @@ export default function TodoPage() {
             <button
               type="button"
               onClick={handleAdd}
-              className="flex items-center gap-1.5 rounded-2xl bg-blue-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 active:bg-blue-800"
+              className="flex items-center gap-1.5 rounded-2xl bg-primary px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--color-primary-hover)] active:bg-[var(--color-primary-hover)]"
             >
               <Plus strokeWidth={2.5} className="h-4 w-4" />
               Add
@@ -73,7 +73,7 @@ export default function TodoPage() {
               <button
                 type="button"
                 onClick={handleAdd}
-                className="mt-1 flex items-center gap-1.5 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                className="mt-1 flex items-center gap-1.5 rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-primary-hover)]"
               >
                 <Plus strokeWidth={2.5} className="h-4 w-4" />
                 Add Reminder

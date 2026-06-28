@@ -4,7 +4,7 @@ import ProgressRing from "@/components/ProgressRing";
 import type { DailyTotals, MacroGoals } from "./types";
 
 const MACROS = [
-  { key: "protein_g" as const, label: "Protein", unit: "g", bar: "bg-blue-500" },
+  { key: "protein_g" as const, label: "Protein", unit: "g", bar: "bg-primary" },
   { key: "carb_g" as const, label: "Carbs", unit: "g", bar: "bg-emerald-500" },
   { key: "fat_g" as const, label: "Fat", unit: "g", bar: "bg-amber-500" },
 ];
