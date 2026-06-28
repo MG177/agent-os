@@ -139,7 +139,7 @@ export default function DesktopSidebar() {
               <p className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-lg font-bold tracking-tight text-transparent">
                 Agent OS
               </p>
-              <p className="mt-0.5 text-xs text-slate-400">Luna Apps · Personal</p>
+              <p className="mt-0.5 text-xs text-slate-500">Luna Apps · Personal</p>
             </>
           )}
         </Link>

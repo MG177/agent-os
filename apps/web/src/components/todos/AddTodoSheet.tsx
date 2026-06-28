@@ -220,7 +220,7 @@ export function AddTodoSheet({ open, onClose, onSaved, editing }: Props) {
               <div className="mb-2 flex items-center justify-between">
                 <Label className="text-xs font-semibold text-slate-700">
                   Triggers
-                  <span className="ml-1 font-normal text-slate-400">— fires on whichever comes first</span>
+                  <span className="ml-1 font-normal text-slate-400">(fires on whichever comes first)</span>
                 </Label>
                 <Button
                   type="button"

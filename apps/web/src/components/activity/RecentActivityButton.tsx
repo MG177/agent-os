@@ -57,8 +57,8 @@ export function RecentActivityButton({ events }: { events: ActivityEvent[] }) {
           </div>
         </header>
         {events.length === 0 ? (
-          <p className="px-6 py-12 text-center text-sm text-slate-400">
-            No activity yet — capture a note or log a meal
+          <p className="px-6 py-12 text-center text-sm text-slate-500">
+            No activity yet, capture a note or log a meal
           </p>
         ) : (
           <div className="max-h-[60vh] overflow-y-auto px-4 py-1">

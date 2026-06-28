@@ -55,7 +55,7 @@ export function CompletedRemindersButton({ onEdit }: Props) {
             ))}
           </div>
         ) : todos.length === 0 ? (
-          <p className="px-6 py-12 text-center text-sm text-slate-400">
+          <p className="px-6 py-12 text-center text-sm text-slate-500">
             No completed reminders yet
           </p>
         ) : (

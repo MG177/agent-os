@@ -360,9 +360,9 @@ export default function AssistantChat() {
             <h2 className="mb-1 text-base font-bold text-slate-800">
               Assistant
             </h2>
-            <p className="mb-5 max-w-xs text-xs leading-relaxed text-slate-400">
+            <p className="mb-5 max-w-xs text-xs leading-relaxed text-slate-500">
               Type <span className="font-mono text-slate-500">/</span> for
-              commands — log nutrition, capture, calendar, vault search, and
+              commands: log nutrition, capture, calendar, vault search, and
               more.
             </p>
             <div className="flex flex-wrap justify-center gap-2">

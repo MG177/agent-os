@@ -154,7 +154,7 @@ export default function IntegrationsSettingsPage() {
         </div>
 
         {loading ? (
-          <p className="mt-4 text-sm text-slate-400">Loading…</p>
+          <p className="mt-4 text-sm text-slate-500">Loading…</p>
         ) : !status?.configured ? (
           <p className="mt-4 text-sm text-slate-500">
             Server OAuth is not configured. Set{" "}
@@ -196,7 +196,7 @@ export default function IntegrationsSettingsPage() {
             <p className="app-section-label">Tasks</p>
             <p className="mt-1 text-sm font-bold text-slate-900">ClickUp</p>
             <p className="mt-1 text-xs text-slate-500">
-              Two-way access to tasks assigned to you — view, complete, create,
+              Two-way access to tasks assigned to you: view, complete, create,
               comment, and track time.
             </p>
           </div>
@@ -204,7 +204,7 @@ export default function IntegrationsSettingsPage() {
         </div>
 
         {loading ? (
-          <p className="mt-4 text-sm text-slate-400">Loading…</p>
+          <p className="mt-4 text-sm text-slate-500">Loading…</p>
         ) : !clickup?.configured ? (
           <p className="mt-4 text-sm text-slate-500">
             Encryption key missing. Set{" "}

@@ -262,8 +262,8 @@ export function TaskGroupList({
       {displayGroups.length === 0 ? (
         <div className="app-card text-center">
           <p className="text-sm font-semibold text-slate-700">Nothing to show</p>
-          <p className="mt-1 text-xs text-slate-400">
-            Every status is hidden — adjust the Status filter.
+          <p className="mt-1 text-xs text-slate-500">
+            Every status is hidden. Adjust the Status filter.
           </p>
         </div>
       ) : (

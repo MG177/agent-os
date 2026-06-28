@@ -166,9 +166,9 @@ function Panel({
         <span className="mt-0.5 shrink-0">{icon}</span>
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-bold text-slate-900">{title}</h3>
-          {subtitle && <p className="mt-0.5 text-[11px] text-slate-400">{subtitle}</p>}
+          {subtitle && <p className="mt-0.5 text-[11px] text-slate-500">{subtitle}</p>}
         </div>
-        <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <span className="shrink-0 text-[10px] font-bold uppercase tracking-widest text-slate-500">
           {count}
         </span>
       </div>
@@ -178,7 +178,7 @@ function Panel({
 }
 
 function EmptyHint({ children }: { children: React.ReactNode }) {
-  return <p className="py-6 text-center text-xs text-slate-400">{children}</p>;
+  return <p className="py-6 text-center text-xs text-slate-500">{children}</p>;
 }
 
 // ── Compact stats (sidebar column, matches Manage schedules width) ─────
@@ -233,7 +233,7 @@ function CompactStatStrip({
           >
             <div className="flex items-center gap-1">
               <span className={cn("size-1.5 shrink-0 rounded-full", dot)} aria-hidden />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                 {label}
               </span>
             </div>
@@ -286,7 +286,7 @@ function TodoRow({
           )}
           <p className="truncate text-sm font-medium text-slate-900">{todo.title}</p>
         </div>
-        <p className="truncate text-[11px] text-slate-400">{itemSubtitle(todo)}</p>
+        <p className="truncate text-[11px] text-slate-500">{itemSubtitle(todo)}</p>
       </button>
       {justDone ? (
         <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
@@ -391,7 +391,7 @@ export function TodoCommandCenter({
           accent={overdueCount > 0 ? "border-red-200" : undefined}
         >
           {todoItems.length === 0 ? (
-            <EmptyHint>Nothing to do — you&apos;re all caught up</EmptyHint>
+            <EmptyHint>Nothing to do, you&apos;re all caught up</EmptyHint>
           ) : (
             <div className="space-y-1.5">
               {todoItems.map((todo) => (
@@ -441,7 +441,7 @@ export function TodoCommandCenter({
                       title="Edit"
                     >
                       <p className="truncate text-sm font-medium text-slate-900">{todo.title}</p>
-                      <p className="truncate text-[11px] text-slate-400">
+                      <p className="truncate text-[11px] text-slate-500">
                         {todo.enabled ? summary || "Recurring" : "Paused"}
                       </p>
                     </button>

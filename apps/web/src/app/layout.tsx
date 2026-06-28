@@ -15,7 +15,7 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   title: "Agent OS",
-  description: "Personal Agent OS — PARA capture and nutrition tracking",
+  description: "Personal Agent OS for PARA capture and nutrition tracking",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
